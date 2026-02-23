@@ -1,0 +1,278 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 228 50% 4%;
+    --foreground: 0 0% 100%;
+    --card: 228 50% 6%;
+    --card-foreground: 0 0% 100%;
+    --popover: 228 50% 6%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 190 100% 50%;
+    --primary-foreground: 228 50% 4%;
+    --secondary: 330 100% 60%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 228 30% 15%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 280 100% 60%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 228 30% 20%;
+    --input: 228 30% 15%;
+    --ring: 190 100% 50%;
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+    touch-action: manipulation;
+  }
+  
+  body {
+    @apply bg-[#0A0A15] text-white antialiased;
+    font-family: 'Rajdhani', sans-serif;
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Orbitron', sans-serif;
+  }
+  
+  code, pre, .font-mono {
+    font-family: 'Share Tech Mono', monospace;
+  }
+}
+
+@layer components {
+  /* Neon glow effects */
+  .glow-cyan {
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.5),
+                0 0 40px rgba(0, 212, 255, 0.3),
+                0 0 60px rgba(0, 212, 255, 0.1);
+  }
+  
+  .glow-pink {
+    box-shadow: 0 0 20px rgba(255, 51, 102, 0.5),
+                0 0 40px rgba(255, 51, 102, 0.3),
+                0 0 60px rgba(255, 51, 102, 0.1);
+  }
+  
+  .glow-purple {
+    box-shadow: 0 0 20px rgba(157, 78, 221, 0.5),
+                0 0 40px rgba(157, 78, 221, 0.3),
+                0 0 60px rgba(157, 78, 221, 0.1);
+  }
+  
+  /* Scanline effect */
+  .scanlines {
+    background-image: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.3) 2px,
+      rgba(0, 0, 0, 0.3) 4px
+    );
+    pointer-events: none;
+  }
+  
+  /* CRT flicker */
+  @keyframes flicker {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.98; }
+  }
+  
+  .crt-flicker {
+    animation: flicker 0.15s infinite;
+  }
+  
+  /* Text glow */
+  .text-glow-cyan {
+    text-shadow: 0 0 10px rgba(0, 212, 255, 0.8),
+                 0 0 20px rgba(0, 212, 255, 0.5),
+                 0 0 30px rgba(0, 212, 255, 0.3);
+  }
+  
+  .text-glow-pink {
+    text-shadow: 0 0 10px rgba(255, 51, 102, 0.8),
+                 0 0 20px rgba(255, 51, 102, 0.5),
+                 0 0 30px rgba(255, 51, 102, 0.3);
+  }
+  
+  /* Button styles */
+  .btn-arcade {
+    @apply relative px-8 py-4 font-bold uppercase tracking-wider transition-all duration-300;
+    font-family: 'Orbitron', sans-serif;
+  }
+  
+  .btn-arcade::before {
+    content: '';
+    @apply absolute inset-0 bg-white/20 opacity-0 transition-opacity;
+  }
+  
+  .btn-arcade:hover::before {
+    @apply opacity-100;
+  }
+  
+  /* Game canvas */
+  .game-canvas {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+  }
+  
+  /* HUD elements */
+  .hud-panel {
+    @apply bg-black/60 backdrop-blur-sm border border-white/20 rounded-lg px-4 py-2;
+  }
+  
+  /* Power bar */
+  .power-bar {
+    @apply h-2 rounded-sm transition-all duration-300;
+  }
+  
+  .power-bar.active {
+    @apply bg-yellow-400;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+  }
+  
+  .power-bar.inactive {
+    @apply bg-white/20;
+  }
+  
+  /* Starfield animation */
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+  
+  .star {
+    animation: twinkle 2s infinite;
+  }
+  
+  /* Pulse animation for indicators */
+  @keyframes pulse-glow {
+    0%, 100% { 
+      box-shadow: 0 0 5px currentColor;
+    }
+    50% { 
+      box-shadow: 0 0 20px currentColor, 0 0 40px currentColor;
+    }
+  }
+  
+  .pulse-glow {
+    animation: pulse-glow 2s infinite;
+  }
+  
+  /* Screen shake */
+  @keyframes shake {
+    0%, 100% { transform: translate(0, 0); }
+    10% { transform: translate(-5px, -5px); }
+    20% { transform: translate(5px, 5px); }
+    30% { transform: translate(-5px, 5px); }
+    40% { transform: translate(5px, -5px); }
+    50% { transform: translate(-5px, -5px); }
+    60% { transform: translate(5px, 5px); }
+    70% { transform: translate(-5px, 5px); }
+    80% { transform: translate(5px, -5px); }
+    90% { transform: translate(-5px, -5px); }
+  }
+  
+  .shake {
+    animation: shake 0.5s;
+  }
+  
+  /* Warning flash */
+  @keyframes warning-flash {
+    0%, 100% { background-color: rgba(255, 0, 0, 0); }
+    50% { background-color: rgba(255, 0, 0, 0.3); }
+  }
+  
+  .warning-flash {
+    animation: warning-flash 0.5s infinite;
+  }
+  
+  /* Beam glow animation */
+  @keyframes beam-pulse {
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 1; }
+  }
+  
+  .beam-pulse {
+    animation: beam-pulse 0.1s infinite;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: #0A0A15;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #1a1a3a;
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #00D4FF;
+  }
+}
+
+@layer utilities {
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+  
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+  
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+  
+  /* Gradient text */
+  .gradient-text-cyan {
+    background: linear-gradient(135deg, #00D4FF 0%, #0088AA 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .gradient-text-pink {
+    background: linear-gradient(135deg, #FF3366 0%, #AA2244 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .game-canvas {
+    touch-action: none;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

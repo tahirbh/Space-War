@@ -58,11 +58,11 @@ export function Menu({ onStartGame, onJoinGame }: MenuProps) {
         <div className="text-center">
           <h1 className="text-7xl md:text-9xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 tracking-tighter"
               style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 40px rgba(0, 212, 255, 0.5)' }}>
-            ZED BLADE
+            STARSHIPS WAR
           </h1>
           <p className="text-xl md:text-2xl text-cyan-400 tracking-[0.5em] mt-2 uppercase"
              style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 20px rgba(0, 212, 255, 0.5)' }}>
-            Space Assault
+            Alpha
           </p>
         </div>
 

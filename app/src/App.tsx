@@ -255,11 +255,11 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A15] flex flex-col items-center justify-center relative p-2 md:p-4">
+    <div className="w-screen h-screen bg-[#0A0A15] flex flex-col relative overflow-hidden touch-none select-none">
       {/* Game Container */}
       <div 
         ref={gameCanvasRef}
-        className="relative w-full max-w-7xl aspect-video bg-black rounded-xl overflow-hidden border-4 border-cyan-500/50 shadow-2xl shadow-cyan-500/20"
+        className="relative flex-1 w-full h-full bg-black overflow-hidden"
       >
         <GameCanvas
           onScoreUpdate={handleScoreUpdate}
@@ -385,7 +385,7 @@ function App() {
       </div>
 
       {/* Instructions */}
-      <div className="mt-4 text-white/50 text-sm text-center flex flex-wrap items-center justify-center gap-4 md:gap-8">
+      <div className="absolute bottom-2 left-0 right-0 z-10 text-white/50 text-sm text-center flex flex-wrap items-center justify-center gap-4 md:gap-8 pointer-events-none">
         <span><span className="text-cyan-400 font-bold">P1:</span> WASD + Z/X</span>
         <span><span className="text-pink-400 font-bold">P2:</span> IJKL + N/B</span>
         <span><span className="text-yellow-400 font-bold">Pause:</span> Enter</span>

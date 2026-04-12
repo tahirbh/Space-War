@@ -1,10 +1,10 @@
-// ZED BLADE Clone - Game Types
+// Starships War Alpha - Game Types
 
 export type GameState = 'menu' | 'playing' | 'paused' | 'gameover' | 'victory';
 export type EnemyType = 'grunt' | 'interceptor' | 'bomber' | 'elite';
 export type BossType = 'mantis' | 'leviathan' | 'omega';
-export type PowerUpType = 'power' | 'bomb' | 'speed' | 'life';
-export type WeaponType = 'spread' | 'laser' | 'homing' | 'missile';
+export type PowerUpType = 'power' | 'bomb' | 'speed' | 'life' | 'weapon';
+export type WeaponType = 'spread' | 'laser' | 'booster';
 
 export interface Vector2 {
   x: number;
@@ -32,6 +32,7 @@ export interface Player extends Entity {
   invincible: boolean;
   invincibleTime: number;
   targetPosition: Vector2;
+  lastShot: number;
 }
 
 export interface Bullet extends Entity {

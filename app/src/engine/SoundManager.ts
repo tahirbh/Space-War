@@ -1,4 +1,4 @@
-// ZED BLADE - Sound Manager
+// ALPHA BLADE - Sound Manager
 // Web Audio API based sound system
 
 export class SoundManager {
@@ -55,6 +55,38 @@ export class SoundManager {
 
   playSound(name: keyof typeof this.SOUNDS): void {
     if (!this.audioContext || this.isMuted) return;
+
+    if (name === 'shoot') {
+      const osc1 = this.audioContext.createOscillator();
+      const osc2 = this.audioContext.createOscillator();
+      const gain = this.audioContext.createGain();
+
+      osc1.type = 'sawtooth';
+      osc1.frequency.setValueAtTime(800, this.audioContext.currentTime);
+      osc1.frequency.exponentialRampToValueAtTime(100, this.audioContext.currentTime + 0.15);
+
+      osc2.type = 'square';
+      osc2.frequency.setValueAtTime(600, this.audioContext.currentTime);
+      osc2.frequency.exponentialRampToValueAtTime(50, this.audioContext.currentTime + 0.15);
+
+      gain.gain.setValueAtTime(0.4, this.audioContext.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.15);
+
+      const filter = this.audioContext.createBiquadFilter();
+      filter.type = 'highpass';
+      filter.frequency.value = 400;
+
+      osc1.connect(gain);
+      osc2.connect(gain);
+      gain.connect(filter);
+      filter.connect(this.sfxGain!);
+
+      osc1.start(this.audioContext.currentTime);
+      osc2.start(this.audioContext.currentTime);
+      osc1.stop(this.audioContext.currentTime + 0.15);
+      osc2.stop(this.audioContext.currentTime + 0.15);
+      return;
+    }
 
     const sound = this.SOUNDS[name];
     const osc = this.audioContext.createOscillator();
@@ -135,6 +167,40 @@ export class SoundManager {
     
     if (!this.audioContext || this.isMuted) return;
 
+    // Background Long Pad Sweep
+    const padOsc1 = this.audioContext.createOscillator();
+    const padOsc2 = this.audioContext.createOscillator();
+    const padGain = this.audioContext.createGain();
+
+    padOsc1.type = 'sawtooth';
+    padOsc2.type = 'sawtooth';
+    padOsc1.frequency.value = 110; // A2
+    padOsc2.frequency.value = 110.5; // detune
+
+    padGain.gain.setValueAtTime(0.04, this.audioContext.currentTime);
+
+    const padFilter = this.audioContext.createBiquadFilter();
+    padFilter.type = 'lowpass';
+    const lfo = this.audioContext.createOscillator();
+    lfo.type = 'sine';
+    lfo.frequency.value = 0.15; // slow sweep
+    const lfoGain = this.audioContext.createGain();
+    lfoGain.gain.value = 800;
+    
+    lfo.connect(lfoGain);
+    lfoGain.connect(padFilter.frequency);
+    padFilter.frequency.value = 1000;
+
+    padOsc1.connect(padFilter);
+    padOsc2.connect(padFilter);
+    padFilter.connect(padGain);
+    padGain.connect(this.musicGain!);
+
+    padOsc1.start();
+    padOsc2.start();
+    lfo.start();
+    this.musicOscillators.push(padOsc1, padOsc2, lfo);
+
     // Stage-specific bass lines
     const bassLines: Record<number, number[]> = {
       1: [65.41, 0, 73.42, 0, 82.41, 0, 98, 0], // Deep space
@@ -142,37 +208,58 @@ export class SoundManager {
       3: [41.2, 41.2, 49, 55, 41.2, 49, 55, 65.41], // Enemy base
     };
 
-    const notes = bassLines[stage] || bassLines[1];
-    let noteIndex = 0;
+    // Fast melody
+    const melodies: Record<number, number[]> = {
+      1: [440, 0, 523.25, 0, 587.33, 659.25, 0, 440, 880, 0, 0, 0, 783.99, 659.25, 523.25, 0],
+      2: [329.63, 0, 392, 0, 440, 0, 329.63, 0, 493.88, 0, 523.25, 0, 0, 0, 0, 0],
+      3: [293.66, 0, 329.63, 0, 349.23, 0, 440, 0, 493.88, 0, 523.25, 0, 587.33, 0, 0, 0],
+    };
 
-    // Bass line
+    const notes = bassLines[stage] || bassLines[1];
+    const melodyNotes = melodies[stage] || melodies[1];
+    let tick = 0;
+
+    // Rhythm and Melody
     this.musicInterval = window.setInterval(() => {
       if (this.isMuted || this.currentMusic !== `stage${stage}`) return;
       
-      const freq = notes[noteIndex];
+      // Play bass
+      const freq = notes[tick % notes.length];
       if (freq > 0) {
         const bass = this.audioContext!.createOscillator();
         const bassGain = this.audioContext!.createGain();
-        
         bass.type = 'sawtooth';
         bass.frequency.value = freq;
-        bassGain.gain.setValueAtTime(0.15, this.audioContext!.currentTime);
-        bassGain.gain.exponentialRampToValueAtTime(0.001, this.audioContext!.currentTime + 0.18);
+        bassGain.gain.setValueAtTime(0.12, this.audioContext!.currentTime);
+        bassGain.gain.exponentialRampToValueAtTime(0.001, this.audioContext!.currentTime + 0.15);
         
-        // Low pass filter for bass
         const filter = this.audioContext!.createBiquadFilter();
         filter.type = 'lowpass';
         filter.frequency.value = 400;
-        
         bass.connect(filter);
         filter.connect(bassGain);
         bassGain.connect(this.musicGain!);
-        
         bass.start();
-        bass.stop(this.audioContext!.currentTime + 0.2);
+        bass.stop(this.audioContext!.currentTime + 0.18);
+      }
+
+      // Play melody
+      const melFreq = melodyNotes[tick % melodyNotes.length];
+      if (melFreq > 0) {
+        const melOsc = this.audioContext!.createOscillator();
+        const melGain = this.audioContext!.createGain();
+        melOsc.type = 'square';
+        melOsc.frequency.value = melFreq;
+        melGain.gain.setValueAtTime(0.05, this.audioContext!.currentTime);
+        melGain.gain.exponentialRampToValueAtTime(0.001, this.audioContext!.currentTime + 0.15);
+        
+        melOsc.connect(melGain);
+        melGain.connect(this.musicGain!);
+        melOsc.start();
+        melOsc.stop(this.audioContext!.currentTime + 0.18);
       }
       
-      noteIndex = (noteIndex + 1) % notes.length;
+      tick++;
     }, 125); // Fast tempo for action
   }
 

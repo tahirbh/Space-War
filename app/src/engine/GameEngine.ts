@@ -67,6 +67,9 @@ export class GameEngine {
   enemySpawnTimer = 0;
   bossSpawned = false;
   bossWarningShown = false;
+  intermission = false;
+  intermissionTimer = 0;
+  carrierPos = { x: 0, y: -300, active: false };
   
   // Input
   input1: InputState = { up: false, down: false, left: false, right: false, shoot: false, bomb: false };
@@ -92,6 +95,7 @@ export class GameEngine {
   bgOffset = 0;
   stars: { x: number; y: number; size: number; speed: number; brightness: number; color: string }[] = [];
   nebulas: { x: number; y: number; radius: number; color: string; alpha: number }[] = [];
+  groundFixtures: { x: number; y: number; width: number; height: number; type: number; speed: number }[] = [];
   
   // Screen shake
   shakeIntensity = 0;
@@ -115,6 +119,7 @@ export class GameEngine {
     // Generate background
     this.generateStars();
     this.generateNebulas();
+    this.generateGroundFixtures();
     
     // Detect touch device
     this.isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
@@ -261,6 +266,19 @@ export class GameEngine {
     }
   }
 
+  private generateGroundFixtures(): void {
+    for (let i = 0; i < 6; i++) {
+      this.groundFixtures.push({
+        x: (CANVAS_WIDTH / 6) * i + Math.random() * 200,
+        y: CANVAS_HEIGHT - 50 - Math.random() * 100,
+        width: 100 + Math.random() * 200,
+        height: 50 + Math.random() * 150,
+        type: Math.floor(Math.random() * 3),
+        speed: 1.5 + Math.random() * 1,
+      });
+    }
+  }
+
   private getStage(stageNum: number): Stage {
     const stages: Stage[] = [
       { id: 1, name: 'DEEP SPACE', duration: 60, enemySpawnRate: 1.5, bossSpawnTime: 55, backgroundType: 'space' },
@@ -285,10 +303,11 @@ export class GameEngine {
       powerLevel: 1,
       bombs: 2,
       speed: PLAYER_SPEED,
-      weaponType: 'spread',
+      weaponType: 'laser',
       invincible: false,
       invincibleTime: 0,
       targetPosition: { x: 100, y: CANVAS_HEIGHT / 2 },
+      lastShot: 0,
     };
     return this.player1;
   }
@@ -308,10 +327,11 @@ export class GameEngine {
       powerLevel: 1,
       bombs: 2,
       speed: PLAYER_SPEED,
-      weaponType: 'spread',
+      weaponType: 'laser',
       invincible: true,
       invincibleTime: 3000,
       targetPosition: { x: 100, y: CANVAS_HEIGHT / 2 + 60 },
+      lastShot: 0,
     };
     this.onPlayer2Join?.();
     return this.player2;
@@ -361,6 +381,9 @@ export class GameEngine {
     this.enemySpawnTimer = 0;
     this.bossSpawned = false;
     this.bossWarningShown = false;
+    this.intermission = false;
+    this.intermissionTimer = 0;
+    this.carrierPos.active = false;
     this.currentStage = this.getStage(1);
     this.spawnPlayer1();
   }
@@ -372,6 +395,9 @@ export class GameEngine {
     this.enemySpawnTimer = 0;
     this.bossSpawned = false;
     this.bossWarningShown = false;
+    this.intermission = false;
+    this.intermissionTimer = 0;
+    this.carrierPos.active = false;
     this.enemies = [];
     this.bullets = this.bullets.filter(b => b.owner !== 'enemy');
     this.soundManager.playSound('stageClear');
@@ -406,6 +432,13 @@ export class GameEngine {
 
     // Update background
     this.bgOffset += 80 * dtSeconds;
+    this.groundFixtures.forEach(fix => {
+      fix.x -= fix.speed * (dt / 16);
+      if (fix.x + fix.width < 0) {
+        fix.x = CANVAS_WIDTH + Math.random() * 500;
+        fix.y = CANVAS_HEIGHT - 50 - Math.random() * 100;
+      }
+    });
 
     // Update players
     this.updatePlayer(this.player1, this.input1, dt);
@@ -426,9 +459,56 @@ export class GameEngine {
     this.checkCollisions();
 
     // Check stage progression
-    if (this.bossSpawned && !this.boss && this.enemies.length === 0) {
-      if (this.stageTime > this.currentStage.bossSpawnTime + 5) {
-        this.nextStage();
+    if (this.intermission) {
+      this.intermissionTimer += dtSeconds;
+      
+      // Zero inputs
+      if (this.player1) { this.input1.up = false; this.input1.down = false; this.input1.left = false; this.input1.right = false; this.input1.shoot = false; this.input1.bomb = false; }
+      if (this.player2) { this.input2.up = false; this.input2.down = false; this.input2.left = false; this.input2.right = false; this.input2.shoot = false; this.input2.bomb = false; }
+      
+      this.carrierPos.active = true;
+
+      // Carrier descending
+      if (this.intermissionTimer < 3) {
+         this.carrierPos.x = CANVAS_WIDTH / 2 - 250;
+         this.carrierPos.y = -300 + this.intermissionTimer * 100; 
+      }
+      
+      // Players flying to carrier
+      if (this.intermissionTimer > 2 && this.intermissionTimer < 5) {
+         if (this.player1 && this.player1.active) {
+            this.player1.position.x += (this.carrierPos.x + 100 - this.player1.position.x) * (dt/500);
+            this.player1.position.y += (this.carrierPos.y + 150 - this.player1.position.y) * (dt/500);
+         }
+         if (this.player2 && this.player2.active) {
+            this.player2.position.x += (this.carrierPos.x + 350 - this.player2.position.x) * (dt/500);
+            this.player2.position.y += (this.carrierPos.y + 150 - this.player2.position.y) * (dt/500);
+         }
+      }
+      
+      // Refuel and speed off
+      if (this.intermissionTimer >= 5 && this.intermissionTimer < 6.5) {
+         if (this.intermissionTimer < 5.05) {
+            if (this.player1) { this.player1.health = this.player1.maxHealth; this.player1.bombs = 2; }
+            if (this.player2) { this.player2.health = this.player2.maxHealth; this.player2.bombs = 2; }
+         }
+         this.carrierPos.x += 15 * (dt/16);
+         if (this.player1 && this.player1.active) this.player1.position.x = this.carrierPos.x + 100;
+         if (this.player2 && this.player2.active) this.player2.position.x = this.carrierPos.x + 350;
+      }
+
+      if (this.intermissionTimer > 6.5) {
+         if (this.player1) this.player1.position.x = 100;
+         if (this.player2) this.player2.position.x = 100;
+         this.nextStage();
+      }
+    } else {
+      if (this.bossSpawned && !this.boss && this.enemies.length === 0) {
+        if (this.stageTime > this.currentStage.bossSpawnTime + 2) {
+          this.intermission = true;
+          this.intermissionTimer = 0;
+          this.bullets = [];
+        }
       }
     }
   }
@@ -463,10 +543,19 @@ export class GameEngine {
     player.position.x = Math.max(20, Math.min(CANVAS_WIDTH - 60, player.position.x));
     player.position.y = Math.max(20, Math.min(CANVAS_HEIGHT - 40, player.position.y));
 
-    // Beam shooting - continuous when button held
+    // Weapon shooting
     if (input.shoot && player.active) {
-      this.beamActive = true;
-      this.updateBeam(player);
+      if (player.weaponType === 'laser') {
+        this.beamActive = true;
+        this.updateBeam(player);
+      } else {
+        this.beamActive = false;
+        const now = Date.now();
+        if (now - player.lastShot > 180) { // 180ms delay
+          player.lastShot = now;
+          this.shootProjectileWeapon(player);
+        }
+      }
     } else {
       this.beamActive = false;
     }
@@ -475,6 +564,38 @@ export class GameEngine {
     if (input.bomb && player.bombs > 0) {
       this.useBomb(player);
       input.bomb = false;
+    }
+  }
+
+  private shootProjectileWeapon(player: Player): void {
+    this.soundManager.playSound('shoot');
+    const bY = player.position.y + player.height / 2;
+    const bX = player.position.x + player.width;
+    const speed = 15;
+    const isBooster = player.weaponType === 'booster';
+    const isSpread = player.weaponType === 'spread';
+    const dmg = player.powerLevel;
+    
+    if (isBooster) {
+      // Booster: Fast, high damage, multiple inline
+      this.bullets.push({
+        id: uuidv4(), position: { x: bX, y: bY },
+        velocity: { x: speed * 1.5, y: 0 }, width: 14 + dmg * 2, height: 4 + dmg,
+        active: true, owner: `player${player.playerNumber}` as 'player1' | 'player2',
+        damage: dmg * 1.5, color: '#00FF00'
+      });
+    } else if (isSpread) {
+      // Spread: up to 5-way cover depending on power
+      const ways = dmg >= 4 ? [-0.3, -0.15, 0, 0.15, 0.3] : dmg >= 2 ? [-0.2, 0, 0.2] : [-0.15, 0.15];
+      ways.forEach(angle => {
+        this.bullets.push({
+          id: uuidv4(), position: { x: bX, y: bY },
+          velocity: { x: Math.cos(angle) * speed, y: Math.sin(angle) * speed },
+          width: 8 + dmg, height: 8 + dmg,
+          active: true, owner: `player${player.playerNumber}` as 'player1' | 'player2',
+          damage: dmg, color: '#0088FF'
+        });
+      });
     }
   }
 
@@ -729,26 +850,55 @@ export class GameEngine {
   private enemyShoot(enemy: Enemy): void {
     this.soundManager.playSound('enemyShoot');
     
-    const bulletPatterns = [
-      [{ x: 0, y: 0, vx: -5, vy: 0 }],
-      [{ x: 0, y: -5, vx: -5, vy: -0.5 }, { x: 0, y: 5, vx: -5, vy: 0.5 }],
-    ];
+    let targetPlayer: Player | null = null;
+    let minDiff = Infinity;
+    [this.player1, this.player2].forEach(p => {
+      if (p && p.active) {
+        const dist = Math.hypot(p.position.x - enemy.position.x, p.position.y - enemy.position.y);
+        if (dist < minDiff) {
+          minDiff = dist;
+          targetPlayer = p as Player;
+        }
+      }
+    });
 
-    const pattern = bulletPatterns[Math.floor(Math.random() * bulletPatterns.length)];
+    let targetAngle = Math.PI; // Default shoot left
+    if (targetPlayer) {
+      const tp = targetPlayer as Player;
+      targetAngle = Math.atan2(
+        tp.position.y + tp.height / 2 - (enemy.position.y + enemy.height / 2),
+        tp.position.x + tp.width / 2 - enemy.position.x
+      );
+    }
+    
+    const speed = 0.125; // 4x slower
+    let numBullets = 1;
+    
+    if (enemy.type === 'interceptor') {
+       numBullets = 2;
+    } else if (enemy.type === 'bomber') {
+       numBullets = 3;
+    }
 
-    pattern.forEach(b => {
+    for (let i = 0; i < numBullets; i++) {
+      const offsetX = -Math.cos(targetAngle) * (i * 30);
+      const offsetY = -Math.sin(targetAngle) * (i * 30);
+      
       this.bullets.push({
         id: uuidv4(),
-        position: { x: enemy.position.x, y: enemy.position.y + enemy.height / 2 },
-        velocity: { x: b.vx, y: b.vy },
-        width: 8,
-        height: 8,
+        position: { x: enemy.position.x + offsetX, y: enemy.position.y + enemy.height / 2 + offsetY },
+        velocity: { 
+          x: Math.cos(targetAngle) * speed, 
+          y: Math.sin(targetAngle) * speed 
+        },
+        width: 20,
+        height: 20,
         active: true,
         owner: 'enemy',
         damage: 1,
-        color: '#FF6B35',
+        color: '#FF3300',
       });
-    });
+    }
   }
 
   private updateBoss(dt: number): void {
@@ -964,11 +1114,11 @@ export class GameEngine {
   }
 
   private spawnPowerUp(x: number, y: number): void {
-    const types: PowerUpType[] = ['power', 'bomb', 'speed', 'life'];
+    const types: PowerUpType[] = ['weapon', 'bomb', 'speed', 'life'];
     const weights = [0.5, 0.25, 0.15, 0.1];
     
     let random = Math.random();
-    let type: PowerUpType = 'power';
+    let type: PowerUpType = 'weapon';
     let cumulative = 0;
     
     for (let i = 0; i < types.length; i++) {
@@ -995,6 +1145,11 @@ export class GameEngine {
     this.soundManager.playSound('powerUp');
     
     switch (type) {
+      case 'weapon':
+        const cycle = Date.now() % 9000;
+        player.weaponType = cycle < 3000 ? 'laser' : cycle < 6000 ? 'booster' : 'spread';
+        player.powerLevel = Math.min(player.powerLevel + 1, 5);
+        break;
       case 'power':
         player.powerLevel = Math.min(player.powerLevel + 1, 5);
         break;
@@ -1116,8 +1271,41 @@ export class GameEngine {
       ctx.globalAlpha = 1;
     });
 
+    // Draw ground fixtures
+    ctx.fillStyle = '#1A1A2E';
+    this.groundFixtures.forEach(fix => {
+      ctx.beginPath();
+      if (fix.type === 0) {
+        // Tech building
+        ctx.fillRect(fix.x, fix.y, fix.width, CANVAS_HEIGHT - fix.y);
+        ctx.fillStyle = '#00FFFF';
+        for (let w = 10; w < fix.width - 10; w += 20) {
+          if (w % 30 !== 0) ctx.fillRect(fix.x + w, fix.y + 20, 5, 10);
+        }
+        ctx.fillStyle = '#1A1A2E';
+      } else if (fix.type === 1) {
+        // Dome cluster
+        ctx.arc(fix.x + fix.width / 2, fix.y + fix.height / 2, fix.width / 2, Math.PI, 0);
+        ctx.fill();
+        ctx.strokeStyle = '#00D4FF';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      } else {
+        // Antenna/Tower
+        ctx.moveTo(fix.x + fix.width * 0.4, CANVAS_HEIGHT);
+        ctx.lineTo(fix.x + fix.width * 0.5, fix.y - fix.height);
+        ctx.lineTo(fix.x + fix.width * 0.6, CANVAS_HEIGHT);
+        ctx.fill();
+        ctx.fillStyle = '#FF0055';
+        ctx.beginPath();
+        ctx.arc(fix.x + fix.width * 0.5, fix.y - fix.height, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#1A1A2E';
+      }
+    });
+
     // Stage name
-    if (this.stageTime < 3) {
+    if (this.stageTime < 3 && !this.intermission) {
       ctx.fillStyle = `rgba(255, 255, 255, ${1 - this.stageTime / 3})`;
       ctx.font = 'bold 56px Orbitron';
       ctx.textAlign = 'center';
@@ -1127,6 +1315,25 @@ export class GameEngine {
       ctx.font = '36px Orbitron';
       ctx.fillText(this.currentStage.name, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 40);
       ctx.shadowBlur = 0;
+    }
+
+    // Draw carrier
+    if (this.carrierPos.active) {
+      ctx.fillStyle = '#222';
+      ctx.fillRect(this.carrierPos.x, this.carrierPos.y, 500, 200);
+      ctx.fillStyle = '#444';
+      ctx.fillRect(this.carrierPos.x + 50, this.carrierPos.y + 50, 400, 100);
+      ctx.fillStyle = '#00FFFF';
+      ctx.fillRect(this.carrierPos.x + 100, this.carrierPos.y + 150, 50, 10);
+      ctx.fillRect(this.carrierPos.x + 350, this.carrierPos.y + 150, 50, 10);
+      
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.lineWidth = 4;
+      ctx.strokeRect(this.carrierPos.x, this.carrierPos.y, 500, 200);
+      ctx.fillStyle = '#FFF';
+      ctx.font = 'bold 28px Orbitron';
+      ctx.textAlign = 'center';
+      ctx.fillText('REFUEL STATION', this.carrierPos.x + 250, this.carrierPos.y + 40);
     }
   }
 
@@ -1234,13 +1441,41 @@ export class GameEngine {
     this.bullets.forEach(bullet => {
       if (!bullet.active) return;
 
-      ctx.fillStyle = bullet.color;
-      ctx.shadowColor = bullet.color;
-      ctx.shadowBlur = 8;
-      
-      ctx.beginPath();
-      ctx.arc(bullet.position.x, bullet.position.y, bullet.width / 2, 0, Math.PI * 2);
-      ctx.fill();
+      if (bullet.owner === 'enemy') {
+        ctx.fillStyle = bullet.color;
+        ctx.shadowColor = bullet.color;
+        ctx.shadowBlur = 15;
+        
+        const timeOffset = Date.now() / 150;
+        ctx.save();
+        ctx.translate(bullet.position.x, bullet.position.y);
+        ctx.rotate(timeOffset);
+        
+        ctx.beginPath();
+        // Inner core
+        ctx.arc(0, 0, bullet.width / 2, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Rolling sawtooth outer spikes
+        ctx.fillStyle = '#FFFFFF';
+        for (let i = 0; i < 4; i++) {
+          ctx.beginPath();
+          ctx.moveTo(0, bullet.width / 2);
+          ctx.lineTo(-bullet.width * 0.2, bullet.width * 0.8);
+          ctx.lineTo(bullet.width * 0.2, bullet.width * 0.8);
+          ctx.fill();
+          ctx.rotate(Math.PI / 2);
+        }
+        ctx.restore();
+      } else {
+        ctx.fillStyle = bullet.color;
+        ctx.shadowColor = bullet.color;
+        ctx.shadowBlur = 8;
+        
+        ctx.beginPath();
+        ctx.arc(bullet.position.x, bullet.position.y, bullet.width / 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
       
       ctx.shadowBlur = 0;
     });
@@ -1264,28 +1499,54 @@ export class GameEngine {
       switch (enemy.type) {
         case 'grunt':
           ctx.beginPath();
-          ctx.moveTo(enemy.position.x, enemy.position.y + enemy.height / 2);
-          ctx.lineTo(enemy.position.x + enemy.width, enemy.position.y);
-          ctx.lineTo(enemy.position.x + enemy.width, enemy.position.y + enemy.height);
+          ctx.moveTo(enemy.position.x + enemy.width, enemy.position.y + enemy.height / 2);
+          ctx.lineTo(enemy.position.x, enemy.position.y);
+          ctx.lineTo(enemy.position.x + enemy.width * 0.2, enemy.position.y + enemy.height / 2);
+          ctx.lineTo(enemy.position.x, enemy.position.y + enemy.height);
           ctx.closePath();
+          ctx.fill();
+          ctx.fillStyle = '#FFF';
+          ctx.beginPath();
+          ctx.arc(enemy.position.x + enemy.width * 0.6, enemy.position.y + enemy.height / 2, enemy.height * 0.15, 0, Math.PI * 2);
           ctx.fill();
           break;
         case 'interceptor':
           ctx.beginPath();
-          ctx.arc(enemy.position.x + enemy.width / 2, enemy.position.y + enemy.height / 2, enemy.width / 2, 0, Math.PI * 2);
+          ctx.arc(enemy.position.x + enemy.width * 0.4, enemy.position.y + enemy.height / 2, enemy.width / 2, -Math.PI / 2, Math.PI / 2);
+          ctx.arc(enemy.position.x + enemy.width * 0.7, enemy.position.y + enemy.height / 2, enemy.width * 0.4, Math.PI / 2, -Math.PI / 2, true);
+          ctx.closePath();
+          ctx.fill();
+          ctx.fillStyle = '#FFF';
+          ctx.beginPath();
+          ctx.arc(enemy.position.x + enemy.width * 0.4, enemy.position.y + enemy.height / 2, enemy.width * 0.15, 0, Math.PI * 2);
           ctx.fill();
           break;
         case 'bomber':
-          ctx.fillRect(enemy.position.x, enemy.position.y, enemy.width, enemy.height);
+          if (!(ctx as any).roundRect) (ctx as any).roundRect = function(x: number, y: number, w: number, h: number) { ctx.rect(x,y,w,h); }; // Polyfill safety
+          ctx.beginPath();
+          ctx.roundRect(enemy.position.x + enemy.width * 0.2, enemy.position.y + enemy.height * 0.2, enemy.width * 0.8, enemy.height * 0.6, 5);
+          ctx.fill();
+          ctx.fillRect(enemy.position.x, enemy.position.y, enemy.width * 0.4, enemy.height * 0.2);
+          ctx.fillRect(enemy.position.x, enemy.position.y + enemy.height * 0.8, enemy.width * 0.4, enemy.height * 0.2);
+          ctx.fillStyle = '#00FFFF';
+          ctx.fillRect(enemy.position.x - 5, enemy.position.y + enemy.height * 0.3, 10, enemy.height * 0.1);
+          ctx.fillRect(enemy.position.x - 5, enemy.position.y + enemy.height * 0.6, 10, enemy.height * 0.1);
           break;
         case 'elite':
           ctx.beginPath();
-          ctx.moveTo(enemy.position.x + enemy.width / 2, enemy.position.y);
-          ctx.lineTo(enemy.position.x + enemy.width, enemy.position.y + enemy.height / 2);
-          ctx.lineTo(enemy.position.x + enemy.width / 2, enemy.position.y + enemy.height);
-          ctx.lineTo(enemy.position.x, enemy.position.y + enemy.height / 2);
+          ctx.moveTo(enemy.position.x + enemy.width, enemy.position.y + enemy.height / 2);
+          ctx.lineTo(enemy.position.x + enemy.width * 0.6, enemy.position.y);
+          ctx.lineTo(enemy.position.x + enemy.width * 0.4, enemy.position.y + enemy.height * 0.3);
+          ctx.lineTo(enemy.position.x, enemy.position.y + enemy.height * 0.1);
+          ctx.lineTo(enemy.position.x + enemy.width * 0.2, enemy.position.y + enemy.height / 2);
+          ctx.lineTo(enemy.position.x, enemy.position.y + enemy.height * 0.9);
+          ctx.lineTo(enemy.position.x + enemy.width * 0.4, enemy.position.y + enemy.height * 0.7);
+          ctx.lineTo(enemy.position.x + enemy.width * 0.6, enemy.position.y + enemy.height);
           ctx.closePath();
           ctx.fill();
+          ctx.strokeStyle = '#FFFFFF';
+          ctx.lineWidth = 1;
+          ctx.stroke();
           break;
       }
 
@@ -1316,29 +1577,74 @@ export class GameEngine {
     ctx.fillStyle = color;
     ctx.shadowColor = color;
     ctx.shadowBlur = 20;
-    ctx.fillRect(this.boss.position.x, this.boss.position.y, this.boss.width, this.boss.height);
-    ctx.shadowBlur = 0;
-
-    // Boss details
-    ctx.fillStyle = '#FFFFFF';
+    // Boss styling
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
     switch (this.boss.type) {
       case 'mantis':
-        ctx.fillRect(this.boss.position.x + 20, this.boss.position.y + 20, 25, 25);
-        ctx.fillRect(this.boss.position.x + 20, this.boss.position.y + 60, 25, 25);
+        ctx.beginPath();
+        ctx.moveTo(this.boss.position.x, this.boss.position.y + this.boss.height / 2);
+        ctx.lineTo(this.boss.position.x + this.boss.width * 0.3, this.boss.position.y);
+        ctx.lineTo(this.boss.position.x + this.boss.width, this.boss.position.y + this.boss.height * 0.2);
+        ctx.lineTo(this.boss.position.x + this.boss.width, this.boss.position.y + this.boss.height * 0.8);
+        ctx.lineTo(this.boss.position.x + this.boss.width * 0.3, this.boss.position.y + this.boss.height);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        
+        ctx.fillStyle = '#FFFFFF';
+        const clawOffset = Math.sin(this.stageTime * 5) * 10;
+        ctx.fillRect(this.boss.position.x - 20 + clawOffset, this.boss.position.y + 10, 40, 15);
+        ctx.fillRect(this.boss.position.x - 20 - clawOffset, this.boss.position.y + this.boss.height - 25, 40, 15);
+        
+        ctx.fillStyle = '#FF0000';
+        ctx.fillRect(this.boss.position.x + 30, this.boss.position.y + 30, 20, 10);
+        ctx.fillRect(this.boss.position.x + 30, this.boss.position.y + this.boss.height - 40, 20, 10);
         break;
       case 'leviathan':
-        for (let i = 0; i < 3; i++) {
-          ctx.fillRect(this.boss.position.x + 35 + i * 40, this.boss.position.y + 35, 25, 50);
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = 2;
+        for (let i = 0; i < 4; i++) {
+          const segOffset = Math.sin(this.stageTime * 3 + i) * 15;
+          ctx.beginPath();
+          ctx.arc(this.boss.position.x + 30 + i * 35, this.boss.position.y + this.boss.height / 2 + segOffset, 30 - i * 3, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+          
+          ctx.fillStyle = '#00FFFF';
+          ctx.beginPath();
+          ctx.arc(this.boss.position.x + 30 + i * 35, this.boss.position.y + this.boss.height / 2 + segOffset, 10, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = color;
         }
         break;
       case 'omega':
+        const pulse = Math.abs(Math.sin(this.stageTime * 2)) * 10;
+        ctx.beginPath();
+        ctx.arc(this.boss.position.x + this.boss.width / 2, this.boss.position.y + this.boss.height / 2, 60 + pulse, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        
         ctx.fillStyle = '#FFFF00';
         ctx.shadowColor = '#FFFF00';
         ctx.shadowBlur = 30;
         ctx.beginPath();
-        ctx.arc(this.boss.position.x + this.boss.width / 2, this.boss.position.y + this.boss.height / 2, 40, 0, Math.PI * 2);
+        ctx.arc(this.boss.position.x + this.boss.width / 2, this.boss.position.y + this.boss.height / 2, 30 - pulse / 2, 0, Math.PI * 2);
         ctx.fill();
         ctx.shadowBlur = 0;
+        
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.ellipse(this.boss.position.x + this.boss.width / 2, this.boss.position.y + this.boss.height / 2, 90, 30, this.stageTime, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.ellipse(this.boss.position.x + this.boss.width / 2, this.boss.position.y + this.boss.height / 2, 90, 30, -this.stageTime * 1.5, 0, Math.PI * 2);
+        ctx.stroke();
         break;
     }
 
@@ -1369,6 +1675,7 @@ export class GameEngine {
   private drawPowerUps(ctx: CanvasRenderingContext2D): void {
     const colors: Record<PowerUpType, string> = {
       power: '#FFA500',
+      weapon: '#FFA500', // Dynamic placeholder
       bomb: '#FF0000',
       speed: '#0088FF',
       life: '#00FF00',
@@ -1376,6 +1683,7 @@ export class GameEngine {
 
     const labels: Record<PowerUpType, string> = {
       power: 'P',
+      weapon: 'W',
       bomb: 'B',
       speed: 'S',
       life: '1UP',
@@ -1385,22 +1693,60 @@ export class GameEngine {
       if (!pu.active) return;
 
       const color = colors[pu.type];
-      
       ctx.shadowColor = color;
       ctx.shadowBlur = 20;
-      
       ctx.fillStyle = color;
-      ctx.beginPath();
-      ctx.arc(pu.position.x + pu.width / 2, pu.position.y + pu.height / 2, pu.width / 2, 0, Math.PI * 2);
-      ctx.fill();
-      
-      ctx.shadowBlur = 0;
 
-      ctx.fillStyle = '#FFF';
-      ctx.font = 'bold 12px Orbitron';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(labels[pu.type], pu.position.x + pu.width / 2, pu.position.y + pu.height / 2);
+      if (pu.type === 'weapon') {
+        const cycle = Date.now() % 9000;
+        const weaponColor = cycle < 3000 ? '#FF0000' : cycle < 6000 ? '#00FF00' : '#00D4FF';
+        const weaponLabel = cycle < 3000 ? 'LSR' : cycle < 6000 ? 'BST' : 'SPR';
+        ctx.shadowColor = weaponColor;
+        ctx.fillStyle = weaponColor;
+        ctx.beginPath();
+        ctx.moveTo(pu.position.x + pu.width / 2, pu.position.y);
+        ctx.lineTo(pu.position.x + pu.width, pu.position.y + pu.height / 2);
+        ctx.lineTo(pu.position.x + pu.width / 2, pu.position.y + pu.height);
+        ctx.lineTo(pu.position.x, pu.position.y + pu.height / 2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#FFF';
+        ctx.font = 'bold 10px Orbitron';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(weaponLabel, pu.position.x + pu.width / 2, pu.position.y + pu.height / 2);
+      } else if (pu.type === 'life') {
+        // Draw distinct cross shape
+        const cx = pu.position.x + pu.width / 2;
+        const cy = pu.position.y + pu.height / 2;
+        const thickness = pu.width * 0.3;
+        const length = pu.width * 0.8;
+        
+        ctx.beginPath();
+        // horizontal bar
+        ctx.fillRect(cx - length / 2, cy - thickness / 2, length, thickness);
+        // vertical bar
+        ctx.fillRect(cx - thickness / 2, cy - length / 2, thickness, length);
+        
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = '#FFF';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(cx - length / 2, cy - thickness / 2, length, thickness);
+        ctx.strokeRect(cx - thickness / 2, cy - length / 2, thickness, length);
+      } else {
+        // Draw standard circle for other powerups
+        ctx.beginPath();
+        ctx.arc(pu.position.x + pu.width / 2, pu.position.y + pu.height / 2, pu.width / 2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        ctx.fillStyle = '#FFF';
+        ctx.font = 'bold 12px Orbitron';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(labels[pu.type], pu.position.x + pu.width / 2, pu.position.y + pu.height / 2);
+      }
     });
   }
 

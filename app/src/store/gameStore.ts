@@ -81,7 +81,7 @@ export const useGameStore = create<GameStore>()(
       }),
     }),
     {
-      name: 'zed-blade-storage',
+      name: 'starships-war-alpha-storage',
       partialize: (state) => ({
         playerName: state.playerName,
         highScore: state.highScore,

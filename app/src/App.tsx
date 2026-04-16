@@ -7,17 +7,30 @@ import { MultiplayerLobby } from '@/components/MultiplayerLobby';
 import { Toaster } from '@/components/ui/sonner';
 import { toast } from 'sonner';
 import { Pause, Play, RotateCcw, LogOut, Trophy, Volume2, VolumeX } from 'lucide-react';
+import { IntermissionUI } from '@/components/IntermissionUI';
+import { ShopMenu } from '@/components/ShopMenu';
 
-type AppState = 'menu' | 'multiplayer' | 'playing' | 'paused' | 'gameover' | 'victory' | 'boss-warning';
+import { SoundManager } from '@/engine/SoundManager';
+
+type AppState = 'start' | 'menu' | 'multiplayer' | 'playing' | 'paused' | 'gameover' | 'victory' | 'boss-warning' | 'intermission' | 'shop';
 
 function App() {
-  const [appState, setAppState] = useState<AppState>('menu');
+  const soundManagerRefStatic = useRef<SoundManager | null>(null);
+
+  // Initialize SoundManager once
+  if (!soundManagerRefStatic.current) {
+    soundManagerRefStatic.current = new SoundManager();
+  }
+  const [appState, setAppState] = useState<AppState>('start');
   const [showBossWarning, setShowBossWarning] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
-  const { score, highScore, setScore, setHighScore, setStage, player2Connected, setPlayer2Connected } = useGameStore();
+  const {
+    score, highScore, setScore, setHighScore, stage, setStage,
+    player2Connected, setPlayer2Connected
+  } = useGameStore();
   const [playerStats] = useState({
-    p1: { lives: 3, bombs: 2, power: 1 },
-    p2: { lives: 3, bombs: 2, power: 1 },
+    p1: { lives: 1 / 0, bombs: 1 / 0, power: 1 },
+    p2: { lives: 1 / 0, bombs: 1 / 0, power: 1 },
   });
   const gameCanvasRef = useRef<HTMLDivElement>(null);
   const soundManagerRef = useRef<{ toggleMute: () => boolean; setMuted: (m: boolean) => void } | null>(null);
@@ -140,6 +153,11 @@ function App() {
     };
   }, [appState]);
 
+  // Expose store to window for engine access
+  useEffect(() => {
+    (window as any).gameStore = useGameStore.getState();
+  }, []);
+
   const togglePause = () => {
     if (appState === 'playing') {
       setAppState('paused');
@@ -176,7 +194,11 @@ function App() {
   }, [highScore, setScore, setHighScore]);
 
   const handleStageComplete = useCallback(() => {
-    toast.success('Stage Complete!', { description: 'Get ready for the next wave!' });
+    toast.success('Stage Complete!', { description: 'Prepare for landing sequence...' });
+  }, []);
+
+  const handleIntermissionStart = useCallback(() => {
+    setAppState('intermission');
   }, []);
 
   const handleGameOver = useCallback(() => {
@@ -233,6 +255,54 @@ function App() {
   }, [appState, player2Connected]);
 
   // Render different screens based on app state
+  if (appState === 'start') {
+    return (
+      <div
+        className="min-h-screen bg-black flex items-center justify-center cursor-pointer overflow-hidden group"
+        onClick={() => {
+          setAppState('menu');
+          // Startup mission music immediately after initialization
+          if (soundManagerRefStatic.current) {
+            soundManagerRefStatic.current.resume();
+            soundManagerRefStatic.current.startMissionMusic();
+          }
+        }}
+      >
+        <div className="absolute inset-0 bg-[#0A0A15]">
+          {/* Animated Background Stars */}
+          <div className="absolute inset-0">
+            {Array.from({ length: 50 }).map((_, i) => (
+              <div
+                key={i}
+                className="absolute w-1 h-1 bg-cyan-400 rounded-full animate-pulse"
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 100}%`,
+                  animationDelay: `${Math.random() * 3}s`,
+                }}
+              />
+            ))}
+          </div>
+        </div>
+
+        <div className="relative z-10 flex flex-col items-center gap-6">
+          <div className="w-16 h-16 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mb-4" />
+          <h1 className="text-3xl md:text-5xl font-black text-cyan-400 tracking-[0.3em] uppercase animate-pulse"
+            style={{ fontFamily: 'Orbitron, sans-serif' }}>
+            Establishing Transmission
+          </h1>
+          <p className="text-white/40 font-mono text-sm tracking-widest group-hover:text-cyan-400/60 transition-colors">
+            - CLICK TO INITIALIZE NEURAL LINK -
+          </p>
+        </div>
+
+        <div className="absolute bottom-10 left-0 right-0 text-center text-[10px] text-white/20 font-mono tracking-widest uppercase">
+          Neural-Net Alpha Blade Engine v4.0.2
+        </div>
+      </div>
+    );
+  }
+
   if (appState === 'menu') {
     return (
       <div className="min-h-screen bg-[#0A0A15]">
@@ -245,34 +315,41 @@ function App() {
   if (appState === 'multiplayer') {
     return (
       <div className="min-h-screen bg-[#0A0A15]">
-        <MultiplayerLobby 
-          onBack={() => setAppState('menu')} 
-          onStartGame={startGame} 
+        <MultiplayerLobby
+          onBack={() => setAppState('menu')}
+          onStartGame={startGame}
         />
         <Toaster />
       </div>
     );
   }
 
+  const proceedToNextMission = () => {
+    (window as any).gameAPI?.nextStage();
+    setAppState('playing');
+  };
+
   return (
     <div className="w-screen h-screen bg-[#0A0A15] flex flex-col relative overflow-hidden touch-none select-none">
       {/* Game Container */}
-      <div 
+      <div
         ref={gameCanvasRef}
         className="relative flex-1 w-full h-full bg-black overflow-hidden"
       >
         <GameCanvas
           onScoreUpdate={handleScoreUpdate}
           onStageComplete={handleStageComplete}
+          onIntermissionStart={handleIntermissionStart}
           onGameOver={handleGameOver}
           onPlayer2Join={handlePlayer2Join}
           onPlayer2Leave={handlePlayer2Leave}
           onBossWarning={handleBossWarning}
+          soundManager={soundManagerRefStatic.current}
           soundManagerRef={soundManagerRef}
         />
 
         {/* HUD */}
-        <HUD 
+        <HUD
           player1Lives={playerStats.p1.lives}
           player1Bombs={playerStats.p1.bombs}
           player1Power={playerStats.p1.power}
@@ -285,11 +362,11 @@ function App() {
         {showBossWarning && (
           <div className="absolute inset-0 bg-red-900/60 flex flex-col items-center justify-center z-30 animate-pulse">
             <div className="text-7xl md:text-9xl font-black text-red-500 tracking-widest animate-bounce"
-                 style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 50px #FF0000' }}>
+              style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 50px #FF0000' }}>
               WARNING
             </div>
             <div className="text-2xl md:text-4xl text-white mt-4 tracking-[0.5em]"
-                 style={{ fontFamily: 'Orbitron, sans-serif' }}>
+              style={{ fontFamily: 'Orbitron, sans-serif' }}>
               BOSS APPROACHING
             </div>
             <div className="mt-8 flex gap-2">
@@ -300,11 +377,24 @@ function App() {
           </div>
         )}
 
+        {/* Intermission View */}
+        {appState === 'intermission' && (
+          <IntermissionUI
+            stage={stage}
+            onFinish={() => setAppState('shop')}
+          />
+        )}
+
+        {/* Shop View */}
+        {appState === 'shop' && (
+          <ShopMenu onContinue={proceedToNextMission} />
+        )}
+
         {/* Pause Overlay */}
         {appState === 'paused' && (
           <div className="absolute inset-0 bg-black/90 flex flex-col items-center justify-center z-20">
-            <h2 className="text-5xl md:text-7xl font-bold text-cyan-400 mb-8" 
-                style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 30px #00D4FF' }}>
+            <h2 className="text-5xl md:text-7xl font-bold text-cyan-400 mb-8"
+              style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 30px #00D4FF' }}>
               PAUSED
             </h2>
             <div className="flex gap-4">
@@ -329,8 +419,8 @@ function App() {
         {/* Game Over Overlay */}
         {appState === 'gameover' && (
           <div className="absolute inset-0 bg-black/95 flex flex-col items-center justify-center z-20">
-            <h2 className="text-6xl md:text-8xl font-bold text-red-500 mb-4" 
-                style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 40px #FF0000' }}>
+            <h2 className="text-6xl md:text-8xl font-bold text-red-500 mb-4"
+              style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 40px #FF0000' }}>
               GAME OVER
             </h2>
             <div className="flex items-center gap-4 mb-8">

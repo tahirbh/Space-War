@@ -28,6 +28,20 @@ interface GameStore {
   setHighScore: (score: number) => void;
   stage: number;
   setStage: (stage: number) => void;
+  coins: number;
+  setCoins: (coins: number) => void;
+  addCoins: (amount: number) => void;
+  
+  // Upgrades & Selection
+  selectedWeapon: WeaponType;
+  setSelectedWeapon: (weapon: WeaponType) => void;
+  upgrades: {
+    fireRate: number;
+    damage: number;
+    health: number;
+    bombs: number;
+  };
+  setUpgrade: (type: 'fireRate' | 'damage' | 'health' | 'bombs', level: number) => void;
   
   // Input states
   input1: InputState;
@@ -52,6 +66,9 @@ export const useGameStore = create<GameStore>()(
       score: 0,
       highScore: 0,
       stage: 1,
+      coins: 0,
+      selectedWeapon: 'laser',
+      upgrades: { fireRate: 1, damage: 1, health: 1, bombs: 1 },
       input1: { up: false, down: false, left: false, right: false, shoot: false, bomb: false },
       input2: { up: false, down: false, left: false, right: false, shoot: false, bomb: false },
 
@@ -64,6 +81,13 @@ export const useGameStore = create<GameStore>()(
       setScore: (score) => set({ score }),
       setHighScore: (score) => set({ highScore: score }),
       setStage: (stage) => set({ stage }),
+      setCoins: (coins) => set({ coins }),
+      addCoins: (amount) => set((state) => ({ coins: state.coins + amount })),
+      
+      setSelectedWeapon: (weapon) => set({ selectedWeapon: weapon }),
+      setUpgrade: (type, level) => set((state) => ({ 
+        upgrades: { ...state.upgrades, [type]: level } 
+      })),
       
       setInput1: (input) => set((state) => ({ 
         input1: { ...state.input1, ...input } 
@@ -85,6 +109,9 @@ export const useGameStore = create<GameStore>()(
       partialize: (state) => ({
         playerName: state.playerName,
         highScore: state.highScore,
+        coins: state.coins,
+        upgrades: state.upgrades,
+        selectedWeapon: state.selectedWeapon,
       }),
     }
   )

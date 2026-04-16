@@ -1,6 +1,6 @@
 // Starships War Alpha - Game Types
 
-export type GameState = 'menu' | 'playing' | 'paused' | 'gameover' | 'victory';
+export type GameState = 'menu' | 'playing' | 'paused' | 'gameover' | 'victory' | 'intermission' | 'shop';
 export type EnemyType = 'grunt' | 'interceptor' | 'bomber' | 'elite';
 export type BossType = 'mantis' | 'leviathan' | 'omega';
 export type PowerUpType = 'power' | 'bomb' | 'speed' | 'life' | 'weapon';
@@ -106,6 +106,7 @@ export interface GameStats {
   stage: number;
   enemiesKilled: number;
   startTime: number;
+  coins: number;
 }
 
 export interface MultiplayerState {

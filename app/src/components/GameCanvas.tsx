@@ -9,29 +9,35 @@ interface GameCanvasProps {
   onPlayer2Join?: () => void;
   onPlayer2Leave?: () => void;
   onBossWarning?: () => void;
+  onIntermissionStart?: () => void;
+  onAddCoins?: (amount: number) => void;
+  soundManager?: any; // SoundManager type
   soundManagerRef?: MutableRefObject<{ toggleMute: () => boolean; setMuted: (m: boolean) => void } | null>;
 }
 
-export function GameCanvas({ 
-  onScoreUpdate, 
-  onStageComplete, 
+export function GameCanvas({
+  onScoreUpdate,
+  onStageComplete,
   onGameOver,
   onPlayer2Join,
   onPlayer2Leave,
   onBossWarning,
+  onIntermissionStart,
+  onAddCoins,
+  soundManager,
   soundManagerRef,
 }: GameCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<GameEngine | null>(null);
-  
-  const { input1, input2, setScore } = useGameStore();
+
+  const { input1, input2, setScore, addCoins } = useGameStore();
 
   // Initialize game engine
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const engine = new GameEngine(canvas);
+    const engine = new GameEngine(canvas, soundManager);
     engineRef.current = engine;
 
     // Expose sound manager
@@ -52,6 +58,11 @@ export function GameCanvas({
     engine.onPlayer2Join = onPlayer2Join;
     engine.onPlayer2Leave = onPlayer2Leave;
     engine.onBossWarning = onBossWarning;
+    engine.onIntermissionStart = onIntermissionStart;
+    engine.onAddCoins = (amount) => {
+      addCoins(amount);
+      onAddCoins?.(amount);
+    };
 
     // Spawn player 1
     engine.spawnPlayer1();
@@ -103,16 +114,20 @@ export function GameCanvas({
 
   // Expose to parent via window
   useEffect(() => {
-    (window as unknown as { gameAPI: { 
-      spawnPlayer2: () => void; 
-      removePlayer2: () => void; 
-      resetGame: () => void;
-      pauseGame: () => void;
-    } }).gameAPI = {
+    (window as unknown as {
+      gameAPI: {
+        spawnPlayer2: () => void;
+        removePlayer2: () => void;
+        resetGame: () => void;
+        pauseGame: () => void;
+        nextStage: () => void;
+      }
+    }).gameAPI = {
       spawnPlayer2,
       removePlayer2,
       resetGame,
       pauseGame,
+      nextStage: () => engineRef.current?.nextStage(),
     };
   }, [spawnPlayer2, removePlayer2, resetGame, pauseGame]);
 
@@ -120,7 +135,7 @@ export function GameCanvas({
     <canvas
       ref={canvasRef}
       className="w-full h-full object-contain game-canvas"
-      style={{ 
+      style={{
         imageRendering: 'pixelated',
       }}
     />

@@ -19,7 +19,7 @@ export function HUD({
   player2Bombs = 2,
   player2Power = 1,
 }: HUDProps) {
-  const { score, highScore, stage, player2Connected, playerName } = useGameStore();
+  const { score, highScore, stage, player2Connected, playerName, coins } = useGameStore();
 
   return (
     <div className="absolute inset-0 pointer-events-none">
@@ -34,8 +34,8 @@ export function HUD({
               {score.toString().padStart(8, '0')}
             </span>
           </div>
-          <div className="text-xs md:text-sm text-white/60 font-mono">
-            HI: {highScore.toString().padStart(8, '0')}
+          <div className="text-xs md:text-sm text-yellow-500 font-mono mt-1">
+            COINS: {coins.toString().padStart(6, '0')}
           </div>
         </div>
 

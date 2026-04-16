@@ -90,6 +90,12 @@ export class GameEngine {
   onPlayer2Join?: () => void;
   onPlayer2Leave?: () => void;
   onBossWarning?: () => void;
+  onIntermissionStart?: () => void;
+  onAddCoins?: (amount: number) => void;
+  
+  // Character dialogues
+  dialogueActive = false;
+  currentDialogueIndex = 0;
   
   // Background scroll
   bgOffset = 0;
@@ -101,7 +107,7 @@ export class GameEngine {
   shakeIntensity = 0;
   shakeDecay = 0.9;
 
-  constructor(canvas: HTMLCanvasElement) {
+  constructor(canvas: HTMLCanvasElement, soundManager?: SoundManager) {
     this.canvas = canvas;
     this.canvas.width = CANVAS_WIDTH;
     this.canvas.height = CANVAS_HEIGHT;
@@ -111,7 +117,7 @@ export class GameEngine {
     this.ctx = ctx;
     
     // Initialize sound
-    this.soundManager = new SoundManager();
+    this.soundManager = soundManager || new SoundManager();
     
     // Initialize stage
     this.currentStage = this.getStage(1);
@@ -309,6 +315,10 @@ export class GameEngine {
       targetPosition: { x: 100, y: CANVAS_HEIGHT / 2 },
       lastShot: 0,
     };
+    // Force weapon type from store/selection
+    const store = (window as any).gameStore;
+    if (store && store.selectedWeapon) this.player1.weaponType = store.selectedWeapon;
+    
     return this.player1;
   }
 
@@ -500,7 +510,10 @@ export class GameEngine {
       if (this.intermissionTimer > 6.5) {
          if (this.player1) this.player1.position.x = 100;
          if (this.player2) this.player2.position.x = 100;
-         this.nextStage();
+         this.intermission = false; // Stop the landing sequence
+         this.intermissionTimer = 0;
+         this.carrierPos.active = false;
+         this.onIntermissionStart?.(); // Trigger UI for Dialogue/Shop
       }
     } else {
       if (this.bossSpawned && !this.boss && this.enemies.length === 0) {
@@ -750,8 +763,9 @@ export class GameEngine {
       health: data.health,
       maxHealth: data.health,
       scoreValue: data.score,
-      shootCooldown: type === 'grunt' ? 2000 : type === 'interceptor' ? 1500 : 3000,
-      lastShot: 0,
+      // Increased cooldowns for easier gameplay (was 1500-3000ms)
+      shootCooldown: type === 'grunt' ? 4000 : type === 'interceptor' ? 3000 : 5000,
+      lastShot: Date.now() + Math.random() * 2000, // Initial delay
       pattern: type === 'grunt' ? 'linear' : type === 'interceptor' ? 'tracking' : type === 'bomber' ? 'hover' : 'sine',
       patternPhase: 0,
     };
@@ -794,8 +808,9 @@ export class GameEngine {
     this.bullets = this.bullets.filter(bullet => {
       if (!bullet.active) return false;
 
-      bullet.position.x += bullet.velocity.x * (dt / 16) * 60;
-      bullet.position.y += bullet.velocity.y * (dt / 16) * 60;
+      // Fixed: Removed * 60 multiplier which caused bullets to teleport off-screen
+      bullet.position.x += bullet.velocity.x * (dt / 16);
+      bullet.position.y += bullet.velocity.y * (dt / 16);
 
       if (bullet.position.x < -50 || bullet.position.x > CANVAS_WIDTH + 50 ||
           bullet.position.y < -50 || bullet.position.y > CANVAS_HEIGHT + 50) {
@@ -871,28 +886,26 @@ export class GameEngine {
       );
     }
     
-    const speed = 0.125; // 4x slower
-    let numBullets = 1;
+    // Rebalanced: Slower bullets and single shots
+    const speed = 4 + (this.stats.stage * 0.5); // Much slower than before (was 7.5+)
+    let numBullets = 1; // Always 1 for base performance
     
-    if (enemy.type === 'interceptor') {
-       numBullets = 2;
-    } else if (enemy.type === 'bomber') {
-       numBullets = 3;
+    if (enemy.type === 'elite') {
+       numBullets = 2; // Only elites get 2
     }
 
     for (let i = 0; i < numBullets; i++) {
-      const offsetX = -Math.cos(targetAngle) * (i * 30);
-      const offsetY = -Math.sin(targetAngle) * (i * 30);
+      const bulletAngle = numBullets > 1 ? targetAngle + (i - 0.5) * 0.2 : targetAngle;
       
       this.bullets.push({
         id: uuidv4(),
-        position: { x: enemy.position.x + offsetX, y: enemy.position.y + enemy.height / 2 + offsetY },
+        position: { x: enemy.position.x, y: enemy.position.y + enemy.height / 2 },
         velocity: { 
-          x: Math.cos(targetAngle) * speed, 
-          y: Math.sin(targetAngle) * speed 
+          x: Math.cos(bulletAngle) * speed, 
+          y: Math.sin(bulletAngle) * speed 
         },
-        width: 20,
-        height: 20,
+        width: 16,
+        height: 16,
         active: true,
         owner: 'enemy',
         damage: 1,
@@ -1023,6 +1036,31 @@ export class GameEngine {
   }
 
   private checkCollisions(): void {
+    // Player bullets vs Enemies/Boss
+    this.bullets.filter(b => b.owner !== 'enemy').forEach(bullet => {
+      // Check enemies
+      this.enemies.forEach(enemy => {
+        if (enemy.active && this.checkRectCollision(bullet, enemy)) {
+          bullet.active = false;
+          enemy.health -= bullet.damage;
+          this.createParticles(bullet.position.x, bullet.position.y, 3, bullet.color);
+          if (enemy.health <= 0) {
+            this.destroyEnemy(enemy);
+          }
+        }
+      });
+
+      // Check boss
+      if (this.boss && this.boss.active && this.checkRectCollision(bullet, this.boss)) {
+        bullet.active = false;
+        this.boss.health -= bullet.damage;
+        this.createParticles(bullet.position.x, bullet.position.y, 5, bullet.color);
+        if (this.boss.health <= 0) {
+          this.destroyBoss();
+        }
+      }
+    });
+
     // Enemy bullets vs players
     this.bullets.filter(b => b.owner === 'enemy').forEach(bullet => {
       [this.player1, this.player2].forEach(player => {
@@ -1105,10 +1143,20 @@ export class GameEngine {
   private destroyBoss(): void {
     if (!this.boss) return;
     this.stats.score += this.boss.scoreValue;
+    this.onAddCoins?.(500); // Boss bonus
     this.shakeIntensity = 40;
     this.soundManager.playSound('explosion');
     this.createExplosion(this.boss.position.x, this.boss.position.y, 200, '#9D4EDD');
     this.createParticles(this.boss.position.x, this.boss.position.y, 80, '#9D4EDD');
+    
+    // Auto-destroy all other enemies
+    this.enemies.forEach(e => {
+      if (e.active) {
+        e.health = 0;
+        this.destroyEnemy(e);
+      }
+    });
+
     this.boss = null;
     this.onScoreUpdate?.(this.stats.score);
   }
@@ -1144,14 +1192,13 @@ export class GameEngine {
   private collectPowerUp(player: Player, type: PowerUpType): void {
     this.soundManager.playSound('powerUp');
     
+    // Power-ups now grant coins instead of changing weapons/stats directly
+    // EXCEPT for specific mechanic power-ups like life/bomb/speed
     switch (type) {
       case 'weapon':
-        const cycle = Date.now() % 9000;
-        player.weaponType = cycle < 3000 ? 'laser' : cycle < 6000 ? 'booster' : 'spread';
-        player.powerLevel = Math.min(player.powerLevel + 1, 5);
-        break;
       case 'power':
-        player.powerLevel = Math.min(player.powerLevel + 1, 5);
+        this.onAddCoins?.(50);
+        this.createParticles(player.position.x, player.position.y, 20, '#FFD700'); // Gold particles
         break;
       case 'bomb':
         player.bombs = Math.min(player.bombs + 1, 5);
@@ -1163,7 +1210,6 @@ export class GameEngine {
         player.lives = Math.min(player.lives + 1, 5);
         break;
     }
-    this.createParticles(player.position.x, player.position.y, 15, '#00FF00');
   }
 
   private createParticles(x: number, y: number, count: number, color: string): void {
@@ -1390,29 +1436,69 @@ export class GameEngine {
         ctx.globalAlpha = 0.5;
       }
 
-      // Ship body
+      // Realistic Fighter Jet Shape
       ctx.fillStyle = color;
       ctx.beginPath();
-      ctx.moveTo(player.position.x + player.width, player.position.y + player.height / 2);
-      ctx.lineTo(player.position.x, player.position.y);
-      ctx.lineTo(player.position.x, player.position.y + player.height);
+      // Main fuselage
+      ctx.moveTo(player.position.x + player.width, player.position.y + player.height / 2); // Nose
+      ctx.lineTo(player.position.x + player.width * 0.7, player.position.y + player.height * 0.3); // Upper intake
+      ctx.lineTo(player.position.x + player.width * 0.4, player.position.y + player.height * 0.1); // Canopy front
+      ctx.lineTo(player.position.x + player.width * 0.1, player.position.y + player.height * 0.1); // Tail top
+      ctx.lineTo(player.position.x, player.position.y); // Vertical stabilizer top
+      ctx.lineTo(player.position.x + player.width * 0.1, player.position.y + player.height * 0.4); // Tail rear
+      ctx.lineTo(player.position.x, player.position.y + player.height / 2); // Engine nozzle mid
+      ctx.lineTo(player.position.x + player.width * 0.1, player.position.y + player.height * 0.6); // Tail bottom rear
+      ctx.lineTo(player.position.x, player.position.y + player.height); // Bottom stabilizer
+      ctx.lineTo(player.position.x + player.width * 0.1, player.position.y + player.height * 0.9); // Underbelly rear
+      ctx.lineTo(player.position.x + player.width * 0.7, player.position.y + player.height * 0.7); // Lower intake
+      ctx.closePath();
+      ctx.fill();
+
+      // Cockpit Canopy (Glass)
+      ctx.fillStyle = 'rgba(0, 255, 255, 0.6)';
+      ctx.beginPath();
+      ctx.moveTo(player.position.x + player.width * 0.65, player.position.y + player.height * 0.35);
+      ctx.bezierCurveTo(
+        player.position.x + player.width * 0.55, player.position.y + player.height * 0.2,
+        player.position.x + player.width * 0.4, player.position.y + player.height * 0.2,
+        player.position.x + player.width * 0.35, player.position.y + player.height * 0.35
+      );
+      ctx.fill();
+
+      // Wing
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.moveTo(player.position.x + player.width * 0.6, player.position.y + player.height / 2);
+      ctx.lineTo(player.position.x + player.width * 0.2, player.position.y + player.height * 0.8);
+      ctx.lineTo(player.position.x + player.width * 0.1, player.position.y + player.height * 0.7);
       ctx.closePath();
       ctx.fill();
 
       // Engine glow
+      const engineX = player.position.x;
+      const engineY = player.position.y + player.height / 2;
       ctx.fillStyle = player.playerNumber === 1 ? '#00FFFF' : '#FF88AA';
       ctx.shadowColor = color;
       ctx.shadowBlur = 15;
       ctx.beginPath();
-      ctx.arc(player.position.x - 5, player.position.y + player.height / 2, 10, 0, Math.PI * 2);
+      ctx.arc(engineX, engineY, 8, 0, Math.PI * 2);
       ctx.fill();
       ctx.shadowBlur = 0;
 
-      // Engine trail
-      for (let i = 0; i < 6; i++) {
-        ctx.fillStyle = `rgba(${player.playerNumber === 1 ? '0, 255, 255' : '255, 136, 170'}, ${0.6 - i * 0.1})`;
+      // Realistic Engine Flame (Jet Exhaust)
+      const time = Date.now() / 50;
+      for (let i = 0; i < 3; i++) {
+        const flameWidth = 15 - i * 4;
+        const flameLen = 40 + Math.sin(time + i) * 15;
+        const grad = ctx.createLinearGradient(engineX, engineY, engineX - flameLen, engineY);
+        grad.addColorStop(0, player.playerNumber === 1 ? '#FFFFFF' : '#FFDDEE');
+        grad.addColorStop(0.3, player.playerNumber === 1 ? '#00FFFF' : '#FF3366');
+        grad.addColorStop(1, 'transparent');
+        
+        ctx.fillStyle = grad;
         ctx.beginPath();
-        ctx.arc(player.position.x - 12 - i * 10, player.position.y + player.height / 2 + Math.sin(Date.now() / 30 + i) * 4, 5 - i * 0.5, 0, Math.PI * 2);
+        ctx.moveTo(engineX, engineY - flameWidth / 2);
+        ctx.quadraticCurveTo(engineX - flameLen, engineY, engineX, engineY + flameWidth / 2);
         ctx.fill();
       }
 

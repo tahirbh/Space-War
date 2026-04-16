@@ -19,6 +19,7 @@ export function Menu({ onStartGame, onJoinGame }: MenuProps) {
   const { highScore, playerName, setPlayerName } = useGameStore();
   const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const { selectedWeapon, setSelectedWeapon } = useGameStore();
   const [nameInput, setNameInput] = useState(playerName);
 
   const handleSaveSettings = () => {
@@ -273,6 +274,26 @@ export function Menu({ onStartGame, onJoinGame }: MenuProps) {
                 className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder:text-white/40 focus:border-cyan-400 focus:outline-none"
                 maxLength={12}
               />
+            </div>
+
+            <div>
+              <label className="text-white/80 text-sm mb-2 block font-medium uppercase tracking-wider">Starting Weapon</label>
+              <div className="grid grid-cols-3 gap-2">
+                {(['laser', 'spread', 'booster'] as const).map((w) => (
+                  <button
+                    key={w}
+                    onClick={() => setSelectedWeapon(w)}
+                    className={cn(
+                      "px-3 py-2 rounded-lg border text-sm capitalize transition-all",
+                      selectedWeapon === w 
+                        ? "bg-cyan-600 border-cyan-400 text-white shadow-[0_0_15px_rgba(0,212,255,0.4)]" 
+                        : "bg-white/5 border-white/10 text-white/40 hover:bg-white/10"
+                    )}
+                  >
+                    {w}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div className="bg-white/5 p-4 rounded-lg">

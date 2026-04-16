@@ -163,6 +163,13 @@ export class SoundManager {
 
   startStageMusic(stage: number): void {
     this.stopMusic();
+    
+    // Mission music for stage 1 (inspired by Through the Wire)
+    if (stage === 1) {
+      this.startMissionMusic();
+      return;
+    }
+
     this.currentMusic = `stage${stage}`;
     
     if (!this.audioContext || this.isMuted) return;
@@ -261,6 +268,122 @@ export class SoundManager {
       
       tick++;
     }, 125); // Fast tempo for action
+  }
+
+  startMissionMusic(): void {
+    this.stopMusic();
+    this.currentMusic = 'mission';
+    
+    if (!this.audioContext || this.isMuted) return;
+
+    // Soulful hip-hop beat - inspired by "Through the Wire"
+    // BPM: 85 (approx 176ms per 1/16th note, 706ms per beat)
+    const tickTime = 175; 
+    let tick = 0;
+
+    // Bass line
+    const bassNotes = [55, 0, 55, 65.41, 0, 0, 41.2, 49, 55, 0, 55, 65.41, 0, 0, 82.41, 73.42];
+
+    this.musicInterval = window.setInterval(() => {
+      if (this.isMuted || this.currentMusic !== 'mission') return;
+
+      const time = this.audioContext!.currentTime;
+
+      // KICK DRUM (Every 1st and 3rd beat + syncopation)
+      if (tick % 8 === 0 || tick % 8 === 2 || tick % 8 === 5) {
+        this.playDrum('kick', time);
+      }
+
+      // SNARE DRUM (Every 2nd and 4th beat)
+      if (tick % 8 === 4) {
+        this.playDrum('snare', time);
+      }
+
+      // BASS
+      const freq = bassNotes[tick % bassNotes.length];
+      if (freq > 0) {
+        this.playBass(freq, time);
+      }
+
+      // SOUL MELODY (Chipmunk-soul inspired high synth)
+      if (tick % 16 === 0 || tick % 16 === 3 || tick % 16 === 6 || tick % 16 === 10) {
+        const melody = [880, 1046.5, 1318.5, 1174.7];
+        this.playSoulLead(melody[Math.floor(tick / 4) % 4], time);
+      }
+
+      tick++;
+    }, tickTime);
+  }
+
+  private playDrum(type: 'kick' | 'snare', time: number): void {
+    if (!this.audioContext || !this.musicGain) return;
+    const osc = this.audioContext.createOscillator();
+    const gain = this.audioContext.createGain();
+
+    if (type === 'kick') {
+      osc.frequency.setValueAtTime(150, time);
+      osc.frequency.exponentialRampToValueAtTime(0.01, time + 0.1);
+      gain.gain.setValueAtTime(0.4, time);
+      gain.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
+    } else {
+       // Snare noise
+       const bufferSize = this.audioContext.sampleRate * 0.1;
+       const buffer = this.audioContext.createBuffer(1, bufferSize, this.audioContext.sampleRate);
+       const data = buffer.getChannelData(0);
+       for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+       const noise = this.audioContext.createBufferSource();
+       noise.buffer = buffer;
+       const noiseFilter = this.audioContext.createBiquadFilter();
+       noiseFilter.type = 'highpass';
+       noiseFilter.frequency.value = 1000;
+       noise.connect(noiseFilter);
+       noiseFilter.connect(gain);
+       gain.gain.setValueAtTime(0.2, time);
+       gain.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
+       noise.start(time);
+       noise.stop(time + 0.1);
+       return;
+    }
+
+    osc.connect(gain);
+    gain.connect(this.musicGain!);
+    osc.start(time);
+    osc.stop(time + 0.1);
+  }
+
+  private playBass(freq: number, time: number): void {
+    if (!this.audioContext || !this.musicGain) return;
+    const osc = this.audioContext.createOscillator();
+    const gain = this.audioContext.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(freq, time);
+    gain.gain.setValueAtTime(0.15, time);
+    gain.gain.exponentialRampToValueAtTime(0.01, time + 0.2);
+    osc.connect(gain);
+    gain.connect(this.musicGain!);
+    osc.start(time);
+    osc.stop(time + 0.2);
+  }
+
+  private playSoulLead(freq: number, time: number): void {
+    if (!this.audioContext || !this.musicGain) return;
+    const osc = this.audioContext.createOscillator();
+    const gain = this.audioContext.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(freq, time);
+    
+    const filter = this.audioContext.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = 2000;
+    
+    gain.gain.setValueAtTime(0.03, time);
+    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.1);
+    
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.musicGain!);
+    osc.start(time);
+    osc.stop(time + 0.3);
   }
 
   playBossWarning(): void {

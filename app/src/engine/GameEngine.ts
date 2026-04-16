@@ -67,6 +67,7 @@ export class GameEngine {
   stageTime = 0;
   enemySpawnTimer = 0;
   bossSpawned = false;
+  bossDefeated = false;
   bossWarningShown = false;
   intermission = false;
   intermissionTimer = 0;
@@ -392,6 +393,7 @@ export class GameEngine {
     this.stageTime = 0;
     this.enemySpawnTimer = 0;
     this.bossSpawned = false;
+    this.bossDefeated = false;
     this.bossWarningShown = false;
     this.intermission = false;
     this.intermissionTimer = 0;
@@ -406,6 +408,7 @@ export class GameEngine {
     this.stageTime = 0;
     this.enemySpawnTimer = 0;
     this.bossSpawned = false;
+    this.bossDefeated = false;
     this.bossWarningShown = false;
     this.intermission = false;
     this.intermissionTimer = 0;
@@ -499,8 +502,8 @@ export class GameEngine {
       }
       
       // Refuel and speed off
-      if (this.intermissionTimer >= 5 && this.intermissionTimer < 6.5) {
-         if (this.intermissionTimer < 5.05) {
+      if (this.intermissionTimer >= 8 && this.intermissionTimer < 10) {
+         if (this.intermissionTimer < 8.05) {
             if (this.player1) { this.player1.health = this.player1.maxHealth; this.player1.bombs = 2; }
             if (this.player2) { this.player2.health = this.player2.maxHealth; this.player2.bombs = 2; }
          }
@@ -509,7 +512,7 @@ export class GameEngine {
          if (this.player2 && this.player2.active) this.player2.position.x = this.carrierPos.x + 350;
       }
 
-      if (this.intermissionTimer > 6.5) {
+      if (this.intermissionTimer > 10) {
          if (this.player1) this.player1.position.x = 100;
          if (this.player2) this.player2.position.x = 100;
          this.intermission = false; // Stop the landing sequence
@@ -710,10 +713,13 @@ export class GameEngine {
     }
 
     // Spawn boss
-    if (!this.bossSpawned && this.stageTime >= this.currentStage.bossSpawnTime) {
+    if (!this.bossSpawned && !this.bossDefeated && this.stageTime >= this.currentStage.bossSpawnTime) {
       this.spawnBoss();
       return;
     }
+
+    // Skip spawning if boss is alive or recently defeated/intermission
+    if (this.boss || this.bossDefeated || this.intermission) return;
 
     // Spawn regular enemies
     if (this.enemySpawnTimer >= this.currentStage.enemySpawnRate) {
@@ -1160,6 +1166,8 @@ export class GameEngine {
     });
 
     this.boss = null;
+    this.bossDefeated = true;
+    this.bullets = this.bullets.filter(b => b.owner !== 'enemy');
     this.onScoreUpdate?.(this.stats.score);
   }
 

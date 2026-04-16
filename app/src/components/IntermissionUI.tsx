@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MatrixDialogue } from './MatrixDialogue';
 import { ShopMenu } from './ShopMenu';
 import { useGameStore } from '@/store/gameStore';
@@ -11,6 +11,24 @@ interface IntermissionUIProps {
 export function IntermissionUI({ stage, onFinish }: IntermissionUIProps) {
   const [phase, setPhase] = useState<'dialogue' | 'shop'>('dialogue');
   const { playerName } = useGameStore();
+  const [timeLeft, setTimeLeft] = useState(60);
+
+  useEffect(() => {
+    if (phase !== 'dialogue') return;
+    
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setPhase('shop');
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [phase]);
 
   const dialogue = [
     { speaker: 'Commander Sarah', text: `Welcome back, Captain ${playerName}. The landing sequence is complete.` },
@@ -39,6 +57,12 @@ export function IntermissionUI({ stage, onFinish }: IntermissionUIProps) {
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-10 left-10 text-cyan-500/30 font-mono text-xs uppercase tracking-[0.5em] animate-pulse">
           Control Tower: Online | Hangar Bay B-12
+        </div>
+        <div className="absolute top-10 right-10 flex flex-col items-end gap-1">
+          <div className="text-cyan-500/50 font-mono text-[10px] uppercase tracking-widest">Auto-Proceed In</div>
+          <div className="text-cyan-400 font-mono text-xl tabular-nums">
+            {timeLeft.toString().padStart(2, '0')}s
+          </div>
         </div>
         <div className="absolute bottom-10 right-10 text-red-500/30 font-mono text-xs uppercase tracking-[0.5em]">
           Status: Refueling in progress...

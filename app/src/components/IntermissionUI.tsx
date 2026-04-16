@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { MatrixDialogue } from './MatrixDialogue';
 import { ShopMenu } from './ShopMenu';
 import { useGameStore } from '@/store/gameStore';
@@ -17,7 +17,7 @@ export function IntermissionUI({ stage, onFinish }: IntermissionUIProps) {
     { speaker: 'Captain Jax', text: 'Thank you, Commander. The mission was intense. Those blue fire modules were glitchy.' },
     { speaker: 'Commander Sarah', text: "I've instructed the hangar crew to fix the spread fire emitters. You'll should find them much more effective now." },
     { speaker: 'Captain Jax', text: 'Excellent. I also collected a significant amount of data... and credits from the debris.' },
-    { speaker: 'Commander Sarah', text: 'Good. Use those credits in the armory. We need you at peak performance for Stage ${stage + 1}.' },
+    { speaker: 'Commander Sarah', text: `Good. Use those credits in the armory. We need you at peak performance for Stage ${stage + 1}.` },
     { speaker: 'Captain Jax', text: "Understood. Re-arming and refueling now. Let's get back out there." },
   ];
 

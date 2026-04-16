@@ -59,6 +59,7 @@ export class GameEngine {
     stage: 1,
     enemiesKilled: 0,
     startTime: 0,
+    coins: 0,
   };
   
   // Stage management
@@ -386,6 +387,7 @@ export class GameEngine {
       stage: 1,
       enemiesKilled: 0,
       startTime: Date.now(),
+      coins: 0,
     };
     this.stageTime = 0;
     this.enemySpawnTimer = 0;

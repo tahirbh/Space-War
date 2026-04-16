@@ -19,7 +19,7 @@ export function HUD({
   player2Bombs = 2,
   player2Power = 1,
 }: HUDProps) {
-  const { score, highScore, stage, player2Connected, playerName, coins } = useGameStore();
+  const { score, stage, player2Connected, playerName, coins } = useGameStore();
 
   return (
     <div className="absolute inset-0 pointer-events-none">

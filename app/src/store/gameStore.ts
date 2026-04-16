@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { GameState, InputState, Vector2 } from '@/types/game';
+import type { GameState, InputState, Vector2, WeaponType } from '@/types/game';
 
 interface GameStore {
   // Game state

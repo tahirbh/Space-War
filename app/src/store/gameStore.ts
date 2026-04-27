@@ -43,6 +43,10 @@ interface GameStore {
   };
   setUpgrade: (type: 'fireRate' | 'damage' | 'health' | 'bombs', level: number) => void;
   
+  // Background selection
+  selectedBackground: string;
+  setSelectedBackground: (bg: string) => void;
+  
   // Input states
   input1: InputState;
   setInput1: (input: Partial<InputState>) => void;
@@ -68,6 +72,7 @@ export const useGameStore = create<GameStore>()(
       stage: 1,
       coins: 0,
       selectedWeapon: 'laser',
+      selectedBackground: 'space',
       upgrades: { fireRate: 1, damage: 1, health: 1, bombs: 1 },
       input1: { up: false, down: false, left: false, right: false, shoot: false, bomb: false },
       input2: { up: false, down: false, left: false, right: false, shoot: false, bomb: false },
@@ -85,6 +90,7 @@ export const useGameStore = create<GameStore>()(
       addCoins: (amount) => set((state) => ({ coins: state.coins + amount })),
       
       setSelectedWeapon: (weapon) => set({ selectedWeapon: weapon }),
+      setSelectedBackground: (bg) => set({ selectedBackground: bg }),
       setUpgrade: (type, level) => set((state) => ({ 
         upgrades: { ...state.upgrades, [type]: level } 
       })),
@@ -112,6 +118,7 @@ export const useGameStore = create<GameStore>()(
         coins: state.coins,
         upgrades: state.upgrades,
         selectedWeapon: state.selectedWeapon,
+        selectedBackground: state.selectedBackground,
       }),
     }
   )

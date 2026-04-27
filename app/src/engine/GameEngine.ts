@@ -4,6 +4,7 @@ import type {
 } from '@/types/game';
 import { SoundManager } from './SoundManager';
 import { v4 as uuidv4 } from 'uuid';
+import { useGameStore } from '@/store/gameStore';
 
 // Game constants
 const CANVAS_WIDTH = 1280;
@@ -71,7 +72,7 @@ export class GameEngine {
   bossWarningShown = false;
   intermission = false;
   intermissionTimer = 0;
-  carrierPos = { x: 0, y: -300, active: false };
+  tankerJet = { x: CANVAS_WIDTH + 500, y: 100, active: false, pipeLen: 0, docking: false };
   
   // Input
   input1: InputState = { up: false, down: false, left: false, right: false, shoot: false, bomb: false };
@@ -94,6 +95,7 @@ export class GameEngine {
   onBossWarning?: () => void;
   onIntermissionStart?: () => void;
   onAddCoins?: (amount: number) => void;
+  onPlayerStatsUpdate?: (stats: { p1: any, p2: any }) => void;
   
   // Character dialogues
   dialogueActive = false;
@@ -104,6 +106,10 @@ export class GameEngine {
   stars: { x: number; y: number; size: number; speed: number; brightness: number; color: string }[] = [];
   nebulas: { x: number; y: number; radius: number; color: string; alpha: number }[] = [];
   groundFixtures: { x: number; y: number; width: number; height: number; type: number; speed: number }[] = [];
+  clouds: { x: number; y: number; width: number; height: number; speed: number; opacity: number }[] = [];
+  cityBuildings: { x: number; width: number; height: number; color: string; speed: number; windows: {x:number, y:number, on:boolean}[] }[] = [];
+  oceanWaves: { x: number; y: number; width: number; speed: number; opacity: number }[] = [];
+  jungleTrees: { x: number; y: number; width: number; height: number; speed: number; color: string }[] = [];
   
   // Screen shake
   shakeIntensity = 0;
@@ -128,6 +134,10 @@ export class GameEngine {
     this.generateStars();
     this.generateNebulas();
     this.generateGroundFixtures();
+    this.generateClouds();
+    this.generateCityBuildings();
+    this.generateOceanWaves();
+    this.generateJungle();
     
     // Detect touch device
     this.isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
@@ -287,17 +297,79 @@ export class GameEngine {
     }
   }
 
+  private generateClouds(): void {
+    for (let i = 0; i < 15; i++) {
+      this.clouds.push({
+        x: Math.random() * CANVAS_WIDTH,
+        y: Math.random() * (CANVAS_HEIGHT * 0.7),
+        width: 100 + Math.random() * 200,
+        height: 40 + Math.random() * 60,
+        speed: 0.5 + Math.random() * 1.5,
+        opacity: 0.3 + Math.random() * 0.4,
+      });
+    }
+  }
+
+  private generateCityBuildings(): void {
+    let currentX = 0;
+    while (currentX < CANVAS_WIDTH + 300) {
+      const width = 60 + Math.random() * 100;
+      const height = 150 + Math.random() * 300;
+      const windows = [];
+      for(let wy = 20; wy < height - 20; wy += 30) {
+        for(let wx = 10; wx < width - 10; wx += 20) {
+          windows.push({ x: wx, y: wy, on: Math.random() > 0.3 });
+        }
+      }
+      this.cityBuildings.push({
+        x: currentX,
+        width,
+        height,
+        color: `hsl(${220 + Math.random() * 40}, 30%, ${10 + Math.random() * 15}%)`,
+        speed: 2 + Math.random() * 0.5,
+        windows
+      });
+      currentX += width + (Math.random() * 20);
+    }
+  }
+
+  private generateOceanWaves(): void {
+    for (let i = 0; i < 30; i++) {
+      this.oceanWaves.push({
+        x: Math.random() * CANVAS_WIDTH,
+        y: CANVAS_HEIGHT - 150 + Math.random() * 150,
+        width: 50 + Math.random() * 100,
+        speed: 1 + Math.random() * 2,
+        opacity: 0.2 + Math.random() * 0.5,
+      });
+    }
+  }
+
+  private generateJungle(): void {
+    for (let i = 0; i < 40; i++) {
+      this.jungleTrees.push({
+        x: Math.random() * CANVAS_WIDTH * 2,
+        y: CANVAS_HEIGHT - 100 - Math.random() * 200,
+        width: 30 + Math.random() * 50,
+        height: 150 + Math.random() * 200,
+        speed: 1.5 + Math.random() * 2,
+        color: `hsl(${100 + Math.random() * 40}, ${40 + Math.random() * 30}%, ${15 + Math.random() * 15}%)`,
+      });
+    }
+  }
+
   private getStage(stageNum: number): Stage {
     const stages: Stage[] = [
-      { id: 1, name: 'DEEP SPACE', duration: 60, enemySpawnRate: 1.5, bossSpawnTime: 55, backgroundType: 'space' },
+      { id: 1, name: 'DEEP SPACE', duration: 60, enemySpawnRate: 4.0, bossSpawnTime: 55, backgroundType: 'space' },
       { id: 2, name: 'ASTEROID BELT', duration: 75, enemySpawnRate: 1.2, bossSpawnTime: 70, backgroundType: 'asteroid' },
       { id: 3, name: 'ENEMY BASE', duration: 90, enemySpawnRate: 0.8, bossSpawnTime: 85, backgroundType: 'base' },
+      { id: 4, name: 'AMAZON JUNGLE', duration: 100, enemySpawnRate: 1.5, bossSpawnTime: 95, backgroundType: 'jungle' },
     ];
     return stages[(stageNum - 1) % stages.length];
   }
 
   spawnPlayer1(): Player {
-    this.player1 = {
+    const player: Player = {
       id: 'player1',
       position: { x: 100, y: CANVAS_HEIGHT / 2 },
       velocity: { x: 0, y: 0 },
@@ -309,23 +381,29 @@ export class GameEngine {
       maxHealth: 3,
       lives: 3,
       powerLevel: 1,
-      bombs: 2,
+      bombs: 90,
       speed: PLAYER_SPEED,
       weaponType: 'laser',
       invincible: false,
       invincibleTime: 0,
       targetPosition: { x: 100, y: CANVAS_HEIGHT / 2 },
       lastShot: 0,
-    };
+      lastBombTime: 0,
+    } as any;
+
+    this.player1 = player;
+
     // Force weapon type from store/selection
     const store = (window as any).gameStore;
-    if (store && store.selectedWeapon) this.player1.weaponType = store.selectedWeapon;
+    if (store && store.selectedWeapon) {
+      player.weaponType = store.selectedWeapon;
+    }
     
-    return this.player1;
+    return player;
   }
 
   spawnPlayer2(): Player {
-    this.player2 = {
+    const player: Player = {
       id: 'player2',
       position: { x: 100, y: CANVAS_HEIGHT / 2 + 60 },
       velocity: { x: 0, y: 0 },
@@ -337,16 +415,19 @@ export class GameEngine {
       maxHealth: 3,
       lives: 3,
       powerLevel: 1,
-      bombs: 2,
+      bombs: 90,
       speed: PLAYER_SPEED,
       weaponType: 'laser',
       invincible: true,
       invincibleTime: 3000,
       targetPosition: { x: 100, y: CANVAS_HEIGHT / 2 + 60 },
       lastShot: 0,
-    };
+      lastBombTime: 0,
+    } as any;
+
+    this.player2 = player;
     this.onPlayer2Join?.();
-    return this.player2;
+    return player;
   }
 
   removePlayer2(): void {
@@ -391,13 +472,13 @@ export class GameEngine {
       coins: 0,
     };
     this.stageTime = 0;
-    this.enemySpawnTimer = 0;
+    this.enemySpawnTimer = -1;
     this.bossSpawned = false;
     this.bossDefeated = false;
     this.bossWarningShown = false;
     this.intermission = false;
     this.intermissionTimer = 0;
-    this.carrierPos.active = false;
+    this.tankerJet.active = false;
     this.currentStage = this.getStage(1);
     this.spawnPlayer1();
   }
@@ -406,13 +487,13 @@ export class GameEngine {
     this.stats.stage++;
     this.currentStage = this.getStage(this.stats.stage);
     this.stageTime = 0;
-    this.enemySpawnTimer = 0;
+    this.enemySpawnTimer = -3;
     this.bossSpawned = false;
     this.bossDefeated = false;
     this.bossWarningShown = false;
     this.intermission = false;
     this.intermissionTimer = 0;
-    this.carrierPos.active = false;
+    this.tankerJet.active = false;
     this.enemies = [];
     this.bullets = this.bullets.filter(b => b.owner !== 'enemy');
     this.soundManager.playSound('stageClear');
@@ -455,6 +536,36 @@ export class GameEngine {
       }
     });
 
+    // Update background objects
+    this.clouds.forEach(cloud => {
+      cloud.x -= cloud.speed * (dt / 16);
+      if (cloud.x + cloud.width < 0) {
+        cloud.x = CANVAS_WIDTH + Math.random() * 200;
+        cloud.y = Math.random() * (CANVAS_HEIGHT * 0.7);
+      }
+    });
+
+    this.cityBuildings.forEach(b => {
+      b.x -= b.speed * (dt / 16);
+      if (b.x + b.width < 0) {
+        b.x = CANVAS_WIDTH + Math.random() * 100;
+      }
+    });
+
+    this.oceanWaves.forEach(wave => {
+      wave.x -= wave.speed * (dt / 16);
+      if (wave.x + wave.width < 0) {
+        wave.x = CANVAS_WIDTH + Math.random() * 100;
+      }
+    });
+
+    this.jungleTrees.forEach(tree => {
+      tree.x -= tree.speed * (dt / 16);
+      if (tree.x + tree.width < 0) {
+        tree.x = CANVAS_WIDTH + Math.random() * 100;
+      }
+    });
+
     // Update players
     this.updatePlayer(this.player1, this.input1, dt);
     this.updatePlayer(this.player2, this.input2, dt);
@@ -477,48 +588,61 @@ export class GameEngine {
     if (this.intermission) {
       this.intermissionTimer += dtSeconds;
       
-      // Zero inputs
+      // Zero inputs to prevent player wandering during cinematic
       if (this.player1) { this.input1.up = false; this.input1.down = false; this.input1.left = false; this.input1.right = false; this.input1.shoot = false; this.input1.bomb = false; }
       if (this.player2) { this.input2.up = false; this.input2.down = false; this.input2.left = false; this.input2.right = false; this.input2.shoot = false; this.input2.bomb = false; }
       
-      this.carrierPos.active = true;
+      this.tankerJet.active = true;
 
-      // Carrier descending
-      if (this.intermissionTimer < 3) {
-         this.carrierPos.x = CANVAS_WIDTH / 2 - 250;
-         this.carrierPos.y = -300 + this.intermissionTimer * 100; 
+      // Tanker Jet flying in from right
+      if (this.intermissionTimer < 2) {
+         this.tankerJet.x = CANVAS_WIDTH + 500 - (this.intermissionTimer * 400);
+         this.tankerJet.y = 100;
+      } else {
+         this.tankerJet.x = CANVAS_WIDTH - 400;
       }
       
-      // Players flying to carrier
-      if (this.intermissionTimer > 2 && this.intermissionTimer < 5) {
+      // Pipe releasing
+      if (this.intermissionTimer > 2.5 && this.intermissionTimer < 4) {
+         this.tankerJet.pipeLen = Math.min(100, (this.intermissionTimer - 2.5) * 80);
+      }
+      
+      // Players flying to tanker
+      if (this.intermissionTimer > 3 && this.intermissionTimer < 6) {
+         const targetX = this.tankerJet.x - 50;
+         const targetY = this.tankerJet.y + 120;
          if (this.player1 && this.player1.active) {
-            this.player1.position.x += (this.carrierPos.x + 100 - this.player1.position.x) * (dt/500);
-            this.player1.position.y += (this.carrierPos.y + 150 - this.player1.position.y) * (dt/500);
+            this.player1.position.x += (targetX - this.player1.position.x) * (dt/800);
+            this.player1.position.y += (targetY - this.player1.position.y) * (dt/800);
          }
          if (this.player2 && this.player2.active) {
-            this.player2.position.x += (this.carrierPos.x + 350 - this.player2.position.x) * (dt/500);
-            this.player2.position.y += (this.carrierPos.y + 150 - this.player2.position.y) * (dt/500);
+            this.player2.position.x += (targetX - 50 - this.player2.position.x) * (dt/800);
+            this.player2.position.y += (targetY + 40 - this.player2.position.y) * (dt/800);
          }
       }
       
       // Refuel and speed off
       if (this.intermissionTimer >= 8 && this.intermissionTimer < 10) {
          if (this.intermissionTimer < 8.05) {
-            if (this.player1) { this.player1.health = this.player1.maxHealth; this.player1.bombs = 2; }
-            if (this.player2) { this.player2.health = this.player2.maxHealth; this.player2.bombs = 2; }
+            if (this.player1) { this.player1.health = this.player1.maxHealth; this.player1.bombs = 90; }
+            if (this.player2) { this.player2.health = this.player2.maxHealth; this.player2.bombs = 90; }
+            this.soundManager.playSound('powerUp');
          }
-         this.carrierPos.x += 15 * (dt/16);
-         if (this.player1 && this.player1.active) this.player1.position.x = this.carrierPos.x + 100;
-         if (this.player2 && this.player2.active) this.player2.position.x = this.carrierPos.x + 350;
+         // All move together to the right
+         const speed = 10 * (dt/16);
+         this.tankerJet.x += speed;
+         if (this.player1 && this.player1.active) this.player1.position.x += speed;
+         if (this.player2 && this.player2.active) this.player2.position.x += speed;
       }
 
       if (this.intermissionTimer > 10) {
          if (this.player1) this.player1.position.x = 100;
          if (this.player2) this.player2.position.x = 100;
-         this.intermission = false; // Stop the landing sequence
+         this.intermission = false;
          this.intermissionTimer = 0;
-         this.carrierPos.active = false;
-         this.onIntermissionStart?.(); // Trigger UI for Dialogue/Shop
+         this.tankerJet.active = false;
+         this.tankerJet.pipeLen = 0;
+         this.onIntermissionStart?.(); 
       }
     } else {
       if (this.bossSpawned && !this.boss && this.enemies.length === 0) {
@@ -529,6 +653,12 @@ export class GameEngine {
         }
       }
     }
+
+    // Trigger HUD update
+    this.onPlayerStatsUpdate?.({
+      p1: this.player1 ? { lives: this.player1.lives, bombs: this.player1.bombs, power: this.player1.powerLevel } : null,
+      p2: this.player2 ? { lives: this.player2.lives, bombs: this.player2.bombs, power: this.player2.powerLevel } : null,
+    });
   }
 
   private updatePlayer(player: Player | null, input: InputState, dt: number): void {
@@ -579,8 +709,10 @@ export class GameEngine {
     }
 
     // Bomb
-    if (input.bomb && player.bombs > 0) {
+    const now = Date.now();
+    if (input.bomb && player.bombs > 0 && now - (player as any).lastBombTime > 300) {
       this.useBomb(player);
+      (player as any).lastBombTime = now;
       input.bomb = false;
     }
   }
@@ -744,18 +876,23 @@ export class GameEngine {
       }
     }
 
+    if (this.stats.stage === 4 && Math.random() < 0.3) {
+      type = 'tank';
+    }
+
     const enemy = this.createEnemy(type);
     this.enemies.push(enemy);
   }
 
   private createEnemy(type: EnemyType): Enemy {
-    const y = Math.random() * (CANVAS_HEIGHT - 100) + 50;
+    const y = type === 'tank' ? CANVAS_HEIGHT - 60 : Math.random() * (CANVAS_HEIGHT - 100) + 50;
     
     const enemyData: Record<EnemyType, { health: number; score: number; width: number; height: number }> = {
       grunt: { health: 3, score: 100, width: 30, height: 25 },
       interceptor: { health: 6, score: 300, width: 35, height: 30 },
       bomber: { health: 15, score: 500, width: 45, height: 40 },
       elite: { health: 30, score: 1000, width: 50, height: 45 },
+      tank: { health: 20, score: 800, width: 60, height: 40 },
     };
 
     const data = enemyData[type];
@@ -772,9 +909,9 @@ export class GameEngine {
       maxHealth: data.health,
       scoreValue: data.score,
       // Increased cooldowns for easier gameplay (was 1500-3000ms)
-      shootCooldown: type === 'grunt' ? 4000 : type === 'interceptor' ? 3000 : 5000,
+      shootCooldown: type === 'grunt' ? 4000 : type === 'interceptor' ? 3000 : type === 'tank' ? 2500 : 5000,
       lastShot: Date.now() + Math.random() * 2000, // Initial delay
-      pattern: type === 'grunt' ? 'linear' : type === 'interceptor' ? 'tracking' : type === 'bomber' ? 'hover' : 'sine',
+      pattern: type === 'grunt' ? 'linear' : type === 'interceptor' ? 'tracking' : type === 'bomber' ? 'hover' : type === 'tank' ? 'linear' : 'sine',
       patternPhase: 0,
     };
   }
@@ -832,6 +969,13 @@ export class GameEngine {
   private updateEnemies(dt: number): void {
     const now = Date.now();
 
+    // Force clear enemies if boss is defeated or in intermission
+    if (this.bossDefeated || this.intermission) {
+      this.enemies = [];
+      this.bullets = this.bullets.filter(b => b.owner !== 'enemy');
+      return;
+    }
+
     this.enemies = this.enemies.filter(enemy => {
       if (!enemy.active) return false;
 
@@ -886,7 +1030,7 @@ export class GameEngine {
     });
 
     let targetAngle = Math.PI; // Default shoot left
-    if (targetPlayer) {
+    if (this.stats.stage > 1 && targetPlayer) { // Only track if stage > 1
       const tp = targetPlayer as Player;
       targetAngle = Math.atan2(
         tp.position.y + tp.height / 2 - (enemy.position.y + enemy.height / 2),
@@ -895,11 +1039,24 @@ export class GameEngine {
     }
     
     // Rebalanced: Slower bullets and single shots
-    const speed = 4 + (this.stats.stage * 0.5); // Much slower than before (was 7.5+)
+    let speed = 4 + (this.stats.stage * 0.5); // Much slower than before (was 7.5+)
+    
+    // Stage 1 kids friendly balance
+    if (this.stats.stage === 1) {
+      speed = 2; // Very slow
+      targetAngle = Math.PI; // Strictly horizontal
+    }
+    
+    // Tank logic (stage 4)
+    if (enemy.type === 'tank') {
+      targetAngle = -Math.PI / 2; // Straight up
+      speed = 3; // Very slow moving upwards
+    }
+
     let numBullets = 1; // Always 1 for base performance
     
-    if (enemy.type === 'elite') {
-       numBullets = 2; // Only elites get 2
+    if (enemy.type === 'elite' && this.stats.stage > 1) {
+       numBullets = 2; // Only elites get 2, but not in Stage 1
     }
 
     for (let i = 0; i < numBullets; i++) {
@@ -1211,7 +1368,7 @@ export class GameEngine {
         this.createParticles(player.position.x, player.position.y, 20, '#FFD700'); // Gold particles
         break;
       case 'bomb':
-        player.bombs = Math.min(player.bombs + 1, 5);
+        player.bombs = Math.min(player.bombs + 1, 99);
         break;
       case 'speed':
         player.speed = Math.min(player.speed + 1, 10);
@@ -1299,66 +1456,192 @@ export class GameEngine {
   }
 
   private drawBackground(ctx: CanvasRenderingContext2D): void {
-    // Draw nebulas
-    this.nebulas.forEach(nebula => {
-      const x = (nebula.x - this.bgOffset * 0.2) % (CANVAS_WIDTH + 400);
-      const wrappedX = x < -200 ? x + CANVAS_WIDTH + 400 : x;
-      
-      const gradient = ctx.createRadialGradient(wrappedX, nebula.y, 0, wrappedX, nebula.y, nebula.radius);
-      gradient.addColorStop(0, nebula.color.replace(/[\d.]+\)$/, `${nebula.alpha})`));
-      gradient.addColorStop(1, 'transparent');
-      
-      ctx.fillStyle = gradient;
-      ctx.beginPath();
-      ctx.arc(wrappedX, nebula.y, nebula.radius, 0, Math.PI * 2);
-      ctx.fill();
-    });
+    const bgMode = this.currentStage.backgroundType || 'space';
 
-    // Draw stars
-    this.stars.forEach(star => {
-      const x = (star.x - this.bgOffset * star.speed) % CANVAS_WIDTH;
-      const wrappedX = x < 0 ? x + CANVAS_WIDTH : x;
-      
-      ctx.fillStyle = star.color;
-      ctx.globalAlpha = star.brightness;
-      ctx.beginPath();
-      ctx.arc(wrappedX, star.y, star.size, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.globalAlpha = 1;
-    });
-
-    // Draw ground fixtures
-    ctx.fillStyle = '#1A1A2E';
-    this.groundFixtures.forEach(fix => {
-      ctx.beginPath();
-      if (fix.type === 0) {
-        // Tech building
-        ctx.fillRect(fix.x, fix.y, fix.width, CANVAS_HEIGHT - fix.y);
-        ctx.fillStyle = '#00FFFF';
-        for (let w = 10; w < fix.width - 10; w += 20) {
-          if (w % 30 !== 0) ctx.fillRect(fix.x + w, fix.y + 20, 5, 10);
-        }
-        ctx.fillStyle = '#1A1A2E';
-      } else if (fix.type === 1) {
-        // Dome cluster
-        ctx.arc(fix.x + fix.width / 2, fix.y + fix.height / 2, fix.width / 2, Math.PI, 0);
-        ctx.fill();
-        ctx.strokeStyle = '#00D4FF';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-      } else {
-        // Antenna/Tower
-        ctx.moveTo(fix.x + fix.width * 0.4, CANVAS_HEIGHT);
-        ctx.lineTo(fix.x + fix.width * 0.5, fix.y - fix.height);
-        ctx.lineTo(fix.x + fix.width * 0.6, CANVAS_HEIGHT);
-        ctx.fill();
-        ctx.fillStyle = '#FF0055';
+    if (bgMode === 'space' || bgMode === 'asteroid' || bgMode === 'base') {
+      // Draw nebulas
+      this.nebulas.forEach(nebula => {
+        const x = (nebula.x - this.bgOffset * 0.2) % (CANVAS_WIDTH + 400);
+        const wrappedX = x < -200 ? x + CANVAS_WIDTH + 400 : x;
+        
+        const gradient = ctx.createRadialGradient(wrappedX, nebula.y, 0, wrappedX, nebula.y, nebula.radius);
+        gradient.addColorStop(0, nebula.color.replace(/[\d.]+\)$/, `${nebula.alpha})`));
+        gradient.addColorStop(1, 'transparent');
+        
+        ctx.fillStyle = gradient;
         ctx.beginPath();
-        ctx.arc(fix.x + fix.width * 0.5, fix.y - fix.height, 5, 0, Math.PI * 2);
+        ctx.arc(wrappedX, nebula.y, nebula.radius, 0, Math.PI * 2);
         ctx.fill();
-        ctx.fillStyle = '#1A1A2E';
-      }
-    });
+      });
+
+      // Draw stars
+      this.stars.forEach(star => {
+        const x = (star.x - this.bgOffset * star.speed) % CANVAS_WIDTH;
+        const wrappedX = x < 0 ? x + CANVAS_WIDTH : x;
+        
+        ctx.fillStyle = star.color;
+        ctx.globalAlpha = star.brightness;
+        ctx.beginPath();
+        ctx.arc(wrappedX, star.y, star.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      });
+
+      // Draw ground fixtures
+      ctx.fillStyle = '#1A1A2E';
+      this.groundFixtures.forEach(fix => {
+        ctx.beginPath();
+        if (fix.type === 0) {
+          ctx.fillRect(fix.x, fix.y, fix.width, CANVAS_HEIGHT - fix.y);
+          ctx.fillStyle = '#00FFFF';
+          for (let w = 10; w < fix.width - 10; w += 20) {
+            if (w % 30 !== 0) ctx.fillRect(fix.x + w, fix.y + 20, 5, 10);
+          }
+          ctx.fillStyle = '#1A1A2E';
+        } else if (fix.type === 1) {
+          ctx.arc(fix.x + fix.width / 2, fix.y + fix.height / 2, fix.width / 2, Math.PI, 0);
+          ctx.fill();
+          ctx.strokeStyle = '#00D4FF';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        } else {
+          ctx.moveTo(fix.x + fix.width * 0.4, CANVAS_HEIGHT);
+          ctx.lineTo(fix.x + fix.width * 0.5, fix.y - fix.height);
+          ctx.lineTo(fix.x + fix.width * 0.6, CANVAS_HEIGHT);
+          ctx.fill();
+          ctx.fillStyle = '#FF0055';
+          ctx.beginPath();
+          ctx.arc(fix.x + fix.width * 0.5, fix.y - fix.height, 5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#1A1A2E';
+        }
+      });
+    } else if (bgMode === 'clouds') {
+      // Sky gradient
+      const skyGradient = ctx.createLinearGradient(0, 0, 0, CANVAS_HEIGHT);
+      skyGradient.addColorStop(0, '#4facfe');
+      skyGradient.addColorStop(1, '#00f2fe');
+      ctx.fillStyle = skyGradient;
+      ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+      // Clouds
+      ctx.fillStyle = '#FFFFFF';
+      this.clouds.forEach(cloud => {
+        ctx.globalAlpha = cloud.opacity;
+        ctx.beginPath();
+        ctx.arc(cloud.x, cloud.y, cloud.height / 2, Math.PI / 2, (Math.PI * 3) / 2);
+        ctx.arc(cloud.x + cloud.width / 4, cloud.y - cloud.height / 3, cloud.height / 1.5, Math.PI, 0);
+        ctx.arc(cloud.x + cloud.width / 2, cloud.y - cloud.height / 2, cloud.height / 1.2, Math.PI, 0);
+        ctx.arc(cloud.x + (cloud.width * 3) / 4, cloud.y - cloud.height / 4, cloud.height / 1.5, Math.PI, 0);
+        ctx.arc(cloud.x + cloud.width, cloud.y, cloud.height / 2, (Math.PI * 3) / 2, Math.PI / 2);
+        ctx.closePath();
+        ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+    } else if (bgMode === 'cyber') {
+      // Cyber City Sky
+      const skyGradient = ctx.createLinearGradient(0, 0, 0, CANVAS_HEIGHT);
+      skyGradient.addColorStop(0, '#0f0c29');
+      skyGradient.addColorStop(0.5, '#302b63');
+      skyGradient.addColorStop(1, '#24243e');
+      ctx.fillStyle = skyGradient;
+      ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+      // Cyber Buildings
+      this.cityBuildings.forEach(b => {
+        ctx.fillStyle = b.color;
+        ctx.fillRect(b.x, CANVAS_HEIGHT - b.height, b.width, b.height);
+        
+        ctx.fillStyle = '#f9ca24'; // Yellow windows
+        b.windows.forEach(w => {
+          if (w.on) {
+            ctx.shadowBlur = 5;
+            ctx.shadowColor = '#f9ca24';
+            ctx.fillRect(b.x + w.x, CANVAS_HEIGHT - b.height + w.y, 8, 12);
+            ctx.shadowBlur = 0;
+          }
+        });
+        
+        // Neon edge
+        ctx.strokeStyle = '#e056fd';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(b.x, CANVAS_HEIGHT - b.height, b.width, b.height);
+      });
+    } else if (bgMode === 'ocean') {
+      // Ocean Sky
+      const skyGradient = ctx.createLinearGradient(0, 0, 0, CANVAS_HEIGHT);
+      skyGradient.addColorStop(0, '#89f7fe');
+      skyGradient.addColorStop(1, '#66a6ff');
+      ctx.fillStyle = skyGradient;
+      ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+      // Clouds in background
+      ctx.fillStyle = '#FFFFFF';
+      this.clouds.forEach(cloud => {
+        ctx.globalAlpha = cloud.opacity * 0.8;
+        ctx.beginPath();
+        ctx.arc(cloud.x, cloud.y * 0.5, cloud.height / 3, 0, Math.PI * 2);
+        ctx.arc(cloud.x + cloud.width * 0.4, cloud.y * 0.5 - 10, cloud.height / 2.5, 0, Math.PI * 2);
+        ctx.arc(cloud.x + cloud.width * 0.8, cloud.y * 0.5, cloud.height / 3, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      
+      // Ocean Water
+      ctx.globalAlpha = 1;
+      const oceanGradient = ctx.createLinearGradient(0, CANVAS_HEIGHT - 200, 0, CANVAS_HEIGHT);
+      oceanGradient.addColorStop(0, '#009ffd');
+      oceanGradient.addColorStop(1, '#2a2a72');
+      ctx.fillStyle = oceanGradient;
+      ctx.fillRect(0, CANVAS_HEIGHT - 200, CANVAS_WIDTH, 200);
+
+      // Waves
+      ctx.fillStyle = '#FFFFFF';
+      this.oceanWaves.forEach(wave => {
+        ctx.globalAlpha = wave.opacity;
+        ctx.beginPath();
+        ctx.ellipse(wave.x, wave.y, wave.width / 2, 5, 0, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+    } else if (bgMode === 'jungle') {
+      // Jungle Sky
+      const skyGradient = ctx.createLinearGradient(0, 0, 0, CANVAS_HEIGHT);
+      skyGradient.addColorStop(0, '#11998e');
+      skyGradient.addColorStop(1, '#38ef7d');
+      ctx.fillStyle = skyGradient;
+      ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+      // Distant mountains
+      ctx.fillStyle = '#2d5a27';
+      ctx.beginPath();
+      ctx.moveTo(0, CANVAS_HEIGHT);
+      ctx.lineTo(CANVAS_WIDTH * 0.2, CANVAS_HEIGHT - 300);
+      ctx.lineTo(CANVAS_WIDTH * 0.5, CANVAS_HEIGHT - 100);
+      ctx.lineTo(CANVAS_WIDTH * 0.8, CANVAS_HEIGHT - 250);
+      ctx.lineTo(CANVAS_WIDTH, CANVAS_HEIGHT);
+      ctx.fill();
+
+      // Trees
+      this.jungleTrees.forEach(tree => {
+        ctx.fillStyle = tree.color;
+        // Trunk
+        ctx.fillRect(tree.x + tree.width / 2 - 10, tree.y, 20, tree.height);
+        // Leaves
+        ctx.beginPath();
+        ctx.arc(tree.x + tree.width / 2, tree.y, tree.width, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(tree.x + tree.width / 2 - 20, tree.y + 20, tree.width * 0.8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(tree.x + tree.width / 2 + 20, tree.y + 20, tree.width * 0.8, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      
+      // Ground
+      ctx.fillStyle = '#1e3d17';
+      ctx.fillRect(0, CANVAS_HEIGHT - 80, CANVAS_WIDTH, 80);
+    }
 
     // Stage name
     if (this.stageTime < 3 && !this.intermission) {
@@ -1373,23 +1656,47 @@ export class GameEngine {
       ctx.shadowBlur = 0;
     }
 
-    // Draw carrier
-    if (this.carrierPos.active) {
-      ctx.fillStyle = '#222';
-      ctx.fillRect(this.carrierPos.x, this.carrierPos.y, 500, 200);
-      ctx.fillStyle = '#444';
-      ctx.fillRect(this.carrierPos.x + 50, this.carrierPos.y + 50, 400, 100);
-      ctx.fillStyle = '#00FFFF';
-      ctx.fillRect(this.carrierPos.x + 100, this.carrierPos.y + 150, 50, 10);
-      ctx.fillRect(this.carrierPos.x + 350, this.carrierPos.y + 150, 50, 10);
+    // Draw Tanker Jet
+    if (this.tankerJet.active) {
+      const tx = this.tankerJet.x;
+      const ty = this.tankerJet.y;
       
-      ctx.strokeStyle = '#FFFFFF';
-      ctx.lineWidth = 4;
-      ctx.strokeRect(this.carrierPos.x, this.carrierPos.y, 500, 200);
+      // Tanker Body
+      ctx.fillStyle = '#333';
+      ctx.beginPath();
+      ctx.moveTo(tx + 300, ty + 50); // Nose
+      ctx.lineTo(tx + 50, ty); // Top wing front
+      ctx.lineTo(tx - 100, ty + 20); // Tail top
+      ctx.lineTo(tx - 120, ty + 50); // Tail rear
+      ctx.lineTo(tx - 100, ty + 80); // Tail bottom
+      ctx.lineTo(tx + 50, ty + 100); // Bottom wing front
+      ctx.closePath();
+      ctx.fill();
+      
+      // Cockpit
+      ctx.fillStyle = 'rgba(0, 200, 255, 0.4)';
+      ctx.beginPath();
+      ctx.ellipse(tx + 220, ty + 50, 40, 15, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Refueling Pipe
+      if (this.tankerJet.pipeLen > 0) {
+        ctx.strokeStyle = '#666';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(tx + 50, ty + 80);
+        ctx.lineTo(tx - 20, ty + 80 + this.tankerJet.pipeLen);
+        ctx.stroke();
+        
+        // Nozzle
+        ctx.fillStyle = '#888';
+        ctx.fillRect(tx - 30, ty + 75 + this.tankerJet.pipeLen, 20, 10);
+      }
+
       ctx.fillStyle = '#FFF';
-      ctx.font = 'bold 28px Orbitron';
+      ctx.font = 'bold 18px Orbitron';
       ctx.textAlign = 'center';
-      ctx.fillText('REFUEL STATION', this.carrierPos.x + 250, this.carrierPos.y + 40);
+      ctx.fillText('FUEL TANKER K-9', tx + 100, ty + 40);
     }
   }
 
@@ -1586,6 +1893,7 @@ export class GameEngine {
         interceptor: '#39FF14',
         bomber: '#FF3366',
         elite: '#9D4EDD',
+        tank: '#8B4513',
       };
 
       ctx.fillStyle = colors[enemy.type];
@@ -1593,6 +1901,23 @@ export class GameEngine {
       ctx.shadowBlur = 10;
 
       switch (enemy.type) {
+        case 'tank':
+          ctx.beginPath();
+          // Tank body
+          ctx.rect(enemy.position.x, enemy.position.y + 10, enemy.width, 30);
+          ctx.fill();
+          // Tank treads
+          ctx.fillStyle = '#333';
+          ctx.beginPath();
+          ctx.roundRect(enemy.position.x - 5, enemy.position.y + 30, enemy.width + 10, 15, 5);
+          ctx.fill();
+          // Turret pointing up
+          ctx.fillStyle = colors[enemy.type];
+          ctx.beginPath();
+          ctx.arc(enemy.position.x + enemy.width / 2, enemy.position.y + 10, 15, Math.PI, 0);
+          ctx.fill();
+          ctx.fillRect(enemy.position.x + enemy.width / 2 - 4, enemy.position.y - 15, 8, 25);
+          break;
         case 'grunt':
           ctx.beginPath();
           ctx.moveTo(enemy.position.x + enemy.width, enemy.position.y + enemy.height / 2);

@@ -188,7 +188,7 @@ export function Menu({ onStartGame, onJoinGame, soundManager }: MenuProps) {
                   <div className="text-white/60 text-sm">Shoot</div>
                 </div>
                 <div className="bg-white/5 p-3 rounded-lg">
-                  <div className="text-white font-mono">X / Shift</div>
+                  <div className="text-white font-mono">B / Shift</div>
                   <div className="text-white/60 text-sm">Use Bomb</div>
                 </div>
                 <div className="bg-white/5 p-3 rounded-lg">

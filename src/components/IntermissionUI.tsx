@@ -62,7 +62,7 @@ export function IntermissionUI({ stage, onFinish }: IntermissionUIProps) {
 
       <MatrixDialogue 
         messages={dialogue} 
-        onComplete={() => setPhase('shop')} 
+        onComplete={onFinish} 
       />
     </div>
   );

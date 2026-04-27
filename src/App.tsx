@@ -64,7 +64,7 @@ function App() {
           setInput1({ shoot: true });
           break;
         case 'x':
-        case 'shift':
+        case 'b':
           setInput1({ bomb: true });
           break;
         case 'enter':
@@ -120,7 +120,7 @@ function App() {
           setInput1({ shoot: false });
           break;
         case 'x':
-        case 'shift':
+        case 'b':
           setInput1({ bomb: false });
           break;
         case 'i':
@@ -406,7 +406,7 @@ function App() {
         {appState === 'intermission' && (
           <IntermissionUI
             stage={stage}
-            onFinish={() => setAppState('shop')}
+            onFinish={proceedToNextMission}
           />
         )}
 
@@ -501,7 +501,7 @@ function App() {
 
       {/* Instructions */}
       <div className="absolute bottom-2 left-0 right-0 z-10 text-white/50 text-sm text-center flex flex-wrap items-center justify-center gap-4 md:gap-8 pointer-events-none">
-        <span><span className="text-cyan-400 font-bold">P1:</span> WASD + Z/X</span>
+        <span><span className="text-cyan-400 font-bold">P1:</span> WASD + Z/B</span>
         <span><span className="text-pink-400 font-bold">P2:</span> IJKL + N/B</span>
         <span><span className="text-yellow-400 font-bold">Pause:</span> Enter</span>
         <span><span className="text-green-400 font-bold">Mute:</span> M</span>

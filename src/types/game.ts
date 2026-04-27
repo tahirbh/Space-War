@@ -1,7 +1,7 @@
 // Starships War Alpha - Game Types
 
 export type GameState = 'menu' | 'playing' | 'paused' | 'gameover' | 'victory' | 'intermission' | 'shop';
-export type EnemyType = 'grunt' | 'interceptor' | 'bomber' | 'elite';
+export type EnemyType = 'grunt' | 'interceptor' | 'bomber' | 'elite' | 'tank';
 export type BossType = 'mantis' | 'leviathan' | 'omega';
 export type PowerUpType = 'power' | 'bomb' | 'speed' | 'life' | 'weapon';
 export type WeaponType = 'spread' | 'laser' | 'booster';
@@ -97,7 +97,7 @@ export interface Stage {
   duration: number; // seconds
   enemySpawnRate: number;
   bossSpawnTime: number;
-  backgroundType: 'space' | 'asteroid' | 'base';
+  backgroundType: 'space' | 'asteroid' | 'base' | 'jungle' | 'clouds' | 'cyber' | 'ocean';
 }
 
 export interface GameStats {

@@ -22,6 +22,11 @@ export class SoundManager {
     bossWarning: { freq: 440, type: 'sawtooth' as const, duration: 0.5, slide: 0 },
     gameOver: { freq: 330, type: 'sawtooth' as const, duration: 1, slide: -100 },
     stageClear: { freq: 659.25, type: 'sine' as const, duration: 0.5, slide: 200 },
+    menuNavigate: { freq: 1200, type: 'square' as const, duration: 0.04, slide: -200 },
+    menuSelect: { freq: 800, type: 'sawtooth' as const, duration: 0.1, slide: 400 },
+    gameStart: { freq: 440, type: 'sawtooth' as const, duration: 0.8, slide: 600 },
+    saveSound: { freq: 523.25, type: 'sine' as const, duration: 0.4, slide: 0 },
+    readyMission: { freq: 220, type: 'square' as const, duration: 0.6, slide: 100 },
   };
 
   constructor() {
@@ -85,6 +90,36 @@ export class SoundManager {
       osc2.start(this.audioContext.currentTime);
       osc1.stop(this.audioContext.currentTime + 0.15);
       osc2.stop(this.audioContext.currentTime + 0.15);
+      return;
+    }
+
+    if (name === 'menuSelect') {
+      const osc = this.audioContext.createOscillator();
+      const gain = this.audioContext.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(800, this.audioContext.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(1600, this.audioContext.currentTime + 0.1);
+      gain.gain.setValueAtTime(0.3, this.audioContext.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.1);
+      osc.connect(gain);
+      gain.connect(this.sfxGain!);
+      osc.start();
+      osc.stop(this.audioContext.currentTime + 0.1);
+      return;
+    }
+
+    if (name === 'gameStart') {
+      const osc = this.audioContext.createOscillator();
+      const gain = this.audioContext.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(200, this.audioContext.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(800, this.audioContext.currentTime + 0.5);
+      gain.gain.setValueAtTime(0.5, this.audioContext.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.5);
+      osc.connect(gain);
+      gain.connect(this.sfxGain!);
+      osc.start();
+      osc.stop(this.audioContext.currentTime + 0.5);
       return;
     }
 

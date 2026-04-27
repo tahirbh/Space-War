@@ -11,6 +11,7 @@ interface GameCanvasProps {
   onBossWarning?: () => void;
   onIntermissionStart?: () => void;
   onAddCoins?: (amount: number) => void;
+  onPlayerStatsUpdate?: (stats: any) => void;
   soundManager?: any; // SoundManager type
   soundManagerRef?: MutableRefObject<{ toggleMute: () => boolean; setMuted: (m: boolean) => void } | null>;
 }
@@ -24,6 +25,7 @@ export function GameCanvas({
   onBossWarning,
   onIntermissionStart,
   onAddCoins,
+  onPlayerStatsUpdate,
   soundManager,
   soundManagerRef,
 }: GameCanvasProps) {
@@ -63,6 +65,7 @@ export function GameCanvas({
       addCoins(amount);
       onAddCoins?.(amount);
     };
+    engine.onPlayerStatsUpdate = onPlayerStatsUpdate;
 
     // Spawn player 1
     engine.spawnPlayer1();

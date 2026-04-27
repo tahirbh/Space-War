@@ -28,9 +28,9 @@ function App() {
     score, highScore, setScore, setHighScore, stage, setStage,
     player2Connected, setPlayer2Connected
   } = useGameStore();
-  const [playerStats] = useState({
-    p1: { lives: 1 / 0, bombs: 1 / 0, power: 1 },
-    p2: { lives: 1 / 0, bombs: 1 / 0, power: 1 },
+  const [playerStats, setPlayerStats] = useState({
+    p1: { lives: 9, bombs: 90, power: 1 },
+    p2: { lives: 9, bombs: 90, power: 1 },
   });
   const gameCanvasRef = useRef<HTMLDivElement>(null);
   const soundManagerRef = useRef<{ toggleMute: () => boolean; setMuted: (m: boolean) => void } | null>(null);
@@ -179,10 +179,16 @@ function App() {
 
   const startGame = useCallback(() => {
     setAppState('playing');
+    if (soundManagerRefStatic.current) {
+      soundManagerRefStatic.current.playSound('gameStart');
+    }
     toast.success('Game Started!', { description: 'Destroy all enemies!' });
   }, []);
 
   const startMultiplayer = useCallback(() => {
+    if (soundManagerRefStatic.current) {
+      soundManagerRefStatic.current.playSound('menuSelect');
+    }
     setAppState('multiplayer');
   }, []);
 
@@ -194,7 +200,7 @@ function App() {
   }, [highScore, setScore, setHighScore]);
 
   const handleStageComplete = useCallback(() => {
-    toast.success('Stage Complete!', { description: 'Prepare for landing sequence...' });
+    toast.success(`Get Ready for Next Stage!`, { description: 'Enemies incoming...', duration: 4000 });
   }, []);
 
   const handleIntermissionStart = useCallback(() => {
@@ -238,6 +244,20 @@ function App() {
     setStage(1);
     setShowBossWarning(false);
   }, [setScore, setStage]);
+
+  const handlePlayerStatsUpdate = useCallback((stats: any) => {
+    setPlayerStats(prev => {
+      const newP1 = stats.p1 || prev.p1;
+      const newP2 = stats.p2 || prev.p2;
+      
+      // Only update if changed
+      if (newP1.lives !== prev.p1.lives || newP1.bombs !== prev.p1.bombs || newP1.power !== prev.p1.power ||
+          newP2.lives !== prev.p2.lives || newP2.bombs !== prev.p2.bombs || newP2.power !== prev.p2.power) {
+        return { p1: newP1, p2: newP2 };
+      }
+      return prev;
+    });
+  }, []);
 
   // Simulate Player 2 joining with key press
   useEffect(() => {
@@ -306,7 +326,11 @@ function App() {
   if (appState === 'menu') {
     return (
       <div className="min-h-screen bg-[#0A0A15]">
-        <Menu onStartGame={startGame} onJoinGame={startMultiplayer} />
+        <Menu 
+          onStartGame={startGame} 
+          onJoinGame={startMultiplayer} 
+          soundManager={soundManagerRefStatic.current}
+        />
         <Toaster />
       </div>
     );
@@ -344,6 +368,7 @@ function App() {
           onPlayer2Join={handlePlayer2Join}
           onPlayer2Leave={handlePlayer2Leave}
           onBossWarning={handleBossWarning}
+          onPlayerStatsUpdate={handlePlayerStatsUpdate}
           soundManager={soundManagerRefStatic.current}
           soundManagerRef={soundManagerRef}
         />

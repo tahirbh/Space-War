@@ -4,7 +4,6 @@ import type {
 } from '@/types/game';
 import { SoundManager } from './SoundManager';
 import { v4 as uuidv4 } from 'uuid';
-import { useGameStore } from '@/store/gameStore';
 
 // Game constants
 const CANVAS_WIDTH = 1280;

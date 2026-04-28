@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useGameStore } from '@/store/gameStore';
 import { cn } from '@/lib/utils';
 import { ArrowLeft, Copy, Users, Wifi, WifiOff, Check, Gamepad2, Share2 } from 'lucide-react';
-import { toast } from 'sonner';
 import type { Socket } from 'socket.io-client';
 
 interface MultiplayerLobbyProps {

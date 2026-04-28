@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useGameStore } from '@/store/gameStore';
 import { cn } from '@/lib/utils';
-import { ArrowLeft, Copy, Users, Wifi, WifiOff, Check, Gamepad2 } from 'lucide-react';
+import { ArrowLeft, Copy, Users, Wifi, WifiOff, Check, Gamepad2, Share2 } from 'lucide-react';
+import { toast } from 'sonner';
 import type { Socket } from 'socket.io-client';
 
 interface MultiplayerLobbyProps {
@@ -79,6 +80,27 @@ export function MultiplayerLobby({ onBack, onStartGame }: MultiplayerLobbyProps)
     navigator.clipboard.writeText(roomCode);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleShareRoom = async () => {
+    const shareUrl = `${window.location.origin}?lobby=${roomCode}`;
+    const shareData = {
+      title: 'Join my Starships War Lobby!',
+      text: `Connect to my cockpit and join the mission! Room Code: ${roomCode}`,
+      url: shareUrl,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        if ((err as Error).name !== 'AbortError') {
+          copyRoomCode();
+        }
+      }
+    } else {
+      copyRoomCode();
+    }
   };
 
   const startGame = () => {
@@ -221,12 +243,22 @@ export function MultiplayerLobby({ onBack, onStartGame }: MultiplayerLobbyProps)
                 {roomCode}
               </div>
               {mode === 'host' && (
-                <button
-                  onClick={copyRoomCode}
-                  className="p-3 bg-white/10 rounded-lg hover:bg-white/20 transition-colors"
-                >
-                  {copied ? <Check className="w-6 h-6 text-green-400" /> : <Copy className="w-6 h-6 text-white" />}
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={copyRoomCode}
+                    className="p-3 bg-white/10 rounded-lg hover:bg-white/20 transition-colors"
+                    title="Copy Code"
+                  >
+                    {copied ? <Check className="w-6 h-6 text-green-400" /> : <Copy className="w-6 h-6 text-white" />}
+                  </button>
+                  <button
+                    onClick={handleShareRoom}
+                    className="p-3 bg-cyan-600/20 border border-cyan-500/50 rounded-lg hover:bg-cyan-600/40 transition-colors"
+                    title="Share Room"
+                  >
+                    <Share2 className="w-6 h-6 text-cyan-400" />
+                  </button>
+                </div>
               )}
             </div>
           </div>

@@ -156,9 +156,23 @@ function App() {
     };
   }, [appState]);
 
-  // Expose store to window for engine access
+  // Expose store to window for engine access and handle deep links
   useEffect(() => {
     (window as any).gameStore = useGameStore.getState();
+    
+    // Deep Link Check
+    const params = new URLSearchParams(window.location.search);
+    const lobbyCode = params.get('lobby');
+    if (lobbyCode && lobbyCode.length === 6) {
+      const { setRoomCode, setIsHost } = useGameStore.getState();
+      setRoomCode(lobbyCode.toUpperCase());
+      setIsHost(false);
+      setAppState('multiplayer');
+      toast.info(`Joining Room: ${lobbyCode.toUpperCase()}`);
+      
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
   }, []);
 
   const togglePause = () => {

@@ -28,11 +28,24 @@ export function IntroStory({ onComplete }: IntroStoryProps) {
   ];
 
   return (
-    <div className="absolute inset-0 z-50 bg-[#0A0A15]">
-      {/* Cinematic Background */}
-      <div className="absolute inset-0 opacity-20">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/20 blur-[100px] animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/20 blur-[100px] animate-pulse delay-700" />
+    <div className="fixed inset-0 z-[100] bg-black flex items-center justify-center overflow-hidden">
+      {/* Cinematic Cockpit Background */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-60 transition-opacity duration-1000"
+        style={{ 
+          backgroundImage: `url('/cockpit_briefing_view.png')`,
+          filter: 'contrast(1.2) brightness(0.8) saturate(1.2)'
+        }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/40" />
+      </div>
+
+      {/* Holographic HUD Overlay Effect */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-10 left-10 w-32 h-32 border-l-2 border-t-2 border-cyan-500/30 rounded-tl-3xl animate-pulse" />
+        <div className="absolute top-10 right-10 w-32 h-32 border-r-2 border-t-2 border-cyan-500/30 rounded-tr-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute bottom-10 left-10 w-32 h-32 border-l-2 border-b-2 border-cyan-500/30 rounded-bl-3xl animate-pulse" style={{ animationDelay: '0.5s' }} />
+        <div className="absolute bottom-10 right-10 w-32 h-32 border-r-2 border-b-2 border-cyan-500/30 rounded-br-3xl animate-pulse" style={{ animationDelay: '1.5s' }} />
       </div>
 
       <div className="relative z-10 w-full h-full flex flex-col items-center justify-center p-8">

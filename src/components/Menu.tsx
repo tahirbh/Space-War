@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useGameStore } from '@/store/gameStore';
 import { cn } from '@/lib/utils';
-import { Play, Users, Settings, BookOpen, Trophy } from 'lucide-react';
+import { Play, Users, Settings, BookOpen, Trophy, ChevronRight, ChevronLeft, RotateCcw, Home } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -262,32 +262,36 @@ export function Menu({ onStartGame, onJoinGame, soundManager }: MenuProps) {
         </div>
       </div>
 
-      {/* Navigation Buttons (Corners) - Adjusted for small screens */}
-      <div className="fixed bottom-4 sm:bottom-6 left-4 sm:left-6 z-20">
+      {/* Navigation Buttons (Corners) - Adjusted for small screens and thumb reach */}
+      <div className="fixed bottom-4 sm:bottom-8 left-4 sm:left-10 z-20 transition-all duration-300">
         {currentPage > 0 && (
           <button
             onClick={handlePrevPage}
-            className="group flex flex-col items-center gap-1 sm:gap-2 p-2 sm:p-4 text-white/40 hover:text-white transition-all"
+            className="group flex flex-col items-center gap-1 sm:gap-2 p-2 sm:p-4 text-white/40 hover:text-white transition-all active:scale-95"
           >
-            <span className="text-[8px] sm:text-[10px] font-mono tracking-[0.2em] uppercase opacity-0 group-hover:opacity-100 transition-opacity hidden xs:inline">Prev</span>
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-white/20 flex items-center justify-center group-hover:border-cyan-400 group-hover:scale-110 transition-all">
-              <span className="text-xl sm:text-2xl">←</span>
+            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full border border-white/10 bg-black/40 backdrop-blur-md flex items-center justify-center group-hover:border-cyan-400 group-hover:bg-cyan-500/10 group-hover:scale-110 transition-all shadow-[0_0_15px_rgba(0,0,0,0.5)]">
+              <ChevronLeft className="w-6 h-6 sm:w-8 sm:h-8 group-hover:text-cyan-400" />
             </div>
+            <span className="text-[8px] sm:text-[10px] font-mono tracking-[0.2em] uppercase opacity-40 group-hover:opacity-100 transition-opacity hidden sm:inline">Back</span>
           </button>
         )}
       </div>
 
-      <div className="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 z-20">
+      <div className="fixed bottom-4 sm:bottom-8 right-4 sm:right-10 z-20 transition-all duration-300">
         <button
           onClick={handleNextPage}
-          className="group flex flex-col items-center gap-1 sm:gap-2 p-2 sm:p-4 text-white/40 hover:text-white transition-all"
+          className="group flex flex-col items-center gap-1 sm:gap-2 p-2 sm:p-4 text-white/40 hover:text-white transition-all active:scale-95"
         >
-          <span className="text-[8px] sm:text-[10px] font-mono tracking-[0.2em] uppercase opacity-0 group-hover:opacity-100 transition-opacity hidden xs:inline">
-            {currentPage === totalPages - 1 ? 'Reset' : 'Next'}
-          </span>
-          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-white/20 flex items-center justify-center group-hover:border-cyan-400 group-hover:scale-110 transition-all shadow-[0_0_20px_rgba(0,212,255,0)] group-hover:shadow-[0_0_20px_rgba(0,212,255,0.3)]">
-            <span className="text-xl sm:text-2xl">{currentPage === totalPages - 1 ? '↺' : '→'}</span>
+          <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full border border-white/10 bg-black/40 backdrop-blur-md flex items-center justify-center group-hover:border-cyan-400 group-hover:bg-cyan-500/10 group-hover:scale-110 transition-all shadow-[0_0_20px_rgba(0,212,255,0)] group-hover:shadow-[0_0_20px_rgba(0,212,255,0.2)] shadow-[0_0_15px_rgba(0,0,0,0.5)]">
+            {currentPage === totalPages - 1 ? (
+              <Home className="w-6 h-6 sm:w-8 sm:h-8 group-hover:text-cyan-400" />
+            ) : (
+              <ChevronRight className="w-6 h-6 sm:w-8 sm:h-8 group-hover:text-cyan-400 animate-pulse" />
+            )}
           </div>
+          <span className="text-[8px] sm:text-[10px] font-mono tracking-[0.2em] uppercase opacity-40 group-hover:opacity-100 transition-opacity hidden sm:inline">
+            {currentPage === totalPages - 1 ? 'Main' : 'Next Deck'}
+          </span>
         </button>
       </div>
 

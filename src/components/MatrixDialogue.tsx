@@ -68,26 +68,26 @@ export function MatrixDialogue({ messages, onComplete }: MatrixDialogueProps) {
 
   return (
     <div 
-      className="absolute bottom-10 left-1/2 -translate-x-1/2 w-[85%] max-w-3xl bg-black/95 border-2 border-green-500/40 p-8 rounded-xl shadow-[0_0_50px_rgba(34,197,94,0.2)] font-mono z-50 cursor-pointer backdrop-blur-sm"
+      className="absolute bottom-6 sm:bottom-10 left-1/2 -translate-x-1/2 w-[95%] sm:w-[85%] max-w-3xl bg-black/95 border-2 border-green-500/40 p-4 sm:p-8 rounded-xl shadow-[0_0_50px_rgba(34,197,94,0.2)] font-mono z-50 cursor-pointer backdrop-blur-sm"
       onClick={handleNext}
     >
       {/* Matrix Glitch Header */}
-      <div className="flex items-center gap-3 mb-4">
+      <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
         <div className="w-2 h-2 bg-green-500 animate-pulse rounded-full shadow-[0_0_10px_rgba(34,197,94,1)]" />
-        <span className="text-green-500 font-bold uppercase tracking-[0.3em] text-xs">
-          DECODING SIGNAL: [{currentMessage.speaker}]
+        <span className="text-green-500 font-bold uppercase tracking-[0.1em] sm:tracking-[0.3em] text-[10px] sm:text-xs truncate">
+          SIGNAL: [{currentMessage.speaker}]
         </span>
         <div className="flex-1 h-[1px] bg-gradient-to-r from-green-500/50 to-transparent" />
-        <span className="text-green-500/40 text-[10px]">
+        <span className="text-green-500/40 text-[8px] sm:text-[10px] whitespace-nowrap">
           PARA {currentParagraphIndex + 1}/{paragraphs.length}
         </span>
       </div>
       
       {/* Content Area */}
-      <div className="min-h-[120px] flex flex-col justify-center">
-        <p className="text-green-400 text-xl leading-relaxed font-medium">
+      <div className="min-h-[80px] sm:min-h-[120px] flex flex-col justify-center">
+        <p className="text-green-400 text-base sm:text-xl leading-relaxed font-medium">
           {displayedText}
-          {isTyping && <span className="animate-pulse ml-1 inline-block w-2 h-5 bg-green-500/70 align-middle" />}
+          {isTyping && <span className="animate-pulse ml-1 inline-block w-2 h-4 sm:h-5 bg-green-500/70 align-middle" />}
         </p>
       </div>
 

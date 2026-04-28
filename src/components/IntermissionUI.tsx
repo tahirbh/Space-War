@@ -23,7 +23,7 @@ export function IntermissionUI({ stage, onFinish }: IntermissionUIProps) {
     },
     { 
       speaker: 'Commander Sarah', 
-      text: "I've instructed the hangar crew to fix the spread fire emitters. You'll should find them much more effective now.\n\nAlso, your refueling tanker is moving into position. Stay steady while we transfer the plasma cells." 
+      text: "I've instructed the hangar crew to install the new Homing Missile launchers. They'll track targets automatically now.\n\nAlso, your refueling tanker is moving into position. Stay steady while we transfer the plasma cells." 
     },
     { 
       speaker: 'Captain Jax', 
@@ -51,18 +51,18 @@ export function IntermissionUI({ stage, onFinish }: IntermissionUIProps) {
 
       {/* Atmospheric Overlays */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-10 left-10 text-cyan-500/30 font-mono text-xs uppercase tracking-[0.5em] animate-pulse">
-          Control Tower: Online | Hangar Bay B-12
+        <div className="absolute top-4 sm:top-10 left-4 sm:left-10 text-cyan-500/30 font-mono text-[8px] sm:text-xs uppercase tracking-[0.2em] sm:tracking-[0.5em] animate-pulse">
+          Tower: Online | Bay B-12
         </div>
         
-        <div className="absolute bottom-10 right-10 text-red-500/30 font-mono text-xs uppercase tracking-[0.5em]">
-          Status: Mid-air refueling in progress...
+        <div className="absolute bottom-20 sm:bottom-10 right-4 sm:right-10 text-red-500/30 font-mono text-[8px] sm:text-xs uppercase tracking-[0.2em] sm:tracking-[0.5em]">
+          Refueling...
         </div>
       </div>
 
       <MatrixDialogue 
         messages={dialogue} 
-        onComplete={onFinish} 
+        onComplete={() => setPhase('shop')} 
       />
     </div>
   );

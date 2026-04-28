@@ -24,41 +24,41 @@ export function HUD({
   return (
     <div className="absolute inset-0 pointer-events-none">
       {/* Top Bar - Score and Stage */}
-      <div className="absolute top-0 left-0 right-0 flex justify-between items-start p-3 md:p-4">
+      <div className="absolute top-0 left-0 right-0 flex justify-between items-start p-2 sm:p-3 md:p-4 gap-2 sm:gap-4">
         {/* Score */}
-        <div className="flex flex-col gap-0.5">
-          <div className="flex items-center gap-2">
-            <Trophy className="w-4 h-4 md:w-5 md:h-5 text-yellow-400" />
-            <span className="text-xl md:text-3xl font-bold text-white font-mono tracking-wider"
+        <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+          <div className="flex items-center gap-1 sm:gap-2">
+            <Trophy className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-yellow-400 shrink-0" />
+            <span className="text-base sm:text-xl md:text-3xl font-bold text-white font-mono tracking-wider truncate"
                   style={{ textShadow: '0 0 10px rgba(255, 215, 0, 0.5)' }}>
               {score.toString().padStart(8, '0')}
             </span>
           </div>
-          <div className="text-xs md:text-sm text-yellow-500 font-mono mt-1">
-            COINS: {coins.toString().padStart(6, '0')}
+          <div className="text-[10px] sm:text-xs md:text-sm text-yellow-500 font-mono mt-0.5 sm:mt-1">
+            G: {coins.toString().padStart(6, '0')}
           </div>
         </div>
 
         {/* Stage */}
-        <div className="flex flex-col items-center">
-          <span className="text-xs text-white/60 uppercase tracking-widest">Stage</span>
-          <span className="text-2xl md:text-4xl font-bold text-cyan-400 font-mono"
+        <div className="flex flex-col items-center shrink-0">
+          <span className="text-[8px] sm:text-xs text-white/60 uppercase tracking-widest">Stage</span>
+          <span className="text-xl sm:text-2xl md:text-4xl font-bold text-cyan-400 font-mono"
                 style={{ textShadow: '0 0 15px rgba(0, 212, 255, 0.6)' }}>
             {stage}
           </span>
         </div>
 
         {/* Player 2 Indicator */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2 flex-1 justify-end">
           {player2Connected ? (
             <>
-              <Users className="w-4 h-4 md:w-5 md:h-5 text-green-400" />
-              <span className="text-green-400 font-bold text-sm md:text-base">P2 CONNECTED</span>
+              <Users className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-green-400 shrink-0" />
+              <span className="text-green-400 font-bold text-[10px] sm:text-sm md:text-base hidden xs:inline">P2 CONNECTED</span>
             </>
           ) : (
             <>
-              <User className="w-4 h-4 md:w-5 md:h-5 text-white/40" />
-              <span className="text-white/40 text-sm md:text-base">P2 WAITING...</span>
+              <User className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-white/40 shrink-0" />
+              <span className="text-white/40 text-[10px] sm:text-sm md:text-base hidden xs:inline">P2 JOIN...</span>
             </>
           )}
         </div>

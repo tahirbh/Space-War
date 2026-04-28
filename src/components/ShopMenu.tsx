@@ -70,27 +70,27 @@ export function ShopMenu({ onContinue }: ShopMenuProps) {
   return (
     <div className="absolute inset-0 bg-[#0A0A15]/95 z-40 flex flex-col items-center justify-center p-8 overflow-hidden animate-in fade-in duration-500">
       {/* Header */}
-      <div className="text-center mb-10">
-        <h2 className="text-5xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-600 mb-2"
+      <div className="text-center mb-6 sm:mb-10">
+        <h2 className="text-3xl sm:text-5xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-600 mb-2"
             style={{ fontFamily: 'Orbitron, sans-serif' }}>
-          ARMORY & SHOP
+          ARMORY
         </h2>
         <div className="flex items-center justify-center gap-2 text-yellow-400">
-          <ShoppingCart className="w-5 h-5" />
-          <span className="text-xl font-mono tracking-widest">{coins.toString().padStart(6, '0')} COINS</span>
+          <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
+          <span className="text-lg sm:text-xl font-mono tracking-widest">{coins.toString().padStart(6, '0')}</span>
         </div>
       </div>
 
       {/* Ship Preview / Weapon Status */}
-      <div className="w-full max-w-4xl bg-white/5 border border-white/10 rounded-2xl p-6 mb-8 flex items-center gap-8 backdrop-blur-xl">
-        <div className="w-32 h-32 flex items-center justify-center bg-cyan-500/10 rounded-full border-2 border-cyan-500/30 shadow-[0_0_30px_rgba(0,212,255,0.2)]">
-            <span className="text-cyan-400 uppercase font-black text-xs tracking-tighter">Current: {selectedWeapon}</span>
+      <div className="w-full max-w-4xl bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8 flex flex-col sm:flex-row items-center gap-4 sm:gap-8 backdrop-blur-xl">
+        <div className="w-20 h-20 sm:w-32 sm:h-32 flex items-center justify-center bg-cyan-500/10 rounded-full border-2 border-cyan-500/30 shadow-[0_0_30px_rgba(0,212,255,0.2)] shrink-0">
+            <span className="text-cyan-400 uppercase font-black text-[10px] sm:text-xs tracking-tighter">Current: {selectedWeapon}</span>
         </div>
-        <div className="flex-1 grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatBox label="Fire Speed" value={upgrades.fireRate} color="text-cyan-400" />
-            <StatBox label="Damage" value={upgrades.damage} color="text-red-400" />
+        <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 w-full">
+            <StatBox label="Speed" value={upgrades.fireRate} color="text-cyan-400" />
+            <StatBox label="Dmg" value={upgrades.damage} color="text-red-400" />
             <StatBox label="Hull" value={upgrades.health} color="text-green-400" />
-            <StatBox label="Bombs" value={upgrades.bombs} color="text-purple-400" />
+            <StatBox label="Bomb" value={upgrades.bombs} color="text-purple-400" />
         </div>
       </div>
 
@@ -128,10 +128,10 @@ export function ShopMenu({ onContinue }: ShopMenuProps) {
       {/* Continue Button */}
       <button
         onClick={onContinue}
-        className="mt-12 flex items-center gap-3 px-12 py-4 bg-gradient-to-r from-cyan-600 to-blue-700 rounded-full text-white font-black uppercase tracking-[0.2em] shadow-[0_0_40px_rgba(0,100,255,0.3)] hover:scale-105 active:scale-95 transition-all"
+        className="mt-8 sm:mt-12 flex items-center gap-3 px-8 sm:px-12 py-3 sm:py-4 bg-gradient-to-r from-cyan-600 to-blue-700 rounded-full text-white font-black uppercase tracking-[0.1em] sm:tracking-[0.2em] text-sm sm:text-base shadow-[0_0_40px_rgba(0,100,255,0.3)] hover:scale-105 active:scale-95 transition-all"
       >
-        Fly Out to Sky
-        <ArrowRight className="w-6 h-6" />
+        Fly Out
+        <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6" />
       </button>
     </div>
   );

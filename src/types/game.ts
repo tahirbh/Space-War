@@ -4,7 +4,7 @@ export type GameState = 'menu' | 'playing' | 'paused' | 'gameover' | 'victory' |
 export type EnemyType = 'grunt' | 'interceptor' | 'bomber' | 'elite' | 'tank';
 export type BossType = 'mantis' | 'leviathan' | 'omega';
 export type PowerUpType = 'power' | 'bomb' | 'speed' | 'life' | 'weapon';
-export type WeaponType = 'spread' | 'laser' | 'booster';
+export type WeaponType = 'homing' | 'laser' | 'booster';
 
 export interface Vector2 {
   x: number;
@@ -39,6 +39,8 @@ export interface Bullet extends Entity {
   owner: 'player1' | 'player2' | 'enemy';
   damage: number;
   color: string;
+  isHoming?: boolean;
+  targetId?: string | null;
 }
 
 export interface Enemy extends Entity {

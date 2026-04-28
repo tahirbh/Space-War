@@ -9,7 +9,6 @@ import { v4 as uuidv4 } from 'uuid';
 const CANVAS_WIDTH = 1280;
 const CANVAS_HEIGHT = 720;
 const PLAYER_SPEED = 6;
-const BEAM_DAMAGE_TICK = 5; // Damage every 5 frames when beam is active
 
 // Base entity interface for collision
 interface Entity {
@@ -692,16 +691,16 @@ export class GameEngine {
 
     // Weapon shooting
     if (input.shoot && player.active) {
+      const now = Date.now();
+      const fireDelay = player.weaponType === 'laser' ? 100 : 180; // Rapid fire for laser
+      
+      if (now - player.lastShot > fireDelay) {
+        player.lastShot = now;
+        this.shootProjectileWeapon(player);
+      }
+      
       if (player.weaponType === 'laser') {
         this.beamActive = true;
-        this.updateBeam(player);
-      } else {
-        this.beamActive = false;
-        const now = Date.now();
-        if (now - player.lastShot > 180) { // 180ms delay
-          player.lastShot = now;
-          this.shootProjectileWeapon(player);
-        }
       }
     } else {
       this.beamActive = false;
@@ -722,7 +721,8 @@ export class GameEngine {
     const bX = player.position.x + player.width;
     const speed = 15;
     const isBooster = player.weaponType === 'booster';
-    const isSpread = player.weaponType === 'spread';
+    const isHoming = player.weaponType === 'homing';
+    const isLaser = player.weaponType === 'laser';
     const dmg = player.powerLevel;
     
     if (isBooster) {
@@ -733,77 +733,42 @@ export class GameEngine {
         active: true, owner: `player${player.playerNumber}` as 'player1' | 'player2',
         damage: dmg * 1.5, color: '#00FF00'
       });
-    } else if (isSpread) {
-      // Spread: up to 5-way cover depending on power
-      const ways = dmg >= 4 ? [-0.3, -0.15, 0, 0.15, 0.3] : dmg >= 2 ? [-0.2, 0, 0.2] : [-0.15, 0.15];
-      ways.forEach(angle => {
+    } else if (isHoming) {
+      // Homing Missile: Starts slow, speeds up and tracks
+      const ways = dmg >= 4 ? 3 : dmg >= 2 ? 2 : 1;
+      for (let i = 0; i < ways; i++) {
+        const angle = ways > 1 ? (i - (ways - 1) / 2) * 0.4 : 0;
         this.bullets.push({
-          id: uuidv4(), position: { x: bX, y: bY },
-          velocity: { x: Math.cos(angle) * speed, y: Math.sin(angle) * speed },
-          width: 8 + dmg, height: 8 + dmg,
-          active: true, owner: `player${player.playerNumber}` as 'player1' | 'player2',
-          damage: dmg, color: '#0088FF'
+          id: uuidv4(), 
+          position: { x: bX, y: bY },
+          velocity: { x: Math.cos(angle) * 8, y: Math.sin(angle) * 8 },
+          width: 12, height: 6,
+          active: true, 
+          owner: `player${player.playerNumber}` as 'player1' | 'player2',
+          damage: dmg * 1.2, 
+          color: '#FF6600',
+          isHoming: true,
+          targetId: null
+        });
+      }
+    } else if (isLaser) {
+      // Rapid Fire Laser: Twin parallel beams
+      const offsets = [-8, 8];
+      offsets.forEach(offset => {
+        this.bullets.push({
+          id: uuidv4(), 
+          position: { x: bX, y: bY + offset },
+          velocity: { x: speed * 2, y: 0 }, 
+          width: 20, height: 3,
+          active: true, 
+          owner: `player${player.playerNumber}` as 'player1' | 'player2',
+          damage: dmg * 0.8, 
+          color: player.playerNumber === 1 ? '#00FFFF' : '#FF66AA'
         });
       });
     }
   }
 
-  private updateBeam(player: Player): void {
-    this.beamDamageTick++;
-    
-    // Create beam particles
-    for (let i = 0; i < 3; i++) {
-      this.particles.push({
-        id: uuidv4(),
-        position: { 
-          x: player.position.x + player.width + Math.random() * (CANVAS_WIDTH - player.position.x - player.width),
-          y: player.position.y + player.height / 2 + (Math.random() - 0.5) * (4 + player.powerLevel * 2)
-        },
-        velocity: { x: 0, y: 0 },
-        width: 2,
-        height: 2,
-        active: true,
-        life: 100,
-        maxLife: 100,
-        color: player.playerNumber === 1 ? '#00FFFF' : '#FF66AA',
-        size: 2 + Math.random() * 2,
-        alpha: 0.8,
-      });
-    }
-
-    // Damage enemies in beam path (every N frames)
-    if (this.beamDamageTick >= BEAM_DAMAGE_TICK) {
-      this.beamDamageTick = 0;
-      this.soundManager.playSound('shoot');
-
-      const beamY = player.position.y + player.height / 2;
-      const beamWidth = 8 + player.powerLevel * 4;
-
-      // Damage enemies in beam
-      this.enemies.forEach(enemy => {
-        if (enemy.position.x > player.position.x + player.width &&
-            Math.abs(enemy.position.y + enemy.height / 2 - beamY) < beamWidth + enemy.height / 2) {
-          enemy.health -= player.powerLevel;
-          this.createParticles(enemy.position.x, enemy.position.y + enemy.height / 2, 3, '#FF6B35');
-          if (enemy.health <= 0) {
-            this.destroyEnemy(enemy);
-          }
-        }
-      });
-
-      // Damage boss in beam
-      if (this.boss) {
-        const bossCenterY = this.boss.position.y + this.boss.height / 2;
-        if (Math.abs(bossCenterY - beamY) < beamWidth + this.boss.height / 2) {
-          this.boss.health -= player.powerLevel;
-          this.createParticles(this.boss.position.x, beamY, 5, '#9D4EDD');
-          if (this.boss.health <= 0) {
-            this.destroyBoss();
-          }
-        }
-      }
-    }
-  }
 
   private useBomb(player: Player): void {
     player.bombs--;
@@ -949,14 +914,78 @@ export class GameEngine {
   }
 
   private updateBullets(dt: number): void {
+    const dtFactor = dt / 16;
     this.bullets = this.bullets.filter(bullet => {
       if (!bullet.active) return false;
 
-      // Fixed: Removed * 60 multiplier which caused bullets to teleport off-screen
-      bullet.position.x += bullet.velocity.x * (dt / 16);
-      bullet.position.y += bullet.velocity.y * (dt / 16);
+      // Homing logic
+      if (bullet.isHoming && bullet.owner !== 'enemy') {
+        // Find target if none
+        if (!bullet.targetId) {
+          let nearestDist = 800;
+          let nearest: Enemy | Boss | null = null;
 
-      if (bullet.position.x < -50 || bullet.position.x > CANVAS_WIDTH + 50 ||
+          this.enemies.forEach(e => {
+            const dist = Math.hypot(e.position.x - bullet.position.x, e.position.y - bullet.position.y);
+            if (dist < nearestDist) {
+              nearestDist = dist;
+              nearest = e;
+            }
+          });
+
+          if (this.boss) {
+            const dist = Math.hypot(this.boss.position.x - bullet.position.x, this.boss.position.y - bullet.position.y);
+            if (dist < nearestDist) {
+              nearestDist = dist;
+              nearest = this.boss;
+            }
+          }
+
+          if (nearest) {
+            bullet.targetId = (nearest as any).id;
+          }
+        }
+
+        // Steer towards target
+        const target = bullet.targetId === 'boss' ? this.boss : this.enemies.find(e => e.id === bullet.targetId);
+        if (target && target.active) {
+          const targetX = target.position.x + target.width / 2;
+          const targetY = target.position.y + target.height / 2;
+          const dx = targetX - bullet.position.x;
+          const dy = targetY - bullet.position.y;
+          const targetAngle = Math.atan2(dy, dx);
+          const currentAngle = Math.atan2(bullet.velocity.y, bullet.velocity.x);
+          
+          let angleDiff = targetAngle - currentAngle;
+          while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+          while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+
+          const turnRate = 0.15 * dtFactor;
+          const newAngle = currentAngle + Math.max(-turnRate, Math.min(turnRate, angleDiff));
+          const speed = Math.hypot(bullet.velocity.x, bullet.velocity.y);
+          const newSpeed = Math.min(20, speed + 0.2 * dtFactor); // Accelerate
+
+          bullet.velocity.x = Math.cos(newAngle) * newSpeed;
+          bullet.velocity.y = Math.sin(newAngle) * newSpeed;
+          
+          // Rotate bullet visual (if height/width used for orientation)
+          if (bullet.width > bullet.height) {
+            // Keep it simple for now, but missiles usually look better pointed at target
+          }
+        } else {
+          bullet.targetId = null; // Target lost
+          // Accelerate forward anyway
+          const speed = Math.hypot(bullet.velocity.x, bullet.velocity.y);
+          const factor = (speed + 0.1 * dtFactor) / speed;
+          bullet.velocity.x *= factor;
+          bullet.velocity.y *= factor;
+        }
+      }
+
+      bullet.position.x += bullet.velocity.x * dtFactor;
+      bullet.position.y += bullet.velocity.y * dtFactor;
+
+      if (bullet.position.x < -50 || bullet.position.x > CANVAS_WIDTH + 100 ||
           bullet.position.y < -50 || bullet.position.y > CANVAS_HEIGHT + 50) {
         return false;
       }
@@ -1437,7 +1466,6 @@ export class GameEngine {
     this.drawBackground(ctx);
 
     // Draw game entities
-    this.drawBeam(ctx);
     this.drawPowerUps(ctx);
     this.drawBullets(ctx);
     this.drawEnemies(ctx);
@@ -1445,6 +1473,7 @@ export class GameEngine {
     this.drawPlayers(ctx);
     this.drawParticles(ctx);
     this.drawExplosions(ctx);
+    this.drawBeam(ctx);
 
     // Draw touch controls
     if (this.isTouchDevice) {

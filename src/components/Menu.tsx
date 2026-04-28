@@ -58,12 +58,12 @@ export function Menu({ onStartGame, onJoinGame, soundManager }: MenuProps) {
       {/* Main Content */}
       <div className="relative z-10 flex flex-col items-center gap-8">
         {/* Logo */}
-        <div className="text-center">
-          <h1 className="text-7xl md:text-9xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 tracking-tighter"
+        <div className="text-center px-4">
+          <h1 className="text-5xl sm:text-7xl md:text-9xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 tracking-tighter"
               style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 40px rgba(0, 212, 255, 0.5)' }}>
             STARSHIPS WAR
           </h1>
-          <p className="text-xl md:text-2xl text-cyan-400 tracking-[0.5em] mt-2 uppercase"
+          <p className="text-lg sm:text-xl md:text-2xl text-cyan-400 tracking-[0.3em] sm:tracking-[0.5em] mt-2 uppercase"
              style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 20px rgba(0, 212, 255, 0.5)' }}>
             Alpha
           </p>
@@ -79,18 +79,18 @@ export function Menu({ onStartGame, onJoinGame, soundManager }: MenuProps) {
         </div>
 
         {/* Menu Buttons */}
-        <div className="flex flex-col gap-4 w-72">
+        <div className="flex flex-col gap-4 w-full max-w-[280px] sm:max-w-72 px-4">
           <button
             onClick={onStartGame}
             className={cn(
-              "group relative flex items-center justify-center gap-3 px-8 py-4",
+              "group relative flex items-center justify-center gap-3 px-6 sm:px-8 py-3 sm:py-4",
               "bg-gradient-to-r from-cyan-600 to-blue-600 rounded-lg",
-              "text-white font-bold text-lg uppercase tracking-wider",
+              "text-white font-bold text-base sm:text-lg uppercase tracking-wider",
               "transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/50",
               "border-2 border-cyan-400/50"
             )}
           >
-            <Play className="w-6 h-6 group-hover:animate-pulse" />
+            <Play className="w-5 h-5 sm:w-6 sm:h-6 group-hover:animate-pulse" />
             Start Game
             <div className="absolute inset-0 bg-white/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity" />
           </button>
@@ -98,19 +98,19 @@ export function Menu({ onStartGame, onJoinGame, soundManager }: MenuProps) {
           <button
             onClick={onJoinGame}
             className={cn(
-              "group relative flex items-center justify-center gap-3 px-8 py-4",
+              "group relative flex items-center justify-center gap-3 px-6 sm:px-8 py-3 sm:py-4",
               "bg-gradient-to-r from-pink-600 to-purple-600 rounded-lg",
-              "text-white font-bold text-lg uppercase tracking-wider",
+              "text-white font-bold text-base sm:text-lg uppercase tracking-wider",
               "transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-pink-500/50",
               "border-2 border-pink-400/50"
             )}
           >
-            <Users className="w-6 h-6 group-hover:animate-pulse" />
+            <Users className="w-5 h-5 sm:w-6 sm:h-6 group-hover:animate-pulse" />
             Multiplayer
             <div className="absolute inset-0 bg-white/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity" />
           </button>
 
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <button
               onClick={() => {
                 soundManager?.playSound('menuNavigate');
@@ -118,12 +118,12 @@ export function Menu({ onStartGame, onJoinGame, soundManager }: MenuProps) {
               }}
               className={cn(
                 "flex-1 flex items-center justify-center gap-2 px-4 py-3",
-                "bg-white/10 rounded-lg text-white/80 font-medium",
+                "bg-white/10 rounded-lg text-white/80 font-medium text-sm sm:text-base",
                 "transition-all duration-300 hover:bg-white/20 hover:text-white",
                 "border border-white/20"
               )}
             >
-              <BookOpen className="w-5 h-5" />
+              <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />
               How to Play
             </button>
 
@@ -134,42 +134,42 @@ export function Menu({ onStartGame, onJoinGame, soundManager }: MenuProps) {
               }}
               className={cn(
                 "flex-1 flex items-center justify-center gap-2 px-4 py-3",
-                "bg-white/10 rounded-lg text-white/80 font-medium",
+                "bg-white/10 rounded-lg text-white/80 font-medium text-sm sm:text-base",
                 "transition-all duration-300 hover:bg-white/20 hover:text-white",
                 "border border-white/20"
               )}
             >
-              <Settings className="w-5 h-5" />
+              <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
               Settings
             </button>
           </div>
         </div>
 
         {/* Decorative Elements */}
-        <div className="flex items-center gap-8 mt-8">
-          <div className="flex flex-col items-center gap-2 text-cyan-400/60">
-            <Rocket className="w-8 h-8" />
-            <span className="text-xs uppercase tracking-wider">Shoot</span>
+        <div className="flex items-center gap-4 sm:gap-8 mt-4 sm:mt-8 px-4 overflow-x-auto no-scrollbar">
+          <div className="flex flex-col items-center gap-1 sm:gap-2 text-cyan-400/60 min-w-[60px]">
+            <Rocket className="w-6 h-6 sm:w-8 sm:h-8" />
+            <span className="text-[10px] sm:text-xs uppercase tracking-wider">Shoot</span>
           </div>
-          <div className="flex flex-col items-center gap-2 text-pink-400/60">
-            <Zap className="w-8 h-8" />
-            <span className="text-xs uppercase tracking-wider">Dodge</span>
+          <div className="flex flex-col items-center gap-1 sm:gap-2 text-pink-400/60 min-w-[60px]">
+            <Zap className="w-6 h-6 sm:w-8 sm:h-8" />
+            <span className="text-[10px] sm:text-xs uppercase tracking-wider">Dodge</span>
           </div>
-          <div className="flex flex-col items-center gap-2 text-yellow-400/60">
-            <Target className="w-8 h-8" />
-            <span className="text-xs uppercase tracking-wider">Destroy</span>
+          <div className="flex flex-col items-center gap-1 sm:gap-2 text-yellow-400/60 min-w-[60px]">
+            <Target className="w-6 h-6 sm:w-8 sm:h-8" />
+            <span className="text-[10px] sm:text-xs uppercase tracking-wider">Destroy</span>
           </div>
         </div>
       </div>
 
       {/* How to Play Dialog */}
       <Dialog open={showHowToPlay} onOpenChange={setShowHowToPlay}>
-        <DialogContent className="bg-[#0A0A15] border-cyan-500/50 text-white max-w-lg max-h-[80vh] overflow-y-auto">
+        <DialogContent className="bg-[#0A0A15] border-cyan-500/50 text-white w-[95vw] sm:max-w-lg max-h-[85vh] overflow-y-auto p-4 sm:p-6 [&>button]:text-cyan-400 [&>button]:opacity-100">
           <DialogHeader>
-            <DialogTitle className="text-2xl text-cyan-400" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+            <DialogTitle className="text-xl sm:text-2xl text-cyan-400" style={{ fontFamily: 'Orbitron, sans-serif' }}>
               HOW TO PLAY
             </DialogTitle>
-            <DialogDescription className="text-white/60">
+            <DialogDescription className="text-white/60 text-sm">
               Master the art of space combat
             </DialogDescription>
           </DialogHeader>
@@ -178,22 +178,22 @@ export function Menu({ onStartGame, onJoinGame, soundManager }: MenuProps) {
             {/* Controls */}
             <div>
               <h3 className="text-lg font-bold text-cyan-400 mb-3">Controls</h3>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="bg-white/5 p-3 rounded-lg">
-                  <div className="text-white font-mono">WASD / Arrows</div>
-                  <div className="text-white/60 text-sm">Move Ship</div>
+                  <div className="text-white font-mono text-sm sm:text-base">WASD / Arrows</div>
+                  <div className="text-white/60 text-xs sm:text-sm">Move Ship</div>
                 </div>
                 <div className="bg-white/5 p-3 rounded-lg">
-                  <div className="text-white font-mono">Z / Space</div>
-                  <div className="text-white/60 text-sm">Shoot</div>
+                  <div className="text-white font-mono text-sm sm:text-base">Z / Space</div>
+                  <div className="text-white/60 text-xs sm:text-sm">Shoot</div>
                 </div>
                 <div className="bg-white/5 p-3 rounded-lg">
-                  <div className="text-white font-mono">B / Shift</div>
-                  <div className="text-white/60 text-sm">Use Bomb</div>
+                  <div className="text-white font-mono text-sm sm:text-base">B / Shift</div>
+                  <div className="text-white/60 text-xs sm:text-sm">Use Bomb</div>
                 </div>
                 <div className="bg-white/5 p-3 rounded-lg">
-                  <div className="text-white font-mono">Enter</div>
-                  <div className="text-white/60 text-sm">Pause</div>
+                  <div className="text-white font-mono text-sm sm:text-base">Enter</div>
+                  <div className="text-white/60 text-xs sm:text-sm">Pause</div>
                 </div>
               </div>
             </div>
@@ -239,19 +239,15 @@ export function Menu({ onStartGame, onJoinGame, soundManager }: MenuProps) {
               <ul className="space-y-2 text-white/80 text-sm">
                 <li className="flex items-start gap-2">
                   <span className="text-cyan-400">•</span>
-                  Collect Power-ups (P) to increase your firepower
+                  Try the Homing Missile for automatic targeting!
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-cyan-400">•</span>
+                  Laser is now rapid-fire - hold shoot for a stream of beams
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-cyan-400">•</span>
                   Use bombs when overwhelmed - they clear all enemy bullets
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-cyan-400">•</span>
-                  Bosses appear at the end of each stage
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-cyan-400">•</span>
-                  Player 2 can join anytime during gameplay!
                 </li>
               </ul>
             </div>
@@ -261,12 +257,12 @@ export function Menu({ onStartGame, onJoinGame, soundManager }: MenuProps) {
 
       {/* Settings Dialog */}
       <Dialog open={showSettings} onOpenChange={setShowSettings}>
-        <DialogContent className="bg-[#0A0A15] border-cyan-500/50 text-white max-w-md">
+        <DialogContent className="bg-[#0A0A15] border-cyan-500/50 text-white w-[95vw] sm:max-w-md p-4 sm:p-6 [&>button]:text-cyan-400 [&>button]:opacity-100">
           <DialogHeader>
-            <DialogTitle className="text-2xl text-cyan-400" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+            <DialogTitle className="text-xl sm:text-2xl text-cyan-400" style={{ fontFamily: 'Orbitron, sans-serif' }}>
               SETTINGS
             </DialogTitle>
-            <DialogDescription className="text-white/60">
+            <DialogDescription className="text-white/60 text-sm">
               Customize your experience
             </DialogDescription>
           </DialogHeader>
@@ -285,9 +281,9 @@ export function Menu({ onStartGame, onJoinGame, soundManager }: MenuProps) {
             </div>
 
             <div>
-              <label className="text-white/80 text-sm mb-2 block font-medium uppercase tracking-wider">Starting Weapon</label>
+              <label className="text-white/80 text-xs sm:text-sm mb-2 block font-medium uppercase tracking-wider">Starting Weapon</label>
               <div className="grid grid-cols-3 gap-2">
-                {(['laser', 'spread', 'booster'] as const).map((w) => (
+                {(['laser', 'homing', 'booster'] as const).map((w) => (
                   <button
                     key={w}
                     onClick={() => {
@@ -295,21 +291,21 @@ export function Menu({ onStartGame, onJoinGame, soundManager }: MenuProps) {
                       setSelectedWeapon(w);
                     }}
                     className={cn(
-                      "px-3 py-2 rounded-lg border text-sm capitalize transition-all",
+                      "px-2 sm:px-3 py-2 rounded-lg border text-[10px] sm:text-sm capitalize transition-all",
                       selectedWeapon === w 
                         ? "bg-cyan-600 border-cyan-400 text-white shadow-[0_0_15px_rgba(0,212,255,0.4)]" 
                         : "bg-white/5 border-white/10 text-white/40 hover:bg-white/10"
                     )}
                   >
-                    {w}
+                    {w === 'homing' ? 'Missile' : w}
                   </button>
                 ))}
               </div>
             </div>
 
             <div>
-              <label className="text-white/80 text-sm mb-2 block font-medium uppercase tracking-wider">Background Theme</label>
-              <div className="grid grid-cols-2 gap-2 mb-4">
+              <label className="text-white/80 text-xs sm:text-sm mb-2 block font-medium uppercase tracking-wider">Background Theme</label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
                 {[
                   { id: 'space', name: 'Deep Space' },
                   { id: 'clouds', name: 'Cloudy Sky' },
@@ -324,7 +320,7 @@ export function Menu({ onStartGame, onJoinGame, soundManager }: MenuProps) {
                       setSelectedBackground(bg.id);
                     }}
                     className={cn(
-                      "px-3 py-2 rounded-lg border text-sm transition-all",
+                      "px-2 sm:px-3 py-2 rounded-lg border text-[10px] sm:text-sm transition-all",
                       selectedBackground === bg.id 
                         ? "bg-purple-600 border-purple-400 text-white shadow-[0_0_15px_rgba(168,85,247,0.4)]" 
                         : "bg-white/5 border-white/10 text-white/40 hover:bg-white/10"

@@ -96,47 +96,47 @@ export function MultiplayerLobby({ onBack, onStartGame }: MultiplayerLobbyProps)
           Back
         </button>
 
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-cyan-400 mb-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+        <div className="text-center mb-8 sm:mb-12">
+          <h2 className="text-3xl sm:text-4xl font-bold text-cyan-400 mb-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
             MULTIPLAYER
           </h2>
-          <p className="text-white/60">Play with a friend online</p>
+          <p className="text-white/60 text-sm sm:text-base">Play with a friend online</p>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-6">
+        <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full max-w-2xl px-4">
           <button
             onClick={handleHostGame}
             className={cn(
-              "group flex flex-col items-center gap-4 p-8 rounded-xl",
+              "flex-1 group flex flex-col items-center gap-3 sm:gap-4 p-6 sm:p-8 rounded-xl",
               "bg-gradient-to-br from-cyan-900/50 to-blue-900/50",
               "border-2 border-cyan-500/50 hover:border-cyan-400",
               "transition-all duration-300 hover:scale-105"
             )}
           >
-            <div className="w-20 h-20 rounded-full bg-cyan-500/20 flex items-center justify-center">
-              <Wifi className="w-10 h-10 text-cyan-400" />
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-cyan-500/20 flex items-center justify-center">
+              <Wifi className="w-8 h-8 sm:w-10 sm:h-10 text-cyan-400" />
             </div>
             <div className="text-center">
-              <h3 className="text-xl font-bold text-white mb-1">Host Game</h3>
-              <p className="text-white/60 text-sm">Create a room and invite a friend</p>
+              <h3 className="text-lg sm:text-xl font-bold text-white mb-1">Host Game</h3>
+              <p className="text-white/60 text-xs sm:text-sm">Create a room and invite a friend</p>
             </div>
           </button>
 
           <button
             onClick={() => setMode('join-input')}
             className={cn(
-              "group flex flex-col items-center gap-4 p-8 rounded-xl",
+              "flex-1 group flex flex-col items-center gap-3 sm:gap-4 p-6 sm:p-8 rounded-xl",
               "bg-gradient-to-br from-pink-900/50 to-purple-900/50",
               "border-2 border-pink-500/50 hover:border-pink-400",
               "transition-all duration-300 hover:scale-105"
             )}
           >
-            <div className="w-20 h-20 rounded-full bg-pink-500/20 flex items-center justify-center">
-              <Gamepad2 className="w-10 h-10 text-pink-400" />
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-pink-500/20 flex items-center justify-center">
+              <Gamepad2 className="w-8 h-8 sm:w-10 sm:h-10 text-pink-400" />
             </div>
             <div className="text-center">
-              <h3 className="text-xl font-bold text-white mb-1">Join Game</h3>
-              <p className="text-white/60 text-sm">Enter a room code to play</p>
+              <h3 className="text-lg sm:text-xl font-bold text-white mb-1">Join Game</h3>
+              <p className="text-white/60 text-xs sm:text-sm">Enter a room code to play</p>
             </div>
           </button>
         </div>

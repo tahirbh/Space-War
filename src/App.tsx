@@ -89,7 +89,7 @@ function App() {
         case 'n':
           setInput2({ shoot: true });
           break;
-        case 'b':
+        case ',':
           setInput2({ bomb: true });
           break;
       }
@@ -138,7 +138,7 @@ function App() {
         case 'n':
           setInput2({ shoot: false });
           break;
-        case 'b':
+        case ',':
           setInput2({ bomb: false });
           break;
       }
@@ -305,18 +305,18 @@ function App() {
           </div>
         </div>
 
-        <div className="relative z-10 flex flex-col items-center gap-6">
-          <div className="w-16 h-16 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mb-4" />
-          <h1 className="text-3xl md:text-5xl font-black text-cyan-400 tracking-[0.3em] uppercase animate-pulse"
+        <div className="relative z-10 flex flex-col items-center gap-6 px-4 text-center">
+          <div className="w-12 h-12 md:w-16 md:h-16 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mb-4" />
+          <h1 className="text-2xl sm:text-3xl md:text-5xl font-black text-cyan-400 tracking-[0.1em] sm:tracking-[0.3em] uppercase animate-pulse"
             style={{ fontFamily: 'Orbitron, sans-serif' }}>
             Establishing Transmission
           </h1>
-          <p className="text-white/40 font-mono text-sm tracking-widest group-hover:text-cyan-400/60 transition-colors">
+          <p className="text-white/40 font-mono text-xs sm:text-sm tracking-widest group-hover:text-cyan-400/60 transition-colors">
             - CLICK TO INITIALIZE NEURAL LINK -
           </p>
         </div>
 
-        <div className="absolute bottom-10 left-0 right-0 text-center text-[10px] text-white/20 font-mono tracking-widest uppercase">
+        <div className="absolute bottom-6 md:bottom-10 left-0 right-0 text-center text-[8px] sm:text-[10px] text-white/20 font-mono tracking-widest uppercase">
           Neural-Net Alpha Blade Engine v4.0.2
         </div>
       </div>
@@ -500,13 +500,13 @@ function App() {
       </div>
 
       {/* Instructions */}
-      <div className="absolute bottom-2 left-0 right-0 z-10 text-white/50 text-sm text-center flex flex-wrap items-center justify-center gap-4 md:gap-8 pointer-events-none">
+      <div className="absolute bottom-16 sm:bottom-2 left-0 right-0 z-10 text-white/40 text-[10px] sm:text-sm text-center flex flex-wrap items-center justify-center gap-x-4 gap-y-1 md:gap-8 pointer-events-none px-4">
         <span><span className="text-cyan-400 font-bold">P1:</span> WASD + Z/B</span>
-        <span><span className="text-pink-400 font-bold">P2:</span> IJKL + N/B</span>
-        <span><span className="text-yellow-400 font-bold">Pause:</span> Enter</span>
-        <span><span className="text-green-400 font-bold">Mute:</span> M</span>
+        <span className="hidden xs:inline"><span className="text-pink-400 font-bold">P2:</span> IJKL + N/,</span>
+        <span className="hidden xs:inline"><span className="text-yellow-400 font-bold">Pause:</span> Enter</span>
+        <span className="hidden xs:inline"><span className="text-green-400 font-bold">Mute:</span> M</span>
         <span className="hidden md:inline text-white/30">|</span>
-        <span className="text-cyan-400/80">Hold FIRE for continuous beam!</span>
+        <span className="text-cyan-400/60 font-medium">Rapid-fire beams enabled!</span>
       </div>
 
       <Toaster />

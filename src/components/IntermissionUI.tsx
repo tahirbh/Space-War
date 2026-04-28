@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { MatrixDialogue } from './MatrixDialogue';
 import { ShopMenu } from './ShopMenu';
 import { useGameStore } from '@/store/gameStore';
@@ -11,6 +11,10 @@ interface IntermissionUIProps {
 export function IntermissionUI({ stage, onFinish }: IntermissionUIProps) {
   const [phase, setPhase] = useState<'dialogue' | 'shop'>('dialogue');
   const { playerName } = useGameStore();
+
+  const handleDialogueComplete = useCallback(() => {
+    setPhase('shop');
+  }, []);
 
   const dialogue = [
     { 
@@ -62,7 +66,7 @@ export function IntermissionUI({ stage, onFinish }: IntermissionUIProps) {
 
       <MatrixDialogue 
         messages={dialogue} 
-        onComplete={() => setPhase('shop')} 
+        onComplete={handleDialogueComplete} 
       />
     </div>
   );

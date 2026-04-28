@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useGameStore } from '@/store/gameStore';
 import { cn } from '@/lib/utils';
-import { Play, Users, Settings, BookOpen, Trophy, ChevronRight, ChevronLeft, RotateCcw, Home } from 'lucide-react';
+import { Play, Users, Settings, BookOpen, Trophy, ChevronRight, ChevronLeft, Home } from 'lucide-react';
 import {
   Dialog,
   DialogContent,

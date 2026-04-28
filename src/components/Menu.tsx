@@ -178,7 +178,7 @@ export function Menu({ onStartGame, onJoinGame, soundManager }: MenuProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0A0A15] flex flex-col items-center justify-center relative overflow-hidden">
+    <div className="h-screen h-[100svh] bg-[#0A0A15] flex flex-col items-center justify-center relative overflow-hidden select-none">
       {/* Animated Background Stars */}
       <div className="absolute inset-0">
         {Array.from({ length: 100 }).map((_, i) => (
@@ -204,16 +204,16 @@ export function Menu({ onStartGame, onJoinGame, soundManager }: MenuProps) {
       />
 
       {/* Main Content */}
-      <div className="relative z-10 flex flex-col items-center gap-4 sm:gap-8 w-full max-w-4xl px-4 text-center">
+      <div className="relative z-10 flex flex-col items-center gap-2 sm:gap-8 w-full max-w-4xl px-4 text-center">
         {/* Logo (Stays fixed) */}
-        <div className="mb-4 sm:mb-8">
-          <h1 className="text-4xl sm:text-6xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 tracking-tighter"
+        <div className="mb-2 sm:mb-8 transition-all duration-500">
+          <h1 className="text-3xl sm:text-6xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 tracking-tighter"
               style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 40px rgba(0, 212, 255, 0.5)' }}>
             STARSHIPS WAR
           </h1>
-          <div className="flex items-center justify-center gap-4 mt-2">
+          <div className="flex items-center justify-center gap-4 mt-1 sm:mt-2">
             <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent to-cyan-500/50" />
-            <p className="text-sm sm:text-base md:text-lg text-cyan-400 tracking-[0.5em] uppercase"
+            <p className="text-[10px] sm:text-base md:text-lg text-cyan-400 tracking-[0.3em] sm:tracking-[0.5em] uppercase font-bold"
                style={{ fontFamily: 'Orbitron, sans-serif' }}>
               Alpha
             </p>
@@ -221,26 +221,26 @@ export function Menu({ onStartGame, onJoinGame, soundManager }: MenuProps) {
           </div>
         </div>
 
-        {/* High Score (Fixed) */}
-        <div className="flex items-center gap-3 bg-black/50 px-6 py-2 rounded-full border border-cyan-500/30 mb-4 scale-90 sm:scale-100">
-          <Trophy className="w-4 h-4 text-yellow-400" />
-          <span className="text-white/60 text-[10px] uppercase tracking-wider">High Score</span>
-          <span className="text-xl font-mono text-yellow-400">
+        {/* High Score (Fixed) - More compact on small screens */}
+        <div className="flex items-center gap-2 sm:gap-3 bg-black/50 px-4 sm:px-6 py-1 sm:py-2 rounded-full border border-cyan-500/30 mb-2 sm:mb-4 scale-75 sm:scale-100">
+          <Trophy className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-400" />
+          <span className="text-white/60 text-[8px] sm:text-[10px] uppercase tracking-wider">High Score</span>
+          <span className="text-lg sm:text-xl font-mono text-yellow-400">
             {highScore.toString().padStart(8, '0')}
           </span>
         </div>
 
-        {/* Paginated Content Area */}
-        <div className="relative w-full max-w-[320px] sm:max-w-md h-[240px] sm:h-[280px] overflow-hidden">
+        {/* Paginated Content Area - Restricted height on short screens */}
+        <div className="relative w-full max-w-[320px] sm:max-w-md h-[180px] sm:h-[280px] overflow-hidden">
           <div 
             className="flex transition-transform duration-500 ease-in-out h-full"
             style={{ transform: `translateX(-${currentPage * 100}%)` }}
           >
             {menuPages.map((page, i) => (
-              <div key={i} className="min-w-full px-4 flex flex-col items-center justify-center gap-6">
+              <div key={i} className="min-w-full px-4 flex flex-col items-center justify-center gap-2 sm:gap-6">
                 <div className="text-center">
-                  <h3 className="text-xs text-cyan-400/60 font-mono tracking-[0.3em] uppercase mb-1">{page.subtitle}</h3>
-                  <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-widest uppercase">{page.title}</h2>
+                  <h3 className="text-[10px] text-cyan-400/60 font-mono tracking-[0.2em] uppercase mb-0.5 sm:mb-1">{page.subtitle}</h3>
+                  <h2 className="text-xl sm:text-3xl font-bold text-white tracking-widest uppercase">{page.title}</h2>
                 </div>
                 {page.content}
               </div>
@@ -249,7 +249,7 @@ export function Menu({ onStartGame, onJoinGame, soundManager }: MenuProps) {
         </div>
 
         {/* Pagination Dots */}
-        <div className="flex gap-2 mt-4">
+        <div className="flex gap-2 mt-2 sm:mt-4">
           {menuPages.map((_, i) => (
             <div 
               key={i}
@@ -262,31 +262,31 @@ export function Menu({ onStartGame, onJoinGame, soundManager }: MenuProps) {
         </div>
       </div>
 
-      {/* Navigation Buttons (Corners) */}
-      <div className="fixed bottom-6 left-6 z-20">
+      {/* Navigation Buttons (Corners) - Adjusted for small screens */}
+      <div className="fixed bottom-4 sm:bottom-6 left-4 sm:left-6 z-20">
         {currentPage > 0 && (
           <button
             onClick={handlePrevPage}
-            className="group flex flex-col items-center gap-2 p-4 text-white/40 hover:text-white transition-all"
+            className="group flex flex-col items-center gap-1 sm:gap-2 p-2 sm:p-4 text-white/40 hover:text-white transition-all"
           >
-            <span className="text-[10px] font-mono tracking-[0.2em] uppercase opacity-0 group-hover:opacity-100 transition-opacity">Previous Deck</span>
-            <div className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center group-hover:border-cyan-400 group-hover:scale-110 transition-all">
-              <span className="text-2xl">←</span>
+            <span className="text-[8px] sm:text-[10px] font-mono tracking-[0.2em] uppercase opacity-0 group-hover:opacity-100 transition-opacity hidden xs:inline">Prev</span>
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-white/20 flex items-center justify-center group-hover:border-cyan-400 group-hover:scale-110 transition-all">
+              <span className="text-xl sm:text-2xl">←</span>
             </div>
           </button>
         )}
       </div>
 
-      <div className="fixed bottom-6 right-6 z-20">
+      <div className="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 z-20">
         <button
           onClick={handleNextPage}
-          className="group flex flex-col items-center gap-2 p-4 text-white/40 hover:text-white transition-all"
+          className="group flex flex-col items-center gap-1 sm:gap-2 p-2 sm:p-4 text-white/40 hover:text-white transition-all"
         >
-          <span className="text-[10px] font-mono tracking-[0.2em] uppercase opacity-0 group-hover:opacity-100 transition-opacity">
-            {currentPage === totalPages - 1 ? 'Back to Combat' : 'Next Deck'}
+          <span className="text-[8px] sm:text-[10px] font-mono tracking-[0.2em] uppercase opacity-0 group-hover:opacity-100 transition-opacity hidden xs:inline">
+            {currentPage === totalPages - 1 ? 'Reset' : 'Next'}
           </span>
-          <div className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center group-hover:border-cyan-400 group-hover:scale-110 transition-all shadow-[0_0_20px_rgba(0,212,255,0)] group-hover:shadow-[0_0_20px_rgba(0,212,255,0.3)]">
-            <span className="text-2xl">{currentPage === totalPages - 1 ? '↺' : '→'}</span>
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-white/20 flex items-center justify-center group-hover:border-cyan-400 group-hover:scale-110 transition-all shadow-[0_0_20px_rgba(0,212,255,0)] group-hover:shadow-[0_0_20px_rgba(0,212,255,0.3)]">
+            <span className="text-xl sm:text-2xl">{currentPage === totalPages - 1 ? '↺' : '→'}</span>
           </div>
         </button>
       </div>

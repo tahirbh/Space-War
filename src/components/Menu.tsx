@@ -77,34 +77,34 @@ export function Menu({ onStartGame, onJoinGame, soundManager }: MenuProps) {
       title: 'Combat Deck',
       subtitle: 'MISSION DEPLOYMENT',
       content: (
-        <div className="flex flex-col gap-4 w-full">
+        <div className="flex flex-row sm:flex-col gap-2 sm:gap-4 w-full justify-center">
           <button
             onClick={onStartGame}
             className={cn(
-              "group relative flex items-center justify-center gap-3 px-8 py-4",
+              "group relative flex-1 sm:flex-none flex items-center justify-center gap-2 sm:gap-3 px-4 sm:px-8 py-3 sm:py-4",
               "bg-gradient-to-r from-cyan-600 to-blue-600 rounded-lg",
-              "text-white font-bold text-lg uppercase tracking-wider",
-              "transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/50",
-              "border-2 border-cyan-400/50"
+              "text-white font-bold text-sm sm:text-lg uppercase tracking-wider",
+              "transition-all duration-300 hover:scale-105 active:scale-95",
+              "border border-cyan-400/50"
             )}
           >
-            <Play className="w-6 h-6 group-hover:animate-pulse" />
-            Start Game
+            <Play className="w-4 h-4 sm:w-6 sm:h-6 group-hover:animate-pulse" />
+            <span className="truncate">Start</span>
             <div className="absolute inset-0 bg-white/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity" />
           </button>
 
           <button
             onClick={onJoinGame}
             className={cn(
-              "group relative flex items-center justify-center gap-3 px-8 py-4",
+              "group relative flex-1 sm:flex-none flex items-center justify-center gap-2 sm:gap-3 px-4 sm:px-8 py-3 sm:py-4",
               "bg-gradient-to-r from-pink-600 to-purple-600 rounded-lg",
-              "text-white font-bold text-lg uppercase tracking-wider",
-              "transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-pink-500/50",
-              "border-2 border-pink-400/50"
+              "text-white font-bold text-sm sm:text-lg uppercase tracking-wider",
+              "transition-all duration-300 hover:scale-105 active:scale-95",
+              "border border-pink-400/50"
             )}
           >
-            <Users className="w-6 h-6 group-hover:animate-pulse" />
-            Multiplayer
+            <Users className="w-4 h-4 sm:w-6 sm:h-6 group-hover:animate-pulse" />
+            <span className="truncate">Lobby</span>
             <div className="absolute inset-0 bg-white/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity" />
           </button>
         </div>
@@ -114,21 +114,21 @@ export function Menu({ onStartGame, onJoinGame, soundManager }: MenuProps) {
       title: 'Technical Deck',
       subtitle: 'SYSTEM CONFIGURATION',
       content: (
-        <div className="flex flex-col gap-4 w-full">
+        <div className="flex flex-row sm:flex-col gap-2 sm:gap-4 w-full justify-center">
           <button
             onClick={() => {
               soundManager?.playSound('menuNavigate');
               setShowHowToPlay(true);
             }}
             className={cn(
-              "flex items-center justify-center gap-2 px-6 py-4",
-              "bg-white/10 rounded-lg text-white font-medium text-lg",
-              "transition-all duration-300 hover:bg-white/20 hover:text-white",
+              "flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-3 sm:py-4",
+              "bg-white/10 rounded-lg text-white font-medium text-xs sm:text-lg",
+              "transition-all duration-300 hover:bg-white/20 active:scale-95",
               "border border-white/20"
             )}
           >
-            <BookOpen className="w-5 h-5" />
-            How to Play
+            <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />
+            Manual
           </button>
 
           <button
@@ -137,14 +137,14 @@ export function Menu({ onStartGame, onJoinGame, soundManager }: MenuProps) {
               setShowSettings(true);
             }}
             className={cn(
-              "flex items-center justify-center gap-2 px-6 py-4",
-              "bg-white/10 rounded-lg text-white font-medium text-lg",
-              "transition-all duration-300 hover:bg-white/20 hover:text-white",
+              "flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-3 sm:py-4",
+              "bg-white/10 rounded-lg text-white font-medium text-xs sm:text-lg",
+              "transition-all duration-300 hover:bg-white/20 active:scale-95",
               "border border-white/20"
             )}
           >
-            <Settings className="w-5 h-5" />
-            Settings
+            <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
+            Config
           </button>
         </div>
       )
@@ -153,24 +153,24 @@ export function Menu({ onStartGame, onJoinGame, soundManager }: MenuProps) {
       title: 'Archives Deck',
       subtitle: 'INTEL & CREDITS',
       content: (
-        <div className="flex flex-col gap-3 w-full">
+        <div className="flex flex-row sm:flex-col gap-2 sm:gap-3 w-full justify-center">
           <button 
             onClick={() => setShowLegal({ open: true, type: 'privacy' })}
-            className="px-6 py-3 bg-white/5 border border-white/10 rounded-lg text-white/80 hover:bg-white/10 hover:text-cyan-400 transition-all text-sm uppercase tracking-widest"
+            className="flex-1 sm:flex-none px-2 py-3 bg-white/5 border border-white/10 rounded-lg text-white/80 hover:bg-white/10 text-[10px] sm:text-sm uppercase tracking-widest"
           >
-            Privacy Policy
+            Privacy
           </button>
           <button 
             onClick={() => setShowLegal({ open: true, type: 'terms' })}
-            className="px-6 py-3 bg-white/5 border border-white/10 rounded-lg text-white/80 hover:bg-white/10 hover:text-pink-400 transition-all text-sm uppercase tracking-widest"
+            className="flex-1 sm:flex-none px-2 py-3 bg-white/5 border border-white/10 rounded-lg text-white/80 hover:bg-white/10 text-[10px] sm:text-sm uppercase tracking-widest"
           >
-            Terms of Service
+            Terms
           </button>
           <button 
             onClick={() => setShowCredits(true)}
-            className="px-6 py-3 bg-white/5 border border-white/10 rounded-lg text-white/80 hover:bg-white/10 hover:text-yellow-400 transition-all text-sm uppercase tracking-widest"
+            className="flex-1 sm:flex-none px-2 py-3 bg-white/5 border border-white/10 rounded-lg text-white/80 hover:bg-white/10 text-[10px] sm:text-sm uppercase tracking-widest"
           >
-            View Credits
+            Credits
           </button>
         </div>
       )
@@ -204,16 +204,16 @@ export function Menu({ onStartGame, onJoinGame, soundManager }: MenuProps) {
       />
 
       {/* Main Content */}
-      <div className="relative z-10 flex flex-col items-center gap-2 sm:gap-8 w-full max-w-4xl px-4 text-center">
+      <div className="relative z-10 flex flex-col items-center gap-[1vh] sm:gap-8 w-full max-w-4xl px-4 text-center">
         {/* Logo (Stays fixed) */}
-        <div className="mb-2 sm:mb-8 transition-all duration-500">
-          <h1 className="text-3xl sm:text-6xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 tracking-tighter"
+        <div className="mb-[1vh] sm:mb-8 transition-all duration-500 transform origin-top scale-75 sm:scale-100">
+          <h1 className="text-4xl sm:text-6xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 tracking-tighter"
               style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 40px rgba(0, 212, 255, 0.5)' }}>
             STARSHIPS WAR
           </h1>
-          <div className="flex items-center justify-center gap-4 mt-1 sm:mt-2">
+          <div className="flex items-center justify-center gap-4 mt-1">
             <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent to-cyan-500/50" />
-            <p className="text-[10px] sm:text-base md:text-lg text-cyan-400 tracking-[0.3em] sm:tracking-[0.5em] uppercase font-bold"
+            <p className="text-[12px] sm:text-base md:text-lg text-cyan-400 tracking-[0.3em] sm:tracking-[0.5em] uppercase font-bold"
                style={{ fontFamily: 'Orbitron, sans-serif' }}>
               Alpha
             </p>
@@ -221,17 +221,17 @@ export function Menu({ onStartGame, onJoinGame, soundManager }: MenuProps) {
           </div>
         </div>
 
-        {/* High Score (Fixed) - More compact on small screens */}
-        <div className="flex items-center gap-2 sm:gap-3 bg-black/50 px-4 sm:px-6 py-1 sm:py-2 rounded-full border border-cyan-500/30 mb-2 sm:mb-4 scale-75 sm:scale-100">
-          <Trophy className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-400" />
-          <span className="text-white/60 text-[8px] sm:text-[10px] uppercase tracking-wider">High Score</span>
-          <span className="text-lg sm:text-xl font-mono text-yellow-400">
+        {/* High Score (Fixed) - Hidden on very short screens to save space */}
+        <div className="hidden sm:flex items-center gap-3 bg-black/50 px-6 py-2 rounded-full border border-cyan-500/30 mb-4">
+          <Trophy className="w-4 h-4 text-yellow-400" />
+          <span className="text-white/60 text-[10px] uppercase tracking-wider">High Score</span>
+          <span className="text-xl font-mono text-yellow-400">
             {highScore.toString().padStart(8, '0')}
           </span>
         </div>
 
-        {/* Paginated Content Area - Restricted height on short screens */}
-        <div className="relative w-full max-w-[320px] sm:max-w-md h-[180px] sm:h-[280px] overflow-hidden">
+        {/* Paginated Content Area - Dynamic height */}
+        <div className="relative w-full max-w-[350px] sm:max-w-md h-[160px] sm:h-[280px] overflow-hidden">
           <div 
             className="flex transition-transform duration-500 ease-in-out h-full"
             style={{ transform: `translateX(-${currentPage * 100}%)` }}

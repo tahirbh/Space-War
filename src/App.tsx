@@ -10,10 +10,12 @@ import { toast } from 'sonner';
 import { Pause, Play, RotateCcw, LogOut, Trophy, Volume2, VolumeX } from 'lucide-react';
 import { IntermissionUI } from '@/components/IntermissionUI';
 import { ShopMenu } from '@/components/ShopMenu';
+import { OrientationOverlay } from '@/components/OrientationOverlay';
+import { IntroStory } from '@/components/IntroStory';
 
 import { SoundManager } from '@/engine/SoundManager';
 
-type AppState = 'start' | 'menu' | 'multiplayer' | 'playing' | 'paused' | 'gameover' | 'victory' | 'boss-warning' | 'intermission' | 'shop';
+type AppState = 'start' | 'menu' | 'intro' | 'multiplayer' | 'playing' | 'paused' | 'gameover' | 'victory' | 'boss-warning' | 'intermission' | 'shop';
 
 function App() {
   const soundManagerRefStatic = useRef<SoundManager | null>(null);
@@ -179,6 +181,13 @@ function App() {
   };
 
   const startGame = useCallback(() => {
+    setAppState('intro');
+    if (soundManagerRefStatic.current) {
+      soundManagerRefStatic.current.playSound('menuSelect');
+    }
+  }, []);
+
+  const startMission = useCallback(() => {
     setAppState('playing');
     if (soundManagerRefStatic.current) {
       soundManagerRefStatic.current.playSound('gameStart');
@@ -378,6 +387,15 @@ function App() {
     );
   }
 
+  if (appState === 'intro') {
+    return (
+      <div className="min-h-screen bg-[#0A0A15]">
+        <IntroStory onComplete={startMission} />
+        <Toaster />
+      </div>
+    );
+  }
+
   if (appState === 'menu') {
     return (
       <div className="min-h-screen bg-[#0A0A15]">
@@ -565,6 +583,7 @@ function App() {
       </div>
 
       <Toaster />
+      <OrientationOverlay />
     </div>
   );
 }

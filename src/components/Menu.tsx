@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useGameStore } from '@/store/gameStore';
 import { cn } from '@/lib/utils';
-import { Play, Users, Settings, BookOpen, Trophy, Zap, Rocket, Target } from 'lucide-react';
+import { Play, Users, Settings, BookOpen, Trophy } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -59,6 +59,124 @@ export function Menu({ onStartGame, onJoinGame, soundManager }: MenuProps) {
     setShowSettings(false);
   };
 
+  const [currentPage, setCurrentPage] = useState(0);
+  const totalPages = 3;
+
+  const handleNextPage = () => {
+    soundManager?.playSound('menuNavigate');
+    setCurrentPage((prev) => (prev + 1) % totalPages);
+  };
+
+  const handlePrevPage = () => {
+    soundManager?.playSound('menuNavigate');
+    setCurrentPage((prev) => (prev - 1 + totalPages) % totalPages);
+  };
+
+  const menuPages = [
+    {
+      title: 'Combat Deck',
+      subtitle: 'MISSION DEPLOYMENT',
+      content: (
+        <div className="flex flex-col gap-4 w-full">
+          <button
+            onClick={onStartGame}
+            className={cn(
+              "group relative flex items-center justify-center gap-3 px-8 py-4",
+              "bg-gradient-to-r from-cyan-600 to-blue-600 rounded-lg",
+              "text-white font-bold text-lg uppercase tracking-wider",
+              "transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/50",
+              "border-2 border-cyan-400/50"
+            )}
+          >
+            <Play className="w-6 h-6 group-hover:animate-pulse" />
+            Start Game
+            <div className="absolute inset-0 bg-white/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity" />
+          </button>
+
+          <button
+            onClick={onJoinGame}
+            className={cn(
+              "group relative flex items-center justify-center gap-3 px-8 py-4",
+              "bg-gradient-to-r from-pink-600 to-purple-600 rounded-lg",
+              "text-white font-bold text-lg uppercase tracking-wider",
+              "transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-pink-500/50",
+              "border-2 border-pink-400/50"
+            )}
+          >
+            <Users className="w-6 h-6 group-hover:animate-pulse" />
+            Multiplayer
+            <div className="absolute inset-0 bg-white/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity" />
+          </button>
+        </div>
+      )
+    },
+    {
+      title: 'Technical Deck',
+      subtitle: 'SYSTEM CONFIGURATION',
+      content: (
+        <div className="flex flex-col gap-4 w-full">
+          <button
+            onClick={() => {
+              soundManager?.playSound('menuNavigate');
+              setShowHowToPlay(true);
+            }}
+            className={cn(
+              "flex items-center justify-center gap-2 px-6 py-4",
+              "bg-white/10 rounded-lg text-white font-medium text-lg",
+              "transition-all duration-300 hover:bg-white/20 hover:text-white",
+              "border border-white/20"
+            )}
+          >
+            <BookOpen className="w-5 h-5" />
+            How to Play
+          </button>
+
+          <button
+            onClick={() => {
+              soundManager?.playSound('menuNavigate');
+              setShowSettings(true);
+            }}
+            className={cn(
+              "flex items-center justify-center gap-2 px-6 py-4",
+              "bg-white/10 rounded-lg text-white font-medium text-lg",
+              "transition-all duration-300 hover:bg-white/20 hover:text-white",
+              "border border-white/20"
+            )}
+          >
+            <Settings className="w-5 h-5" />
+            Settings
+          </button>
+        </div>
+      )
+    },
+    {
+      title: 'Archives Deck',
+      subtitle: 'INTEL & CREDITS',
+      content: (
+        <div className="flex flex-col gap-3 w-full">
+          <button 
+            onClick={() => setShowLegal({ open: true, type: 'privacy' })}
+            className="px-6 py-3 bg-white/5 border border-white/10 rounded-lg text-white/80 hover:bg-white/10 hover:text-cyan-400 transition-all text-sm uppercase tracking-widest"
+          >
+            Privacy Policy
+          </button>
+          <button 
+            onClick={() => setShowLegal({ open: true, type: 'terms' })}
+            className="px-6 py-3 bg-white/5 border border-white/10 rounded-lg text-white/80 hover:bg-white/10 hover:text-pink-400 transition-all text-sm uppercase tracking-widest"
+          >
+            Terms of Service
+          </button>
+          <button 
+            onClick={() => setShowCredits(true)}
+            className="px-6 py-3 bg-white/5 border border-white/10 rounded-lg text-white/80 hover:bg-white/10 hover:text-yellow-400 transition-all text-sm uppercase tracking-widest"
+          >
+            View Credits
+          </button>
+        </div>
+      )
+    }
+  ];
+
   return (
     <div className="min-h-screen bg-[#0A0A15] flex flex-col items-center justify-center relative overflow-hidden">
       {/* Animated Background Stars */}
@@ -86,131 +204,91 @@ export function Menu({ onStartGame, onJoinGame, soundManager }: MenuProps) {
       />
 
       {/* Main Content */}
-      <div className="relative z-10 flex flex-col items-center gap-8">
-        {/* Logo */}
-        <div className="text-center px-4">
-          <h1 className="text-5xl sm:text-7xl md:text-9xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 tracking-tighter"
+      <div className="relative z-10 flex flex-col items-center gap-4 sm:gap-8 w-full max-w-4xl px-4 text-center">
+        {/* Logo (Stays fixed) */}
+        <div className="mb-4 sm:mb-8">
+          <h1 className="text-4xl sm:text-6xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 tracking-tighter"
               style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 40px rgba(0, 212, 255, 0.5)' }}>
             STARSHIPS WAR
           </h1>
-          <p className="text-lg sm:text-xl md:text-2xl text-cyan-400 tracking-[0.3em] sm:tracking-[0.5em] mt-2 uppercase"
-             style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 20px rgba(0, 212, 255, 0.5)' }}>
-            Alpha
-          </p>
+          <div className="flex items-center justify-center gap-4 mt-2">
+            <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent to-cyan-500/50" />
+            <p className="text-sm sm:text-base md:text-lg text-cyan-400 tracking-[0.5em] uppercase"
+               style={{ fontFamily: 'Orbitron, sans-serif' }}>
+              Alpha
+            </p>
+            <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent to-cyan-500/50" />
+          </div>
         </div>
 
-        {/* High Score */}
-        <div className="flex items-center gap-3 bg-black/50 px-6 py-3 rounded-full border border-cyan-500/30">
-          <Trophy className="w-5 h-5 text-yellow-400" />
-          <span className="text-white/60 text-sm uppercase tracking-wider">High Score</span>
-          <span className="text-2xl font-mono text-yellow-400">
+        {/* High Score (Fixed) */}
+        <div className="flex items-center gap-3 bg-black/50 px-6 py-2 rounded-full border border-cyan-500/30 mb-4 scale-90 sm:scale-100">
+          <Trophy className="w-4 h-4 text-yellow-400" />
+          <span className="text-white/60 text-[10px] uppercase tracking-wider">High Score</span>
+          <span className="text-xl font-mono text-yellow-400">
             {highScore.toString().padStart(8, '0')}
           </span>
         </div>
 
-        {/* Menu Buttons */}
-        <div className="flex flex-col gap-4 w-full max-w-[280px] sm:max-w-72 px-4">
-          <button
-            onClick={onStartGame}
-            className={cn(
-              "group relative flex items-center justify-center gap-3 px-6 sm:px-8 py-3 sm:py-4",
-              "bg-gradient-to-r from-cyan-600 to-blue-600 rounded-lg",
-              "text-white font-bold text-base sm:text-lg uppercase tracking-wider",
-              "transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/50",
-              "border-2 border-cyan-400/50"
-            )}
+        {/* Paginated Content Area */}
+        <div className="relative w-full max-w-[320px] sm:max-w-md h-[240px] sm:h-[280px] overflow-hidden">
+          <div 
+            className="flex transition-transform duration-500 ease-in-out h-full"
+            style={{ transform: `translateX(-${currentPage * 100}%)` }}
           >
-            <Play className="w-5 h-5 sm:w-6 sm:h-6 group-hover:animate-pulse" />
-            Start Game
-            <div className="absolute inset-0 bg-white/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity" />
-          </button>
+            {menuPages.map((page, i) => (
+              <div key={i} className="min-w-full px-4 flex flex-col items-center justify-center gap-6">
+                <div className="text-center">
+                  <h3 className="text-xs text-cyan-400/60 font-mono tracking-[0.3em] uppercase mb-1">{page.subtitle}</h3>
+                  <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-widest uppercase">{page.title}</h2>
+                </div>
+                {page.content}
+              </div>
+            ))}
+          </div>
+        </div>
 
-          <button
-            onClick={onJoinGame}
-            className={cn(
-              "group relative flex items-center justify-center gap-3 px-6 sm:px-8 py-3 sm:py-4",
-              "bg-gradient-to-r from-pink-600 to-purple-600 rounded-lg",
-              "text-white font-bold text-base sm:text-lg uppercase tracking-wider",
-              "transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-pink-500/50",
-              "border-2 border-pink-400/50"
-            )}
-          >
-            <Users className="w-5 h-5 sm:w-6 sm:h-6 group-hover:animate-pulse" />
-            Multiplayer
-            <div className="absolute inset-0 bg-white/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity" />
-          </button>
-
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-            <button
-              onClick={() => {
-                soundManager?.playSound('menuNavigate');
-                setShowHowToPlay(true);
-              }}
+        {/* Pagination Dots */}
+        <div className="flex gap-2 mt-4">
+          {menuPages.map((_, i) => (
+            <div 
+              key={i}
               className={cn(
-                "flex-1 flex items-center justify-center gap-2 px-4 py-3",
-                "bg-white/10 rounded-lg text-white/80 font-medium text-sm sm:text-base",
-                "transition-all duration-300 hover:bg-white/20 hover:text-white",
-                "border border-white/20"
+                "h-1 transition-all duration-300 rounded-full",
+                currentPage === i ? "w-8 bg-cyan-400" : "w-2 bg-white/20"
               )}
-            >
-              <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />
-              How to Play
-            </button>
+            />
+          ))}
+        </div>
+      </div>
 
-            <button
-              onClick={() => {
-                soundManager?.playSound('menuNavigate');
-                setShowSettings(true);
-              }}
-              className={cn(
-                "flex-1 flex items-center justify-center gap-2 px-4 py-3",
-                "bg-white/10 rounded-lg text-white/80 font-medium text-sm sm:text-base",
-                "transition-all duration-300 hover:bg-white/20 hover:text-white",
-                "border border-white/20"
-              )}
-            >
-              <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
-              Settings
-            </button>
-          </div>
-        </div>
+      {/* Navigation Buttons (Corners) */}
+      <div className="fixed bottom-6 left-6 z-20">
+        {currentPage > 0 && (
+          <button
+            onClick={handlePrevPage}
+            className="group flex flex-col items-center gap-2 p-4 text-white/40 hover:text-white transition-all"
+          >
+            <span className="text-[10px] font-mono tracking-[0.2em] uppercase opacity-0 group-hover:opacity-100 transition-opacity">Previous Deck</span>
+            <div className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center group-hover:border-cyan-400 group-hover:scale-110 transition-all">
+              <span className="text-2xl">←</span>
+            </div>
+          </button>
+        )}
+      </div>
 
-        {/* Decorative Elements */}
-        <div className="flex items-center gap-4 sm:gap-8 mt-4 sm:mt-8 px-4 overflow-x-auto no-scrollbar">
-          <div className="flex flex-col items-center gap-1 sm:gap-2 text-cyan-400/60 min-w-[60px]">
-            <Rocket className="w-6 h-6 sm:w-8 sm:h-8" />
-            <span className="text-[10px] sm:text-xs uppercase tracking-wider">Shoot</span>
+      <div className="fixed bottom-6 right-6 z-20">
+        <button
+          onClick={handleNextPage}
+          className="group flex flex-col items-center gap-2 p-4 text-white/40 hover:text-white transition-all"
+        >
+          <span className="text-[10px] font-mono tracking-[0.2em] uppercase opacity-0 group-hover:opacity-100 transition-opacity">
+            {currentPage === totalPages - 1 ? 'Back to Combat' : 'Next Deck'}
+          </span>
+          <div className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center group-hover:border-cyan-400 group-hover:scale-110 transition-all shadow-[0_0_20px_rgba(0,212,255,0)] group-hover:shadow-[0_0_20px_rgba(0,212,255,0.3)]">
+            <span className="text-2xl">{currentPage === totalPages - 1 ? '↺' : '→'}</span>
           </div>
-          <div className="flex flex-col items-center gap-1 sm:gap-2 text-pink-400/60 min-w-[60px]">
-            <Zap className="w-6 h-6 sm:w-8 sm:h-8" />
-            <span className="text-[10px] sm:text-xs uppercase tracking-wider">Dodge</span>
-          </div>
-          <div className="flex flex-col items-center gap-1 sm:gap-2 text-yellow-400/60 min-w-[60px]">
-            <Target className="w-6 h-6 sm:w-8 sm:h-8" />
-            <span className="text-[10px] sm:text-xs uppercase tracking-wider">Destroy</span>
-          </div>
-        </div>
-        {/* Footer Links */}
-        <div className="absolute bottom-6 flex gap-6 text-[10px] uppercase tracking-[0.2em] text-white/20">
-          <button 
-            onClick={() => setShowLegal({ open: true, type: 'privacy' })}
-            className="hover:text-cyan-400 transition-colors"
-          >
-            Privacy
-          </button>
-          <button 
-            onClick={() => setShowLegal({ open: true, type: 'terms' })}
-            className="hover:text-pink-400 transition-colors"
-          >
-            Terms
-          </button>
-          <button 
-            onClick={() => setShowCredits(true)}
-            className="hover:text-yellow-400 transition-colors"
-          >
-            Credits
-          </button>
-        </div>
+        </button>
       </div>
 
       <LegalDialog 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useGameStore } from '@/store/gameStore';
 import { cn } from '@/lib/utils';
 import { Play, Users, Settings, BookOpen, Trophy, Zap, Rocket, Target } from 'lucide-react';
@@ -9,6 +9,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Slider } from '@/components/ui/slider';
+import { LegalDialog } from './LegalDialog';
+import { CreditsDialog } from './CreditsDialog';
 
 interface MenuProps {
   onStartGame: () => void;
@@ -20,12 +23,39 @@ export function Menu({ onStartGame, onJoinGame, soundManager }: MenuProps) {
   const { highScore, playerName, setPlayerName } = useGameStore();
   const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const { selectedWeapon, setSelectedWeapon, selectedBackground, setSelectedBackground } = useGameStore();
+  const [showLegal, setShowLegal] = useState<{ open: boolean; type: 'privacy' | 'terms' }>({ open: false, type: 'privacy' });
+  const [showCredits, setShowCredits] = useState(false);
+  const { 
+    selectedWeapon, setSelectedWeapon, 
+    selectedBackground, setSelectedBackground,
+    musicVolume, setMusicVolume,
+    sfxVolume, setSfxVolume 
+  } = useGameStore();
   const [nameInput, setNameInput] = useState(playerName);
+  const [tempMusicVol, setTempMusicVol] = useState(musicVolume);
+  const [tempSfxVol, setTempSfxVol] = useState(sfxVolume);
+
+  // Sync temp volumes when dialog opens
+  useEffect(() => {
+    if (showSettings) {
+      setTempMusicVol(musicVolume);
+      setTempSfxVol(sfxVolume);
+      setNameInput(playerName);
+    }
+  }, [showSettings, musicVolume, sfxVolume, playerName]);
 
   const handleSaveSettings = () => {
     soundManager?.playSound('saveSound');
     setPlayerName(nameInput || 'Player 1');
+    setMusicVolume(tempMusicVol);
+    setSfxVolume(tempSfxVol);
+    
+    // Apply immediately to sound manager
+    if (soundManager) {
+      soundManager.setMusicVolume(tempMusicVol);
+      soundManager.setSFXVolume(tempSfxVol);
+    }
+    
     setShowSettings(false);
   };
 
@@ -160,7 +190,39 @@ export function Menu({ onStartGame, onJoinGame, soundManager }: MenuProps) {
             <span className="text-[10px] sm:text-xs uppercase tracking-wider">Destroy</span>
           </div>
         </div>
+        {/* Footer Links */}
+        <div className="absolute bottom-6 flex gap-6 text-[10px] uppercase tracking-[0.2em] text-white/20">
+          <button 
+            onClick={() => setShowLegal({ open: true, type: 'privacy' })}
+            className="hover:text-cyan-400 transition-colors"
+          >
+            Privacy
+          </button>
+          <button 
+            onClick={() => setShowLegal({ open: true, type: 'terms' })}
+            className="hover:text-pink-400 transition-colors"
+          >
+            Terms
+          </button>
+          <button 
+            onClick={() => setShowCredits(true)}
+            className="hover:text-yellow-400 transition-colors"
+          >
+            Credits
+          </button>
+        </div>
       </div>
+
+      <LegalDialog 
+        open={showLegal.open} 
+        onOpenChange={(open: boolean) => setShowLegal(prev => ({ ...prev, open }))} 
+        type={showLegal.type} 
+      />
+      
+      <CreditsDialog 
+        open={showCredits} 
+        onOpenChange={setShowCredits} 
+      />
 
       {/* How to Play Dialog */}
       <Dialog open={showHowToPlay} onOpenChange={setShowHowToPlay}>
@@ -300,6 +362,36 @@ export function Menu({ onStartGame, onJoinGame, soundManager }: MenuProps) {
                     {w === 'homing' ? 'Missile' : w}
                   </button>
                 ))}
+              </div>
+            </div>
+
+            <div className="space-y-4 pt-2">
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <label className="text-white/80 text-xs sm:text-sm font-medium uppercase tracking-wider">Music Volume</label>
+                  <span className="text-cyan-400 font-mono text-xs">{Math.round(tempMusicVol * 100)}%</span>
+                </div>
+                <Slider
+                  value={[tempMusicVol * 100]}
+                  max={100}
+                  step={1}
+                  onValueChange={(val) => setTempMusicVol(val[0] / 100)}
+                  className="[&>[role=slider]]:bg-cyan-400"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <label className="text-white/80 text-xs sm:text-sm font-medium uppercase tracking-wider">SFX Volume</label>
+                  <span className="text-pink-400 font-mono text-xs">{Math.round(tempSfxVol * 100)}%</span>
+                </div>
+                <Slider
+                  value={[tempSfxVol * 100]}
+                  max={100}
+                  step={1}
+                  onValueChange={(val) => setTempSfxVol(val[0] / 100)}
+                  className="[&>[role=slider]]:bg-pink-400"
+                />
               </div>
             </div>
 

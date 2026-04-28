@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useGameStore } from '@/store/gameStore';
+import { cn } from '@/lib/utils';
 import { GameCanvas } from '@/components/GameCanvas';
 import { HUD } from '@/components/HUD';
 import { Menu } from '@/components/Menu';
@@ -275,21 +276,50 @@ function App() {
   }, [appState, player2Connected]);
 
   // Render different screens based on app state
+  const [isSystemReady, setIsSystemReady] = useState(false);
+  const [bootLog, setBootLog] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (appState === 'start') {
+      const logs = [
+        'INITIALIZING NEURAL LINK...',
+        'LOADING SHIP ASSETS...',
+        'SYNCING WEAPON SYSTEMS...',
+        'CALIBRATING SHIELD FREQUENCY...',
+        'ESTABLISHING WEBSOCKET UPLINK...',
+        'READY FOR DEPLOYMENT.'
+      ];
+      
+      let i = 0;
+      const interval = setInterval(() => {
+        if (i < logs.length) {
+          setBootLog(prev => [...prev, logs[i]]);
+          i++;
+        } else {
+          setIsSystemReady(true);
+          clearInterval(interval);
+        }
+      }, 400);
+      
+      return () => clearInterval(interval);
+    }
+  }, [appState]);
+
   if (appState === 'start') {
     return (
       <div
         className="min-h-screen bg-black flex items-center justify-center cursor-pointer overflow-hidden group"
         onClick={() => {
-          setAppState('menu');
-          // Startup mission music immediately after initialization
-          if (soundManagerRefStatic.current) {
-            soundManagerRefStatic.current.resume();
-            soundManagerRefStatic.current.startMissionMusic();
+          if (isSystemReady) {
+            setAppState('menu');
+            if (soundManagerRefStatic.current) {
+              soundManagerRefStatic.current.resume();
+              soundManagerRefStatic.current.startMissionMusic();
+            }
           }
         }}
       >
         <div className="absolute inset-0 bg-[#0A0A15]">
-          {/* Animated Background Stars */}
           <div className="absolute inset-0">
             {Array.from({ length: 50 }).map((_, i) => (
               <div
@@ -305,19 +335,44 @@ function App() {
           </div>
         </div>
 
-        <div className="relative z-10 flex flex-col items-center gap-6 px-4 text-center">
-          <div className="w-12 h-12 md:w-16 md:h-16 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mb-4" />
-          <h1 className="text-2xl sm:text-3xl md:text-5xl font-black text-cyan-400 tracking-[0.1em] sm:tracking-[0.3em] uppercase animate-pulse"
+        <div className="relative z-10 flex flex-col items-center gap-6 px-4 text-center max-w-lg">
+          {!isSystemReady ? (
+            <div className="w-12 h-12 md:w-16 md:h-16 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mb-4" />
+          ) : (
+            <div className="w-12 h-12 md:w-16 md:h-16 border-4 border-green-500 rounded-full flex items-center justify-center animate-pulse mb-4">
+              <div className="w-6 h-6 bg-green-500 rounded-full" />
+            </div>
+          )}
+          
+          <h1 className={cn(
+            "text-2xl sm:text-3xl md:text-5xl font-black tracking-[0.1em] sm:tracking-[0.3em] uppercase transition-all duration-700",
+            isSystemReady ? "text-green-400" : "text-cyan-400"
+          )}
             style={{ fontFamily: 'Orbitron, sans-serif' }}>
-            Establishing Transmission
+            {isSystemReady ? 'Link Established' : 'System Boot'}
           </h1>
-          <p className="text-white/40 font-mono text-xs sm:text-sm tracking-widest group-hover:text-cyan-400/60 transition-colors">
-            - CLICK TO INITIALIZE NEURAL LINK -
+
+          <div className="w-full bg-black/40 border border-white/10 rounded-lg p-4 font-mono text-[10px] sm:text-xs text-left space-y-1 min-h-[120px]">
+            {bootLog.map((log, i) => (
+              <div key={i} className="flex gap-2">
+                <span className="text-white/20">[{i.toString().padStart(2, '0')}]</span>
+                <span className={i === bootLog.length - 1 ? "text-cyan-400 animate-pulse" : "text-white/60"}>
+                  {log}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <p className={cn(
+            "font-mono text-xs sm:text-sm tracking-widest transition-all duration-500",
+            isSystemReady ? "text-green-400/80 animate-bounce" : "text-white/20"
+          )}>
+            {isSystemReady ? '- CLICK TO DEPLOY -' : '- CONNECTING NEURAL LINK -'}
           </p>
         </div>
 
         <div className="absolute bottom-6 md:bottom-10 left-0 right-0 text-center text-[8px] sm:text-[10px] text-white/20 font-mono tracking-widest uppercase">
-          Neural-Net Alpha Blade Engine v4.0.2
+          Neural-Net Alpha Blade Engine v4.1.0
         </div>
       </div>
     );

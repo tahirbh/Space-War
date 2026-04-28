@@ -486,6 +486,18 @@ export class SoundManager {
     this.setMuted(!this.isMuted);
     return this.isMuted;
   }
+
+  setMusicVolume(volume: number): void {
+    if (this.musicGain) {
+      this.musicGain.gain.value = volume * 0.3; // Scaling factor
+    }
+  }
+
+  setSFXVolume(volume: number): void {
+    if (this.sfxGain) {
+      this.sfxGain.gain.value = volume * 0.4; // Scaling factor
+    }
+  }
 }
 
 export default SoundManager;

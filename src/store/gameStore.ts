@@ -47,6 +47,12 @@ interface GameStore {
   selectedBackground: string;
   setSelectedBackground: (bg: string) => void;
   
+  // Settings
+  musicVolume: number;
+  setMusicVolume: (volume: number) => void;
+  sfxVolume: number;
+  setSfxVolume: (volume: number) => void;
+  
   // Input states
   input1: InputState;
   setInput1: (input: Partial<InputState>) => void;
@@ -74,6 +80,8 @@ export const useGameStore = create<GameStore>()(
       selectedWeapon: 'laser',
       selectedBackground: 'space',
       upgrades: { fireRate: 1, damage: 1, health: 1, bombs: 1 },
+      musicVolume: 0.5,
+      sfxVolume: 0.7,
       input1: { up: false, down: false, left: false, right: false, shoot: false, bomb: false },
       input2: { up: false, down: false, left: false, right: false, shoot: false, bomb: false },
 
@@ -94,6 +102,9 @@ export const useGameStore = create<GameStore>()(
       setUpgrade: (type, level) => set((state) => ({ 
         upgrades: { ...state.upgrades, [type]: level } 
       })),
+      
+      setMusicVolume: (volume) => set({ musicVolume: volume }),
+      setSfxVolume: (volume) => set({ sfxVolume: volume }),
       
       setInput1: (input) => set((state) => ({ 
         input1: { ...state.input1, ...input } 
@@ -119,6 +130,8 @@ export const useGameStore = create<GameStore>()(
         upgrades: state.upgrades,
         selectedWeapon: state.selectedWeapon,
         selectedBackground: state.selectedBackground,
+        musicVolume: state.musicVolume,
+        sfxVolume: state.sfxVolume,
       }),
     }
   )

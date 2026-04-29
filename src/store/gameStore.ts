@@ -50,9 +50,6 @@ interface GameStore {
   };
   setUpgrade: (type: 'fireRate' | 'damage' | 'health' | 'bombs', level: number) => void;
   
-  // Background selection
-  selectedBackground: string;
-  setSelectedBackground: (bg: string) => void;
   
   // Settings
   musicVolume: number;
@@ -85,7 +82,6 @@ export const useGameStore = create<GameStore>()(
       stage: 1,
       coins: 0,
       selectedWeapon: 'laser',
-      selectedBackground: 'space',
       upgrades: { fireRate: 1, damage: 1, health: 1, bombs: 1 },
       musicVolume: 0.5,
       sfxVolume: 0.7,
@@ -108,7 +104,6 @@ export const useGameStore = create<GameStore>()(
       addCoins: (amount) => set((state) => ({ coins: state.coins + amount })),
       
       setSelectedWeapon: (weapon) => set({ selectedWeapon: weapon }),
-      setSelectedBackground: (bg) => set({ selectedBackground: bg }),
       setUpgrade: (type, level) => set((state) => ({ 
         upgrades: { ...state.upgrades, [type]: level } 
       })),
@@ -151,7 +146,6 @@ export const useGameStore = create<GameStore>()(
         coins: state.coins,
         upgrades: state.upgrades,
         selectedWeapon: state.selectedWeapon,
-        selectedBackground: state.selectedBackground,
         musicVolume: state.musicVolume,
         sfxVolume: state.sfxVolume,
       }),

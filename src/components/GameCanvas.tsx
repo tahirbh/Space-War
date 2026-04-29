@@ -55,7 +55,11 @@ export function GameCanvas({
       setScore(score);
       onScoreUpdate?.(score);
     };
-    engine.onStageComplete = onStageComplete;
+    engine.onStageComplete = () => {
+      const currentStage = engine.stats.stage;
+      useGameStore.getState().setStage(currentStage);
+      onStageComplete?.();
+    };
     engine.onGameOver = onGameOver;
     engine.onPlayer2Join = onPlayer2Join;
     engine.onPlayer2Leave = onPlayer2Leave;

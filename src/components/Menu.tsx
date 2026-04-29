@@ -27,7 +27,6 @@ export function Menu({ onStartGame, onJoinGame, soundManager }: MenuProps) {
   const [showCredits, setShowCredits] = useState(false);
   const { 
     selectedWeapon, setSelectedWeapon, 
-    selectedBackground, setSelectedBackground,
     musicVolume, setMusicVolume,
     sfxVolume, setSfxVolume 
   } = useGameStore();
@@ -477,79 +476,8 @@ export function Menu({ onStartGame, onJoinGame, soundManager }: MenuProps) {
               </div>
             </div>
 
-            <div>
-              <label className="text-white/80 text-xs sm:text-sm mb-2 block font-medium uppercase tracking-wider">Background Theme</label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
-                {[
-                  { id: 'space', name: 'Deep Space' },
-                  { id: 'clouds', name: 'Cloudy Sky' },
-                  { id: 'cyber', name: 'Cyber City' },
-                  { id: 'ocean', name: 'Ocean Flight' },
-                  { id: 'jungle', name: 'Amazon Jungle' }
-                ].map((bg) => (
-                  <button
-                    key={bg.id}
-                    onClick={() => {
-                      soundManager?.playSound('menuNavigate');
-                      setSelectedBackground(bg.id);
-                    }}
-                    className={cn(
-                      "px-2 sm:px-3 py-2 rounded-lg border text-[10px] sm:text-sm transition-all",
-                      selectedBackground === bg.id 
-                        ? "bg-purple-600 border-purple-400 text-white shadow-[0_0_15px_rgba(168,85,247,0.4)]" 
-                        : "bg-white/5 border-white/10 text-white/40 hover:bg-white/10"
-                    )}
-                  >
-                    {bg.name}
-                  </button>
-                ))}
-              </div>
-              
-              {/* Live Background Preview Box */}
-              <div className="relative w-full h-24 rounded-lg overflow-hidden border border-white/20 bg-black">
-                {selectedBackground === 'space' && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-[#050510]">
-                    <div className="absolute w-1 h-1 bg-white rounded-full top-4 left-4 shadow-[0_0_4px_#fff]"></div>
-                    <div className="absolute w-2 h-2 bg-blue-400 rounded-full top-12 left-20 opacity-50 blur-[2px]"></div>
-                    <div className="absolute w-1 h-1 bg-white rounded-full top-8 right-10 shadow-[0_0_4px_#fff]"></div>
-                    <div className="absolute w-1.5 h-1.5 bg-purple-400 rounded-full bottom-4 left-1/2 opacity-50 blur-[1px]"></div>
-                  </div>
-                )}
-                {selectedBackground === 'clouds' && (
-                  <div className="absolute inset-0 bg-gradient-to-b from-[#87CEEB] to-[#E0F6FF]">
-                    <div className="absolute w-16 h-8 bg-white/80 rounded-full top-4 left-4 blur-[4px]"></div>
-                    <div className="absolute w-20 h-10 bg-white/60 rounded-full bottom-2 right-4 blur-[6px]"></div>
-                  </div>
-                )}
-                {selectedBackground === 'cyber' && (
-                  <div className="absolute inset-0 bg-gradient-to-b from-[#1a0b2e] to-[#000000] border-b-2 border-pink-500">
-                    <div className="absolute bottom-0 left-4 w-6 h-12 bg-[#2a1b3e] border border-pink-500/30"></div>
-                    <div className="absolute bottom-0 left-12 w-8 h-16 bg-[#2a1b3e] border border-cyan-500/30"></div>
-                    <div className="absolute bottom-0 right-8 w-10 h-10 bg-[#2a1b3e] border border-purple-500/30"></div>
-                    <div className="absolute inset-0 bg-[linear-gradient(rgba(255,0,255,0.1)_1px,transparent_1px)] bg-[size:100%_4px]"></div>
-                  </div>
-                )}
-                {selectedBackground === 'ocean' && (
-                  <div className="absolute inset-0 bg-gradient-to-b from-[#0f2027] via-[#203a43] to-[#2c5364]">
-                    <div className="absolute bottom-4 left-4 w-12 h-1 bg-white/40 rounded-full"></div>
-                    <div className="absolute bottom-8 right-8 w-16 h-1.5 bg-white/30 rounded-full"></div>
-                    <div className="absolute bottom-2 left-1/2 w-8 h-1 bg-white/50 rounded-full"></div>
-                  </div>
-                )}
-                {selectedBackground === 'jungle' && (
-                  <div className="absolute inset-0 bg-gradient-to-b from-[#11998e] to-[#38ef7d]">
-                    <div className="absolute bottom-0 w-full h-4 bg-[#1e3d17]"></div>
-                    <div className="absolute bottom-4 left-4 w-4 h-12 bg-[#2d5a27] rounded-t-full"></div>
-                    <div className="absolute bottom-4 left-2 w-8 h-8 bg-[#1e3d17] rounded-full"></div>
-                    <div className="absolute bottom-4 right-6 w-6 h-16 bg-[#2d5a27] rounded-t-full"></div>
-                    <div className="absolute bottom-8 right-4 w-10 h-10 bg-[#1e3d17] rounded-full"></div>
-                  </div>
-                )}
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <span className="text-white/80 font-bold text-xs uppercase tracking-widest drop-shadow-md">Preview</span>
-                </div>
-              </div>
-            </div>
+            {/* Background selection removed - stages now use fixed sequential parallax backgrounds */}
+
 
             <div className="bg-white/5 p-4 rounded-lg">
               <h4 className="text-white font-medium mb-2">Game Info</h4>

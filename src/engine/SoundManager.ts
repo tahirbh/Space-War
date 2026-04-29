@@ -10,27 +10,57 @@ export class SoundManager {
   private currentMusic: string | null = null;
   private musicOscillators: OscillatorNode[] = [];
   private musicInterval: number | null = null;
+  private audioBuffers: Map<string, AudioBuffer> = new Map();
 
   // Sound effect frequencies
   private readonly SOUNDS = {
-    shoot: { freq: 880, type: 'sawtooth' as const, duration: 0.05, slide: -200 },
+    shoot: { freq: 880, type: 'sawtooth' as const, duration: 0.05, slide: -200, file: '/audio/Shoot.mp3' },
     enemyShoot: { freq: 220, type: 'square' as const, duration: 0.08, slide: -50 },
-    explosion: { freq: 100, type: 'sawtooth' as const, duration: 0.3, slide: -80 },
+    explosion: { freq: 100, type: 'sawtooth' as const, duration: 0.3, slide: -80, file: '/audio/bomb.mp3' },
     powerUp: { freq: 523.25, type: 'sine' as const, duration: 0.15, slide: 200 },
-    bomb: { freq: 60, type: 'sawtooth' as const, duration: 0.8, slide: -30 },
+    bomb: { freq: 60, type: 'sawtooth' as const, duration: 0.8, slide: -30, file: '/audio/bomb.mp3' },
     hit: { freq: 200, type: 'square' as const, duration: 0.1, slide: -100 },
-    bossWarning: { freq: 440, type: 'sawtooth' as const, duration: 0.5, slide: 0 },
+    bossWarning: { freq: 440, type: 'sawtooth' as const, duration: 0.5, slide: 0, file: '/audio/Boss.mp3' },
     gameOver: { freq: 330, type: 'sawtooth' as const, duration: 1, slide: -100 },
     stageClear: { freq: 659.25, type: 'sine' as const, duration: 0.5, slide: 200 },
     menuNavigate: { freq: 1200, type: 'square' as const, duration: 0.04, slide: -200 },
     menuSelect: { freq: 800, type: 'sawtooth' as const, duration: 0.1, slide: 400 },
-    gameStart: { freq: 440, type: 'sawtooth' as const, duration: 0.8, slide: 600 },
+    gameStart: { freq: 440, type: 'sawtooth' as const, duration: 0.8, slide: 600, file: '/audio/startup.mp3' },
     saveSound: { freq: 523.25, type: 'sine' as const, duration: 0.4, slide: 0 },
     readyMission: { freq: 220, type: 'square' as const, duration: 0.6, slide: 100 },
+    intro: { freq: 0, type: 'sine' as const, duration: 0, slide: 0, file: '/audio/Intro_conversation.mp3' },
+    welcome: { freq: 0, type: 'sine' as const, duration: 0, slide: 0, file: '/audio/welcoming_conversation.mp3' },
   };
 
   constructor() {
     this.init();
+    this.loadAllSounds();
+  }
+
+  private async loadAllSounds(): Promise<void> {
+    const soundFiles = [
+      { name: 'shoot', url: '/audio/Shoot.mp3' },
+      { name: 'explosion', url: '/audio/bomb.mp3' },
+      { name: 'bomb', url: '/audio/bomb.mp3' },
+      { name: 'bossWarning', url: '/audio/Boss.mp3' },
+      { name: 'gameStart', url: '/audio/startup.mp3' },
+      { name: 'intro', url: '/audio/Intro_conversation.mp3' },
+      { name: 'welcome', url: '/audio/welcoming_conversation.mp3' },
+      { name: 'music_stage', url: '/audio/music_stage.mp3' },
+    ];
+
+    for (const s of soundFiles) {
+      try {
+        const response = await fetch(s.url);
+        const arrayBuffer = await response.arrayBuffer();
+        if (this.audioContext) {
+          const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+          this.audioBuffers.set(s.name, audioBuffer);
+        }
+      } catch (e) {
+        console.error(`Failed to load sound: ${s.name}`, e);
+      }
+    }
   }
 
   init(): void {
@@ -60,6 +90,28 @@ export class SoundManager {
 
   playSound(name: keyof typeof this.SOUNDS): void {
     if (!this.audioContext || this.isMuted) return;
+
+    // Try playing real audio buffer first
+    const buffer = this.audioBuffers.get(name as string);
+    if (buffer) {
+      const source = this.audioContext.createBufferSource();
+      source.buffer = buffer;
+      const gain = this.audioContext.createGain();
+      
+      // Dynamic volume adjustment for real samples
+      let volume = 0.4;
+      if (name === 'bomb') volume = 0.8;
+      if (name === 'explosion') volume = 0.6;
+      if (name === 'bossWarning') volume = 0.7;
+      if (name === 'gameStart') volume = 0.6;
+      if (name === 'intro' || name === 'welcome') volume = 0.9;
+      
+      gain.gain.setValueAtTime(volume, this.audioContext.currentTime);
+      source.connect(gain);
+      gain.connect(this.sfxGain!);
+      source.start(0);
+      return;
+    }
 
     if (name === 'shoot') {
       const osc1 = this.audioContext.createOscillator();
@@ -199,6 +251,19 @@ export class SoundManager {
   startStageMusic(stage: number): void {
     this.stopMusic();
     
+    // Check for high-quality music buffer
+    const musicBuffer = this.audioBuffers.get('music_stage');
+    if (musicBuffer && this.audioContext && !this.isMuted) {
+      this.currentMusic = `stage${stage}`;
+      const source = this.audioContext.createBufferSource();
+      source.buffer = musicBuffer;
+      source.loop = true;
+      source.connect(this.musicGain!);
+      source.start(0);
+      this.musicOscillators.push(source as any); // Re-using array for cleanup
+      return;
+    }
+
     // Mission music for stage 1 (inspired by Through the Wire)
     if (stage === 1) {
       this.startMissionMusic();

@@ -1,8 +1,10 @@
 import { Smartphone } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useGameStore } from '@/store/gameStore';
 
 export function OrientationOverlay() {
   const [isPortrait, setIsPortrait] = useState(false);
+  const { gameState } = useGameStore();
 
   useEffect(() => {
     const checkOrientation = () => {
@@ -19,7 +21,8 @@ export function OrientationOverlay() {
     };
   }, []);
 
-  if (!isPortrait) return null;
+  // Allow portrait mode in shop or menu for accessibility
+  if (!isPortrait || gameState === 'shop' || gameState === 'menu') return null;
 
   return (
     <div className="fixed inset-0 z-[100] bg-[#0A0A15] flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-500">

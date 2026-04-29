@@ -109,6 +109,10 @@ export class GameEngine {
   oceanWaves: { x: number; y: number; width: number; speed: number; opacity: number }[] = [];
   jungleTrees: { x: number; y: number; width: number; height: number; speed: number; color: string }[] = [];
   
+  // Background images
+  bgImages: HTMLImageElement[] = [];
+  bgImagesLoaded = false;
+  
   // Screen shake
   shakeIntensity = 0;
   shakeDecay = 0.9;
@@ -140,6 +144,9 @@ export class GameEngine {
     // Detect touch device
     this.isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     
+    // Load background images
+    this.loadBackgroundImages();
+    
     // Bind methods
     this.gameLoop = this.gameLoop.bind(this);
     this.handleTouchStart = this.handleTouchStart.bind(this);
@@ -148,6 +155,34 @@ export class GameEngine {
     
     // Setup touch listeners
     this.setupTouchListeners();
+  }
+
+  private loadBackgroundImages(): void {
+    const urls = [
+      '/bg_stage_1.png',
+      '/bg_stage_2.png',
+      '/bg_stage_3.png',
+      '/bg_stage_4.png',
+      '/bg_stage_5.png',
+      '/bg_stage_6.png',
+      '/bg_stage_7.png',
+      '/bg_stage_8.png',
+      '/bg_stage_9.png',
+      '/bg_stage_10.png'
+    ];
+    
+    let loadedCount = 0;
+    urls.forEach((url, index) => {
+      const img = new Image();
+      img.onload = () => {
+        loadedCount++;
+        if (loadedCount === urls.length) {
+          this.bgImagesLoaded = true;
+        }
+      };
+      img.src = url;
+      this.bgImages[index] = img;
+    });
   }
 
   private setupTouchListeners(): void {
@@ -358,10 +393,16 @@ export class GameEngine {
 
   private getStage(stageNum: number): Stage {
     const stages: Stage[] = [
-      { id: 1, name: 'DEEP SPACE', duration: 60, enemySpawnRate: 4.0, bossSpawnTime: 55, backgroundType: 'space' },
-      { id: 2, name: 'ASTEROID BELT', duration: 75, enemySpawnRate: 1.2, bossSpawnTime: 70, backgroundType: 'asteroid' },
-      { id: 3, name: 'ENEMY BASE', duration: 90, enemySpawnRate: 0.8, bossSpawnTime: 85, backgroundType: 'base' },
-      { id: 4, name: 'AMAZON JUNGLE', duration: 100, enemySpawnRate: 1.5, bossSpawnTime: 95, backgroundType: 'jungle' },
+      { id: 1, name: 'EVEREST - MARS ORBIT', duration: 60, enemySpawnRate: 4.0, bossSpawnTime: 55, backgroundType: 'space' },
+      { id: 2, name: 'GULF - SATURN RINGS', duration: 75, enemySpawnRate: 1.2, bossSpawnTime: 70, backgroundType: 'asteroid' },
+      { id: 3, name: 'ARAB DESERT - JUPITER', duration: 90, enemySpawnRate: 0.8, bossSpawnTime: 85, backgroundType: 'base' },
+      { id: 4, name: 'RIO - VENUS GATES', duration: 100, enemySpawnRate: 1.5, bossSpawnTime: 95, backgroundType: 'jungle' },
+      { id: 5, name: 'KASHMIR - NEPTUNE COLD', duration: 120, enemySpawnRate: 1.0, bossSpawnTime: 110, backgroundType: 'clouds' },
+      { id: 6, name: 'NEW YORK - MERCURY FAST', duration: 120, enemySpawnRate: 0.8, bossSpawnTime: 110, backgroundType: 'cyber' },
+      { id: 7, name: 'SYDNEY - URANUS BLUE', duration: 140, enemySpawnRate: 0.7, bossSpawnTime: 130, backgroundType: 'ocean' },
+      { id: 8, name: 'REEF - LUNAR TIDE', duration: 140, enemySpawnRate: 0.6, bossSpawnTime: 130, backgroundType: 'ocean' },
+      { id: 9, name: 'GRAND CANYON - PLUTO', duration: 150, enemySpawnRate: 0.5, bossSpawnTime: 140, backgroundType: 'asteroid' },
+      { id: 10, name: 'TOKYO - SOLAR FLARE', duration: 180, enemySpawnRate: 0.4, bossSpawnTime: 160, backgroundType: 'cyber' },
     ];
     return stages[(stageNum - 1) % stages.length];
   }
@@ -371,8 +412,8 @@ export class GameEngine {
       id: 'player1',
       position: { x: 100, y: CANVAS_HEIGHT / 2 },
       velocity: { x: 0, y: 0 },
-      width: 40,
-      height: 30,
+      width: 120, // Increased 3x
+      height: 90, // Increased 3x
       active: true,
       playerNumber: 1,
       health: 3,
@@ -405,8 +446,8 @@ export class GameEngine {
       id: 'player2',
       position: { x: 100, y: CANVAS_HEIGHT / 2 + 60 },
       velocity: { x: 0, y: 0 },
-      width: 40,
-      height: 30,
+      width: 120, // Increased 3x
+      height: 90, // Increased 3x
       active: true,
       playerNumber: 2,
       health: 3,
@@ -852,11 +893,11 @@ export class GameEngine {
     const y = type === 'tank' ? CANVAS_HEIGHT - 60 : Math.random() * (CANVAS_HEIGHT - 100) + 50;
     
     const enemyData: Record<EnemyType, { health: number; score: number; width: number; height: number }> = {
-      grunt: { health: 3, score: 100, width: 30, height: 25 },
-      interceptor: { health: 6, score: 300, width: 35, height: 30 },
-      bomber: { health: 15, score: 500, width: 45, height: 40 },
-      elite: { health: 30, score: 1000, width: 50, height: 45 },
-      tank: { health: 20, score: 800, width: 60, height: 40 },
+      grunt: { health: 3, score: 100, width: 90, height: 75 }, // Increased 3x
+      interceptor: { health: 6, score: 300, width: 105, height: 90 }, // Increased 3x
+      bomber: { health: 15, score: 500, width: 135, height: 120 }, // Increased 3x
+      elite: { health: 30, score: 1000, width: 150, height: 135 }, // Increased 3x
+      tank: { health: 20, score: 800, width: 180, height: 120 }, // Increased 3x
     };
 
     const data = enemyData[type];
@@ -886,9 +927,9 @@ export class GameEngine {
     const type = bossTypes[(this.stats.stage - 1) % 3];
 
     const bossData: Record<BossType, { health: number; score: number; width: number; height: number }> = {
-      mantis: { health: 300, score: 10000, width: 120, height: 100 },
-      leviathan: { health: 500, score: 20000, width: 150, height: 120 },
-      omega: { health: 800, score: 50000, width: 180, height: 140 },
+      mantis: { health: 300, score: 10000, width: 360, height: 300 }, // Increased 3x
+      leviathan: { health: 500, score: 20000, width: 450, height: 360 }, // Increased 3x
+      omega: { health: 800, score: 50000, width: 540, height: 420 }, // Increased 3x
     };
 
     const data = bossData[type];
@@ -1097,8 +1138,8 @@ export class GameEngine {
           x: Math.cos(bulletAngle) * speed, 
           y: Math.sin(bulletAngle) * speed 
         },
-        width: 16,
-        height: 16,
+        width: 8, // Reduced 50%
+        height: 8, // Reduced 50%
         active: true,
         owner: 'enemy',
         damage: 1,
@@ -1149,8 +1190,8 @@ export class GameEngine {
               x: Math.cos(angle) * 6, 
               y: Math.sin(angle) * 6 
             },
-            width: 10,
-            height: 10,
+            width: 5, // Reduced 50%
+            height: 5, // Reduced 50%
             active: true,
             owner: 'enemy',
             damage: 1,
@@ -1168,8 +1209,8 @@ export class GameEngine {
               x: Math.cos(angle) * 5, 
               y: Math.sin(angle) * 5 
             },
-            width: 8,
-            height: 8,
+            width: 4, // Reduced 50%
+            height: 4, // Reduced 50%
             active: true,
             owner: 'enemy',
             damage: 1,
@@ -1187,8 +1228,8 @@ export class GameEngine {
               x: Math.cos(angle) * 7, 
               y: Math.sin(angle) * 7 
             },
-            width: 6,
-            height: 6,
+            width: 3, // Reduced 50%
+            height: 3, // Reduced 50%
             active: true,
             owner: 'enemy',
             damage: 1,
@@ -1485,6 +1526,40 @@ export class GameEngine {
 
   private drawBackground(ctx: CanvasRenderingContext2D): void {
     const bgMode = this.currentStage.backgroundType || 'space';
+
+    // Parallax Background Image
+    const bgIndex = (this.stats.stage - 1) % this.bgImages.length;
+    const bgImg = this.bgImages[bgIndex];
+    
+    if (this.bgImagesLoaded && bgImg) {
+      const scrollSpeed = 60;
+      const aspectRatio = bgImg.width / bgImg.height;
+      
+      // Ensure drawWidth is at least the canvas width to prevent gaps
+      // but also ensure it maintains aspect ratio for parallax
+      let drawWidth = CANVAS_HEIGHT * aspectRatio;
+      
+      // If the image is too narrow (e.g. square), scale it up to provide more scroll room
+      // or at least ensure we draw enough tiles.
+      const minDrawWidth = CANVAS_WIDTH * 1.5; 
+      if (drawWidth < minDrawWidth) {
+        drawWidth = minDrawWidth;
+      }
+      
+      const x = (this.bgOffset * scrollSpeed / 100) % drawWidth;
+      
+      // Draw as many tiles as needed to cover the canvas
+      for (let i = 0; i <= Math.ceil(CANVAS_WIDTH / drawWidth) + 1; i++) {
+        ctx.drawImage(bgImg, (i * drawWidth) - x, 0, drawWidth, CANVAS_HEIGHT);
+      }
+      
+      // Optional: Add a dark overlay to ensure readability
+      ctx.fillStyle = 'rgba(10, 10, 21, 0.4)';
+      ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    } else {
+      ctx.fillStyle = '#0A0A15';
+      ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    }
 
     if (bgMode === 'space' || bgMode === 'asteroid' || bgMode === 'base') {
       // Draw nebulas

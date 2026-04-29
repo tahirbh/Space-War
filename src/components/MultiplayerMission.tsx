@@ -14,7 +14,7 @@ export function MultiplayerMission({ onBack, onStartGame }: MultiplayerMissionPr
   const { 
     playerName, setIsHost, setRoomCode, setPlayer2Connected, 
     stage: currentStage, score: currentScore,
-    pendingMissionCode, pendingStage, pendingScore, clearPendingState
+    pendingMissionCode
   } = useGameStore();
   const [mode, setMode] = useState<'select' | 'host' | 'join' | 'join-input'>('select');
   const [roomCodeInput, setRoomCodeInput] = useState('');

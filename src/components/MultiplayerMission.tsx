@@ -10,7 +10,11 @@ interface MultiplayerMissionProps {
 }
 
 export function MultiplayerMission({ onBack, onStartGame }: MultiplayerMissionProps) {
-  const { playerName, setIsHost, setRoomCode, setPlayer2Connected, stage, score } = useGameStore();
+  const { 
+    playerName, setIsHost, setRoomCode, setPlayer2Connected, 
+    stage: currentStage, score: currentScore,
+    pendingMissionCode, pendingStage, pendingScore, clearPendingState
+  } = useGameStore();
   const [mode, setMode] = useState<'select' | 'host' | 'join' | 'join-input'>('select');
   const [roomCodeInput, setRoomCodeInput] = useState('');
   const [, setSocket] = useState<Socket | null>(null);
@@ -42,6 +46,23 @@ export function MultiplayerMission({ onBack, onStartGame }: MultiplayerMissionPr
       mockSocket.disconnect();
     };
   }, []);
+
+  // Handle auto-join from pending mission
+  useEffect(() => {
+    if (pendingMissionCode && mode === 'select') {
+      setIsHost(false);
+      setRoomCode(pendingMissionCode);
+      setLocalRoomCode(pendingMissionCode);
+      setMode('join');
+      setConnected(true);
+      setPlayer2Connected(true);
+      
+      // Note: stats (stage/score) are handled when the game actually starts in startMission
+      // but we could also apply them here if we wanted to show them in a lobby
+      
+      toast.success(`Joining Mission: ${pendingMissionCode}`);
+    }
+  }, [pendingMissionCode, mode]);
 
   const generateRoomCode = () => {
     return Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -82,7 +103,7 @@ export function MultiplayerMission({ onBack, onStartGame }: MultiplayerMissionPr
   };
 
   const handleShareRoom = async () => {
-    const shareUrl = `${window.location.origin}?mission=${roomCode}&stage=${stage}&score=${score}`;
+    const shareUrl = `${window.location.origin}?mission=${roomCode}&stage=${currentStage}&score=${currentScore}`;
     const shareData = {
       title: 'Join my Starships War Mission!',
       text: `Connect to my cockpit and join the mission! Room Code: ${roomCode}`,

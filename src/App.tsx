@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { GameCanvas } from '@/components/GameCanvas';
 import { HUD } from '@/components/HUD';
 import { Menu } from '@/components/Menu';
-import { MultiplayerLobby } from '@/components/MultiplayerLobby';
+import { MultiplayerMission } from '@/components/MultiplayerMission';
 import { Toaster } from '@/components/ui/sonner';
 import { toast } from 'sonner';
 import { Pause, Play, RotateCcw, LogOut, Trophy, Volume2, VolumeX } from 'lucide-react';
@@ -162,13 +162,19 @@ function App() {
     
     // Deep Link Check
     const params = new URLSearchParams(window.location.search);
-    const lobbyCode = params.get('lobby');
-    if (lobbyCode && lobbyCode.length === 6) {
-      const { setRoomCode, setIsHost } = useGameStore.getState();
-      setRoomCode(lobbyCode.toUpperCase());
-      setIsHost(false);
-      setAppState('multiplayer');
-      toast.info(`Joining Room: ${lobbyCode.toUpperCase()}`);
+    const missionCode = params.get('mission') || params.get('lobby');
+    const targetStage = params.get('stage');
+    const targetScore = params.get('score');
+
+    if (missionCode && missionCode.length === 6) {
+      const { setPendingState } = useGameStore.getState();
+      setPendingState(
+        missionCode.toUpperCase(), 
+        targetStage ? parseInt(targetStage) : 1,
+        targetScore ? parseInt(targetScore) : 0
+      );
+      
+      toast.success(`Mission Signal Detected: ${missionCode.toUpperCase()}`);
       
       // Clean up URL
       window.history.replaceState({}, document.title, window.location.pathname);
@@ -202,12 +208,24 @@ function App() {
   }, []);
 
   const startMission = useCallback(() => {
+    const { pendingMissionCode, pendingStage, pendingScore, clearPendingState, setRoomCode, setIsHost, setPlayer2Connected } = useGameStore.getState();
+    
+    if (pendingMissionCode) {
+      setRoomCode(pendingMissionCode);
+      setIsHost(false);
+      setPlayer2Connected(true);
+      if (pendingStage !== null) setStage(pendingStage);
+      if (pendingScore !== null) setScore(pendingScore);
+      clearPendingState();
+      toast.success('Joined Mission Sequence Complete');
+    }
+
     setAppState('playing');
     if (soundManagerRefStatic.current) {
       soundManagerRefStatic.current.playSound('gameStart');
     }
     toast.success('Game Started!', { description: 'Destroy all enemies!' });
-  }, []);
+  }, [setScore, setStage]);
 
   const startMultiplayer = useCallback(() => {
     if (soundManagerRefStatic.current) {
@@ -426,7 +444,7 @@ function App() {
   if (appState === 'multiplayer') {
     return (
       <div className="min-h-screen bg-[#0A0A15]">
-        <MultiplayerLobby
+        <MultiplayerMission
           onBack={() => setAppState('menu')}
           onStartGame={startGame}
         />

@@ -4,13 +4,13 @@ import { cn } from '@/lib/utils';
 import { ArrowLeft, Copy, Users, Wifi, WifiOff, Check, Gamepad2, Share2 } from 'lucide-react';
 import type { Socket } from 'socket.io-client';
 
-interface MultiplayerLobbyProps {
+interface MultiplayerMissionProps {
   onBack: () => void;
   onStartGame: () => void;
 }
 
-export function MultiplayerLobby({ onBack, onStartGame }: MultiplayerLobbyProps) {
-  const { playerName, setIsHost, setRoomCode, setPlayer2Connected } = useGameStore();
+export function MultiplayerMission({ onBack, onStartGame }: MultiplayerMissionProps) {
+  const { playerName, setIsHost, setRoomCode, setPlayer2Connected, stage, score } = useGameStore();
   const [mode, setMode] = useState<'select' | 'host' | 'join' | 'join-input'>('select');
   const [roomCodeInput, setRoomCodeInput] = useState('');
   const [, setSocket] = useState<Socket | null>(null);
@@ -82,9 +82,9 @@ export function MultiplayerLobby({ onBack, onStartGame }: MultiplayerLobbyProps)
   };
 
   const handleShareRoom = async () => {
-    const shareUrl = `${window.location.origin}?lobby=${roomCode}`;
+    const shareUrl = `${window.location.origin}?mission=${roomCode}&stage=${stage}&score=${score}`;
     const shareData = {
-      title: 'Join my Starships War Lobby!',
+      title: 'Join my Starships War Mission!',
       text: `Connect to my cockpit and join the mission! Room Code: ${roomCode}`,
       url: shareUrl,
     };
@@ -119,7 +119,7 @@ export function MultiplayerLobby({ onBack, onStartGame }: MultiplayerLobbyProps)
 
         <div className="text-center mb-8 sm:mb-12">
           <h2 className="text-3xl sm:text-4xl font-bold text-cyan-400 mb-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-            MULTIPLAYER
+            MULTIPLAYER MISSION
           </h2>
           <p className="text-white/60 text-sm sm:text-base">Play with a friend online</p>
         </div>

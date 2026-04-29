@@ -104,7 +104,7 @@ export function Menu({ onStartGame, onJoinGame, soundManager }: MenuProps) {
             )}
           >
             <Users className="w-4 h-4 sm:w-6 sm:h-6 group-hover:animate-pulse" />
-            <span className="truncate">Lobby</span>
+            <span className="truncate">Mission</span>
             <div className="absolute inset-0 bg-white/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity" />
           </button>
         </div>

@@ -21,6 +21,13 @@ interface GameStore {
   player2Position: Vector2;
   setPlayer2Position: (pos: Vector2) => void;
   
+  // Pending Multiplayer State
+  pendingMissionCode: string | null;
+  pendingStage: number | null;
+  pendingScore: number | null;
+  setPendingState: (code: string | null, stage: number | null, score: number | null) => void;
+  clearPendingState: () => void;
+  
   // Game stats
   score: number;
   setScore: (score: number) => void;
@@ -84,6 +91,9 @@ export const useGameStore = create<GameStore>()(
       sfxVolume: 0.7,
       input1: { up: false, down: false, left: false, right: false, shoot: false, bomb: false },
       input2: { up: false, down: false, left: false, right: false, shoot: false, bomb: false },
+      pendingMissionCode: null,
+      pendingStage: null,
+      pendingScore: null,
 
       setGameState: (state) => set({ gameState: state }),
       setPlayerName: (name) => set({ playerName: name }),
@@ -112,6 +122,18 @@ export const useGameStore = create<GameStore>()(
       setInput2: (input) => set((state) => ({ 
         input2: { ...state.input2, ...input } 
       })),
+      
+      setPendingState: (code, stage, score) => set({ 
+        pendingMissionCode: code, 
+        pendingStage: stage, 
+        pendingScore: score 
+      }),
+      
+      clearPendingState: () => set({ 
+        pendingMissionCode: null, 
+        pendingStage: null, 
+        pendingScore: null 
+      }),
       
       resetGame: () => set({
         gameState: 'menu',

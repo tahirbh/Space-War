@@ -69,6 +69,12 @@ export function GameCanvas({
 
     // Spawn player 1
     engine.spawnPlayer1();
+    
+    // Auto-spawn player 2 if connected via mission link
+    if (useGameStore.getState().player2Connected) {
+      engine.spawnPlayer2();
+    }
+    
     engine.start();
 
     return () => {

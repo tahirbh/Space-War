@@ -1383,7 +1383,6 @@ export class GameEngine {
   }
 
   private drawBackground(ctx: CanvasRenderingContext2D): void {
-    const bgMode = this.currentStage.backgroundType || 'space';
 
     // Parallax Background Image
     const bgIndex = (this.stats.stage - 1) % this.bgImages.length;

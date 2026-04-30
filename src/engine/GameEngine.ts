@@ -4,6 +4,7 @@ import type {
 } from '@/types/game';
 import { SoundManager } from './SoundManager';
 import { v4 as uuidv4 } from 'uuid';
+import { ShipRenderer } from './ShipRenderer';
 
 // Game constants
 const CANVAS_WIDTH = 1280;
@@ -101,13 +102,6 @@ export class GameEngine {
   
   // Background scroll
   bgOffset = 0;
-  stars: { x: number; y: number; size: number; speed: number; brightness: number; color: string }[] = [];
-  nebulas: { x: number; y: number; radius: number; color: string; alpha: number }[] = [];
-  groundFixtures: { x: number; y: number; width: number; height: number; type: number; speed: number }[] = [];
-  clouds: { x: number; y: number; width: number; height: number; speed: number; opacity: number }[] = [];
-  cityBuildings: { x: number; width: number; height: number; color: string; speed: number; windows: {x:number, y:number, on:boolean}[] }[] = [];
-  oceanWaves: { x: number; y: number; width: number; speed: number; opacity: number }[] = [];
-  jungleTrees: { x: number; y: number; width: number; height: number; speed: number; color: string }[] = [];
   
   // Background images
   bgImages: HTMLImageElement[] = [];
@@ -116,6 +110,9 @@ export class GameEngine {
   // Screen shake
   shakeIntensity = 0;
   shakeDecay = 0.9;
+
+  // Ship Renderer
+  shipRenderer: ShipRenderer;
 
   constructor(canvas: HTMLCanvasElement, soundManager?: SoundManager) {
     this.canvas = canvas;
@@ -132,20 +129,14 @@ export class GameEngine {
     // Initialize stage
     this.currentStage = this.getStage(1);
     
-    // Generate background
-    this.generateStars();
-    this.generateNebulas();
-    this.generateGroundFixtures();
-    this.generateClouds();
-    this.generateCityBuildings();
-    this.generateOceanWaves();
-    this.generateJungle();
-    
     // Detect touch device
     this.isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     
     // Load background images
     this.loadBackgroundImages();
+    
+    // Initialize Ship Renderer
+    this.shipRenderer = new ShipRenderer();
     
     // Bind methods
     this.gameLoop = this.gameLoop.bind(this);
@@ -290,106 +281,7 @@ export class GameEngine {
     }
   }
 
-  private generateStars(): void {
-    const colors = ['#FFFFFF', '#FFE4B5', '#B0E0E6', '#FFB6C1'];
-    for (let i = 0; i < 200; i++) {
-      this.stars.push({
-        x: Math.random() * CANVAS_WIDTH,
-        y: Math.random() * CANVAS_HEIGHT,
-        size: Math.random() * 2 + 0.5,
-        speed: Math.random() * 3 + 0.5,
-        brightness: Math.random(),
-        color: colors[Math.floor(Math.random() * colors.length)],
-      });
-    }
-  }
 
-  private generateNebulas(): void {
-    const colors = ['rgba(138, 43, 226, 0.1)', 'rgba(0, 191, 255, 0.08)', 'rgba(255, 20, 147, 0.06)'];
-    for (let i = 0; i < 5; i++) {
-      this.nebulas.push({
-        x: Math.random() * CANVAS_WIDTH,
-        y: Math.random() * CANVAS_HEIGHT,
-        radius: Math.random() * 200 + 100,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        alpha: Math.random() * 0.3 + 0.1,
-      });
-    }
-  }
-
-  private generateGroundFixtures(): void {
-    for (let i = 0; i < 6; i++) {
-      this.groundFixtures.push({
-        x: (CANVAS_WIDTH / 6) * i + Math.random() * 200,
-        y: CANVAS_HEIGHT - 50 - Math.random() * 100,
-        width: 100 + Math.random() * 200,
-        height: 50 + Math.random() * 150,
-        type: Math.floor(Math.random() * 3),
-        speed: 1.5 + Math.random() * 1,
-      });
-    }
-  }
-
-  private generateClouds(): void {
-    for (let i = 0; i < 15; i++) {
-      this.clouds.push({
-        x: Math.random() * CANVAS_WIDTH,
-        y: Math.random() * (CANVAS_HEIGHT * 0.7),
-        width: 100 + Math.random() * 200,
-        height: 40 + Math.random() * 60,
-        speed: 0.5 + Math.random() * 1.5,
-        opacity: 0.3 + Math.random() * 0.4,
-      });
-    }
-  }
-
-  private generateCityBuildings(): void {
-    let currentX = 0;
-    while (currentX < CANVAS_WIDTH + 300) {
-      const width = 60 + Math.random() * 100;
-      const height = 150 + Math.random() * 300;
-      const windows = [];
-      for(let wy = 20; wy < height - 20; wy += 30) {
-        for(let wx = 10; wx < width - 10; wx += 20) {
-          windows.push({ x: wx, y: wy, on: Math.random() > 0.3 });
-        }
-      }
-      this.cityBuildings.push({
-        x: currentX,
-        width,
-        height,
-        color: `hsl(${220 + Math.random() * 40}, 30%, ${10 + Math.random() * 15}%)`,
-        speed: 2 + Math.random() * 0.5,
-        windows
-      });
-      currentX += width + (Math.random() * 20);
-    }
-  }
-
-  private generateOceanWaves(): void {
-    for (let i = 0; i < 30; i++) {
-      this.oceanWaves.push({
-        x: Math.random() * CANVAS_WIDTH,
-        y: CANVAS_HEIGHT - 150 + Math.random() * 150,
-        width: 50 + Math.random() * 100,
-        speed: 1 + Math.random() * 2,
-        opacity: 0.2 + Math.random() * 0.5,
-      });
-    }
-  }
-
-  private generateJungle(): void {
-    for (let i = 0; i < 40; i++) {
-      this.jungleTrees.push({
-        x: Math.random() * CANVAS_WIDTH * 2,
-        y: CANVAS_HEIGHT - 100 - Math.random() * 200,
-        width: 30 + Math.random() * 50,
-        height: 150 + Math.random() * 200,
-        speed: 1.5 + Math.random() * 2,
-        color: `hsl(${100 + Math.random() * 40}, ${40 + Math.random() * 30}%, ${15 + Math.random() * 15}%)`,
-      });
-    }
-  }
 
   private getStage(stageNum: number): Stage {
     const stages: Stage[] = [
@@ -567,43 +459,6 @@ export class GameEngine {
 
     // Update background
     this.bgOffset += 80 * dtSeconds;
-    this.groundFixtures.forEach(fix => {
-      fix.x -= fix.speed * (dt / 16);
-      if (fix.x + fix.width < 0) {
-        fix.x = CANVAS_WIDTH + Math.random() * 500;
-        fix.y = CANVAS_HEIGHT - 50 - Math.random() * 100;
-      }
-    });
-
-    // Update background objects
-    this.clouds.forEach(cloud => {
-      cloud.x -= cloud.speed * (dt / 16);
-      if (cloud.x + cloud.width < 0) {
-        cloud.x = CANVAS_WIDTH + Math.random() * 200;
-        cloud.y = Math.random() * (CANVAS_HEIGHT * 0.7);
-      }
-    });
-
-    this.cityBuildings.forEach(b => {
-      b.x -= b.speed * (dt / 16);
-      if (b.x + b.width < 0) {
-        b.x = CANVAS_WIDTH + Math.random() * 100;
-      }
-    });
-
-    this.oceanWaves.forEach(wave => {
-      wave.x -= wave.speed * (dt / 16);
-      if (wave.x + wave.width < 0) {
-        wave.x = CANVAS_WIDTH + Math.random() * 100;
-      }
-    });
-
-    this.jungleTrees.forEach(tree => {
-      tree.x -= tree.speed * (dt / 16);
-      if (tree.x + tree.width < 0) {
-        tree.x = CANVAS_WIDTH + Math.random() * 100;
-      }
-    });
 
     // Update players
     this.updatePlayer(this.player1, this.input1, dt);
@@ -726,6 +581,9 @@ export class GameEngine {
 
     player.position.x += dx * player.speed * (dt / 16);
     player.position.y += dy * player.speed * (dt / 16);
+    
+    player.velocity.x = dx * player.speed;
+    player.velocity.y = dy * player.speed;
 
     player.position.x = Math.max(20, Math.min(CANVAS_WIDTH - 60, player.position.x));
     player.position.y = Math.max(20, Math.min(CANVAS_HEIGHT - 40, player.position.y));
@@ -1534,216 +1392,37 @@ export class GameEngine {
     if (this.bgImagesLoaded && bgImg) {
       const scrollSpeed = 60;
       const aspectRatio = bgImg.width / bgImg.height;
-      
-      // Ensure drawWidth is at least the canvas width to prevent gaps
-      // but also ensure it maintains aspect ratio for parallax
       let drawWidth = CANVAS_HEIGHT * aspectRatio;
       
-      // If the image is too narrow (e.g. square), scale it up to provide more scroll room
-      // or at least ensure we draw enough tiles.
       const minDrawWidth = CANVAS_WIDTH * 1.5; 
       if (drawWidth < minDrawWidth) {
         drawWidth = minDrawWidth;
       }
       
-      const x = (this.bgOffset * scrollSpeed / 100) % drawWidth;
+      const x = (this.bgOffset * scrollSpeed / 100) % (drawWidth * 2);
       
-      // Draw as many tiles as needed to cover the canvas
-      for (let i = 0; i <= Math.ceil(CANVAS_WIDTH / drawWidth) + 1; i++) {
-        ctx.drawImage(bgImg, (i * drawWidth) - x, 0, drawWidth, CANVAS_HEIGHT);
+      // Draw 3 tiles with mirroring: [Original][Mirrored][Original]
+      for (let i = 0; i < 3; i++) {
+        const drawX = (i * drawWidth) - x;
+        if (drawX + drawWidth < 0 || drawX > CANVAS_WIDTH) continue;
+        
+        if (i % 2 === 1) {
+          // Draw flipped image
+          ctx.save();
+          ctx.translate(drawX + drawWidth, 0);
+          ctx.scale(-1, 1);
+          ctx.drawImage(bgImg, 0, 0, drawWidth, CANVAS_HEIGHT);
+          ctx.restore();
+        } else {
+          ctx.drawImage(bgImg, drawX, 0, drawWidth, CANVAS_HEIGHT);
+        }
       }
       
-      // Optional: Add a dark overlay to ensure readability
       ctx.fillStyle = 'rgba(10, 10, 21, 0.4)';
       ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     } else {
       ctx.fillStyle = '#0A0A15';
       ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-    }
-
-    if (bgMode === 'space' || bgMode === 'asteroid' || bgMode === 'base') {
-      // Draw nebulas
-      this.nebulas.forEach(nebula => {
-        const x = (nebula.x - this.bgOffset * 0.2) % (CANVAS_WIDTH + 400);
-        const wrappedX = x < -200 ? x + CANVAS_WIDTH + 400 : x;
-        
-        const gradient = ctx.createRadialGradient(wrappedX, nebula.y, 0, wrappedX, nebula.y, nebula.radius);
-        gradient.addColorStop(0, nebula.color.replace(/[\d.]+\)$/, `${nebula.alpha})`));
-        gradient.addColorStop(1, 'transparent');
-        
-        ctx.fillStyle = gradient;
-        ctx.beginPath();
-        ctx.arc(wrappedX, nebula.y, nebula.radius, 0, Math.PI * 2);
-        ctx.fill();
-      });
-
-      // Draw stars
-      this.stars.forEach(star => {
-        const x = (star.x - this.bgOffset * star.speed) % CANVAS_WIDTH;
-        const wrappedX = x < 0 ? x + CANVAS_WIDTH : x;
-        
-        ctx.fillStyle = star.color;
-        ctx.globalAlpha = star.brightness;
-        ctx.beginPath();
-        ctx.arc(wrappedX, star.y, star.size, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.globalAlpha = 1;
-      });
-
-      // Draw ground fixtures
-      ctx.fillStyle = '#1A1A2E';
-      this.groundFixtures.forEach(fix => {
-        ctx.beginPath();
-        if (fix.type === 0) {
-          ctx.fillRect(fix.x, fix.y, fix.width, CANVAS_HEIGHT - fix.y);
-          ctx.fillStyle = '#00FFFF';
-          for (let w = 10; w < fix.width - 10; w += 20) {
-            if (w % 30 !== 0) ctx.fillRect(fix.x + w, fix.y + 20, 5, 10);
-          }
-          ctx.fillStyle = '#1A1A2E';
-        } else if (fix.type === 1) {
-          ctx.arc(fix.x + fix.width / 2, fix.y + fix.height / 2, fix.width / 2, Math.PI, 0);
-          ctx.fill();
-          ctx.strokeStyle = '#00D4FF';
-          ctx.lineWidth = 2;
-          ctx.stroke();
-        } else {
-          ctx.moveTo(fix.x + fix.width * 0.4, CANVAS_HEIGHT);
-          ctx.lineTo(fix.x + fix.width * 0.5, fix.y - fix.height);
-          ctx.lineTo(fix.x + fix.width * 0.6, CANVAS_HEIGHT);
-          ctx.fill();
-          ctx.fillStyle = '#FF0055';
-          ctx.beginPath();
-          ctx.arc(fix.x + fix.width * 0.5, fix.y - fix.height, 5, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.fillStyle = '#1A1A2E';
-        }
-      });
-    } else if (bgMode === 'clouds') {
-      // Sky gradient
-      const skyGradient = ctx.createLinearGradient(0, 0, 0, CANVAS_HEIGHT);
-      skyGradient.addColorStop(0, '#4facfe');
-      skyGradient.addColorStop(1, '#00f2fe');
-      ctx.fillStyle = skyGradient;
-      ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-      // Clouds
-      ctx.fillStyle = '#FFFFFF';
-      this.clouds.forEach(cloud => {
-        ctx.globalAlpha = cloud.opacity;
-        ctx.beginPath();
-        ctx.arc(cloud.x, cloud.y, cloud.height / 2, Math.PI / 2, (Math.PI * 3) / 2);
-        ctx.arc(cloud.x + cloud.width / 4, cloud.y - cloud.height / 3, cloud.height / 1.5, Math.PI, 0);
-        ctx.arc(cloud.x + cloud.width / 2, cloud.y - cloud.height / 2, cloud.height / 1.2, Math.PI, 0);
-        ctx.arc(cloud.x + (cloud.width * 3) / 4, cloud.y - cloud.height / 4, cloud.height / 1.5, Math.PI, 0);
-        ctx.arc(cloud.x + cloud.width, cloud.y, cloud.height / 2, (Math.PI * 3) / 2, Math.PI / 2);
-        ctx.closePath();
-        ctx.fill();
-      });
-      ctx.globalAlpha = 1;
-    } else if (bgMode === 'cyber') {
-      // Cyber City Sky
-      const skyGradient = ctx.createLinearGradient(0, 0, 0, CANVAS_HEIGHT);
-      skyGradient.addColorStop(0, '#0f0c29');
-      skyGradient.addColorStop(0.5, '#302b63');
-      skyGradient.addColorStop(1, '#24243e');
-      ctx.fillStyle = skyGradient;
-      ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-      // Cyber Buildings
-      this.cityBuildings.forEach(b => {
-        ctx.fillStyle = b.color;
-        ctx.fillRect(b.x, CANVAS_HEIGHT - b.height, b.width, b.height);
-        
-        ctx.fillStyle = '#f9ca24'; // Yellow windows
-        b.windows.forEach(w => {
-          if (w.on) {
-            ctx.shadowBlur = 5;
-            ctx.shadowColor = '#f9ca24';
-            ctx.fillRect(b.x + w.x, CANVAS_HEIGHT - b.height + w.y, 8, 12);
-            ctx.shadowBlur = 0;
-          }
-        });
-        
-        // Neon edge
-        ctx.strokeStyle = '#e056fd';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(b.x, CANVAS_HEIGHT - b.height, b.width, b.height);
-      });
-    } else if (bgMode === 'ocean') {
-      // Ocean Sky
-      const skyGradient = ctx.createLinearGradient(0, 0, 0, CANVAS_HEIGHT);
-      skyGradient.addColorStop(0, '#89f7fe');
-      skyGradient.addColorStop(1, '#66a6ff');
-      ctx.fillStyle = skyGradient;
-      ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-      // Clouds in background
-      ctx.fillStyle = '#FFFFFF';
-      this.clouds.forEach(cloud => {
-        ctx.globalAlpha = cloud.opacity * 0.8;
-        ctx.beginPath();
-        ctx.arc(cloud.x, cloud.y * 0.5, cloud.height / 3, 0, Math.PI * 2);
-        ctx.arc(cloud.x + cloud.width * 0.4, cloud.y * 0.5 - 10, cloud.height / 2.5, 0, Math.PI * 2);
-        ctx.arc(cloud.x + cloud.width * 0.8, cloud.y * 0.5, cloud.height / 3, 0, Math.PI * 2);
-        ctx.fill();
-      });
-      
-      // Ocean Water
-      ctx.globalAlpha = 1;
-      const oceanGradient = ctx.createLinearGradient(0, CANVAS_HEIGHT - 200, 0, CANVAS_HEIGHT);
-      oceanGradient.addColorStop(0, '#009ffd');
-      oceanGradient.addColorStop(1, '#2a2a72');
-      ctx.fillStyle = oceanGradient;
-      ctx.fillRect(0, CANVAS_HEIGHT - 200, CANVAS_WIDTH, 200);
-
-      // Waves
-      ctx.fillStyle = '#FFFFFF';
-      this.oceanWaves.forEach(wave => {
-        ctx.globalAlpha = wave.opacity;
-        ctx.beginPath();
-        ctx.ellipse(wave.x, wave.y, wave.width / 2, 5, 0, 0, Math.PI * 2);
-        ctx.fill();
-      });
-      ctx.globalAlpha = 1;
-    } else if (bgMode === 'jungle') {
-      // Jungle Sky
-      const skyGradient = ctx.createLinearGradient(0, 0, 0, CANVAS_HEIGHT);
-      skyGradient.addColorStop(0, '#11998e');
-      skyGradient.addColorStop(1, '#38ef7d');
-      ctx.fillStyle = skyGradient;
-      ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-      // Distant mountains
-      ctx.fillStyle = '#2d5a27';
-      ctx.beginPath();
-      ctx.moveTo(0, CANVAS_HEIGHT);
-      ctx.lineTo(CANVAS_WIDTH * 0.2, CANVAS_HEIGHT - 300);
-      ctx.lineTo(CANVAS_WIDTH * 0.5, CANVAS_HEIGHT - 100);
-      ctx.lineTo(CANVAS_WIDTH * 0.8, CANVAS_HEIGHT - 250);
-      ctx.lineTo(CANVAS_WIDTH, CANVAS_HEIGHT);
-      ctx.fill();
-
-      // Trees
-      this.jungleTrees.forEach(tree => {
-        ctx.fillStyle = tree.color;
-        // Trunk
-        ctx.fillRect(tree.x + tree.width / 2 - 10, tree.y, 20, tree.height);
-        // Leaves
-        ctx.beginPath();
-        ctx.arc(tree.x + tree.width / 2, tree.y, tree.width, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(tree.x + tree.width / 2 - 20, tree.y + 20, tree.width * 0.8, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(tree.x + tree.width / 2 + 20, tree.y + 20, tree.width * 0.8, 0, Math.PI * 2);
-        ctx.fill();
-      });
-      
-      // Ground
-      ctx.fillStyle = '#1e3d17';
-      ctx.fillRect(0, CANVAS_HEIGHT - 80, CANVAS_WIDTH, 80);
     }
 
     // Stage name
@@ -1856,71 +1535,27 @@ export class GameEngine {
         ctx.globalAlpha = 0.5;
       }
 
-      // Realistic Fighter Jet Shape
-      ctx.fillStyle = color;
-      ctx.beginPath();
-      // Main fuselage
-      ctx.moveTo(player.position.x + player.width, player.position.y + player.height / 2); // Nose
-      ctx.lineTo(player.position.x + player.width * 0.7, player.position.y + player.height * 0.3); // Upper intake
-      ctx.lineTo(player.position.x + player.width * 0.4, player.position.y + player.height * 0.1); // Canopy front
-      ctx.lineTo(player.position.x + player.width * 0.1, player.position.y + player.height * 0.1); // Tail top
-      ctx.lineTo(player.position.x, player.position.y); // Vertical stabilizer top
-      ctx.lineTo(player.position.x + player.width * 0.1, player.position.y + player.height * 0.4); // Tail rear
-      ctx.lineTo(player.position.x, player.position.y + player.height / 2); // Engine nozzle mid
-      ctx.lineTo(player.position.x + player.width * 0.1, player.position.y + player.height * 0.6); // Tail bottom rear
-      ctx.lineTo(player.position.x, player.position.y + player.height); // Bottom stabilizer
-      ctx.lineTo(player.position.x + player.width * 0.1, player.position.y + player.height * 0.9); // Underbelly rear
-      ctx.lineTo(player.position.x + player.width * 0.7, player.position.y + player.height * 0.7); // Lower intake
-      ctx.closePath();
-      ctx.fill();
+      // Calculate 3D rotations based on movement and time
+      const time = Date.now() / 1000;
+      const tiltY = player.velocity ? (player.velocity.y / 10) : 0; // Pitch
+      const tiltZ = player.velocity ? (player.velocity.x / 10) : 0; // Roll
+      
+      // Base rotation (facing right) + movement tilts
+      const rotX = Math.PI / 2 + Math.sin(time) * 0.05; // Subtle hover
+      const rotY = Math.PI / 2 + tiltY; // Turning up/down
+      const rotZ = tiltZ; // Acceleration tilt
 
-      // Cockpit Canopy (Glass)
-      ctx.fillStyle = 'rgba(0, 255, 255, 0.6)';
-      ctx.beginPath();
-      ctx.moveTo(player.position.x + player.width * 0.65, player.position.y + player.height * 0.35);
-      ctx.bezierCurveTo(
-        player.position.x + player.width * 0.55, player.position.y + player.height * 0.2,
-        player.position.x + player.width * 0.4, player.position.y + player.height * 0.2,
-        player.position.x + player.width * 0.35, player.position.y + player.height * 0.35
+      // Render the 3D ship
+      const shipCanvas = this.shipRenderer.render(rotX, rotY, rotZ);
+      
+      // Draw the rendered ship canvas onto the main game canvas
+      ctx.drawImage(
+        shipCanvas,
+        player.position.x - player.width / 2,
+        player.position.y - player.height / 2,
+        player.width * 2,
+        player.height * 2
       );
-      ctx.fill();
-
-      // Wing
-      ctx.fillStyle = color;
-      ctx.beginPath();
-      ctx.moveTo(player.position.x + player.width * 0.6, player.position.y + player.height / 2);
-      ctx.lineTo(player.position.x + player.width * 0.2, player.position.y + player.height * 0.8);
-      ctx.lineTo(player.position.x + player.width * 0.1, player.position.y + player.height * 0.7);
-      ctx.closePath();
-      ctx.fill();
-
-      // Engine glow
-      const engineX = player.position.x;
-      const engineY = player.position.y + player.height / 2;
-      ctx.fillStyle = player.playerNumber === 1 ? '#00FFFF' : '#FF88AA';
-      ctx.shadowColor = color;
-      ctx.shadowBlur = 15;
-      ctx.beginPath();
-      ctx.arc(engineX, engineY, 8, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.shadowBlur = 0;
-
-      // Realistic Engine Flame (Jet Exhaust)
-      const time = Date.now() / 50;
-      for (let i = 0; i < 3; i++) {
-        const flameWidth = 15 - i * 4;
-        const flameLen = 40 + Math.sin(time + i) * 15;
-        const grad = ctx.createLinearGradient(engineX, engineY, engineX - flameLen, engineY);
-        grad.addColorStop(0, player.playerNumber === 1 ? '#FFFFFF' : '#FFDDEE');
-        grad.addColorStop(0.3, player.playerNumber === 1 ? '#00FFFF' : '#FF3366');
-        grad.addColorStop(1, 'transparent');
-        
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.moveTo(engineX, engineY - flameWidth / 2);
-        ctx.quadraticCurveTo(engineX - flameLen, engineY, engineX, engineY + flameWidth / 2);
-        ctx.fill();
-      }
 
       // Shield
       if (player.invincible) {

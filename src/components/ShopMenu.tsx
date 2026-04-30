@@ -132,7 +132,7 @@ export function ShopMenu({ onContinue }: ShopMenuProps) {
       <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-8 bg-gradient-to-t from-[#0A0A15] via-[#0A0A15]/90 to-transparent flex justify-center z-50">
         <button
           onClick={onContinue}
-          className="flex items-center gap-2 sm:gap-3 px-10 sm:px-16 py-3 sm:py-4 bg-gradient-to-r from-cyan-600 to-blue-700 rounded-full text-white font-black uppercase tracking-[0.1em] sm:tracking-[0.2em] text-[10px] sm:text-base shadow-[0_0_30px_rgba(0,100,255,0.4)] hover:scale-105 active:scale-95 transition-all"
+          className="flex items-center gap-2 sm:gap-3 px-6 sm:px-16 py-2 sm:py-4 bg-gradient-to-r from-cyan-600 to-blue-700 rounded-full text-white font-black uppercase tracking-[0.1em] sm:tracking-[0.2em] text-[10px] sm:text-base shadow-[0_0_30px_rgba(0,100,255,0.4)] hover:scale-105 active:scale-95 transition-all"
         >
           Fly Out
           <ArrowRight className="w-4 h-4 sm:w-6 sm:h-6" />

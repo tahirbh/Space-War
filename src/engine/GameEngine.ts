@@ -5,6 +5,7 @@ import type {
 import { SoundManager } from './SoundManager';
 import { v4 as uuidv4 } from 'uuid';
 import { ShipRenderer } from './ShipRenderer';
+import { ObjectRenderer, type ObjectModelType } from './ObjectRenderer';
 
 // Game constants
 const CANVAS_WIDTH = 1280;
@@ -111,8 +112,9 @@ export class GameEngine {
   shakeIntensity = 0;
   shakeDecay = 0.9;
 
-  // Ship Renderer
+  // Renderers
   shipRenderer: ShipRenderer;
+  objectRenderer: ObjectRenderer;
 
   constructor(canvas: HTMLCanvasElement, soundManager?: SoundManager) {
     this.canvas = canvas;
@@ -135,8 +137,9 @@ export class GameEngine {
     // Load background images
     this.loadBackgroundImages();
     
-    // Initialize Ship Renderer
+    // Initialize Renderers
     this.shipRenderer = new ShipRenderer();
+    this.objectRenderer = new ObjectRenderer();
     
     // Bind methods
     this.gameLoop = this.gameLoop.bind(this);
@@ -1625,90 +1628,34 @@ export class GameEngine {
     this.enemies.forEach(enemy => {
       if (!enemy.active) return;
 
-      const colors: Record<typeof enemy.type, string> = {
-        grunt: '#FF6B35',
-        interceptor: '#39FF14',
-        bomber: '#FF3366',
-        elite: '#9D4EDD',
-        tank: '#8B4513',
+      const time = Date.now() / 1000;
+      
+      // Map internal types to realistic 3D models
+      const modelMap: Record<EnemyType, ObjectModelType> = {
+        grunt: 'drone',
+        interceptor: 'satellite',
+        bomber: 'asteroid',
+        elite: 'jet',
+        tank: 'tank'
       };
 
-      ctx.fillStyle = colors[enemy.type];
-      ctx.shadowColor = colors[enemy.type];
-      ctx.shadowBlur = 10;
+      const modelType = modelMap[enemy.type];
+      
+      // Calculate 3D rotations
+      const rotX = Math.PI / 2 + Math.sin(time * 2) * 0.1;
+      const rotY = Math.PI / 2 + (enemy.velocity.y / 5);
+      const rotZ = time * 0.5; // Constant spin for drones/satellites
 
-      switch (enemy.type) {
-        case 'tank':
-          ctx.beginPath();
-          // Tank body
-          ctx.rect(enemy.position.x, enemy.position.y + 10, enemy.width, 30);
-          ctx.fill();
-          // Tank treads
-          ctx.fillStyle = '#333';
-          ctx.beginPath();
-          ctx.roundRect(enemy.position.x - 5, enemy.position.y + 30, enemy.width + 10, 15, 5);
-          ctx.fill();
-          // Turret pointing up
-          ctx.fillStyle = colors[enemy.type];
-          ctx.beginPath();
-          ctx.arc(enemy.position.x + enemy.width / 2, enemy.position.y + 10, 15, Math.PI, 0);
-          ctx.fill();
-          ctx.fillRect(enemy.position.x + enemy.width / 2 - 4, enemy.position.y - 15, 8, 25);
-          break;
-        case 'grunt':
-          ctx.beginPath();
-          ctx.moveTo(enemy.position.x + enemy.width, enemy.position.y + enemy.height / 2);
-          ctx.lineTo(enemy.position.x, enemy.position.y);
-          ctx.lineTo(enemy.position.x + enemy.width * 0.2, enemy.position.y + enemy.height / 2);
-          ctx.lineTo(enemy.position.x, enemy.position.y + enemy.height);
-          ctx.closePath();
-          ctx.fill();
-          ctx.fillStyle = '#FFF';
-          ctx.beginPath();
-          ctx.arc(enemy.position.x + enemy.width * 0.6, enemy.position.y + enemy.height / 2, enemy.height * 0.15, 0, Math.PI * 2);
-          ctx.fill();
-          break;
-        case 'interceptor':
-          ctx.beginPath();
-          ctx.arc(enemy.position.x + enemy.width * 0.4, enemy.position.y + enemy.height / 2, enemy.width / 2, -Math.PI / 2, Math.PI / 2);
-          ctx.arc(enemy.position.x + enemy.width * 0.7, enemy.position.y + enemy.height / 2, enemy.width * 0.4, Math.PI / 2, -Math.PI / 2, true);
-          ctx.closePath();
-          ctx.fill();
-          ctx.fillStyle = '#FFF';
-          ctx.beginPath();
-          ctx.arc(enemy.position.x + enemy.width * 0.4, enemy.position.y + enemy.height / 2, enemy.width * 0.15, 0, Math.PI * 2);
-          ctx.fill();
-          break;
-        case 'bomber':
-          if (!(ctx as any).roundRect) (ctx as any).roundRect = function(x: number, y: number, w: number, h: number) { ctx.rect(x,y,w,h); }; // Polyfill safety
-          ctx.beginPath();
-          ctx.roundRect(enemy.position.x + enemy.width * 0.2, enemy.position.y + enemy.height * 0.2, enemy.width * 0.8, enemy.height * 0.6, 5);
-          ctx.fill();
-          ctx.fillRect(enemy.position.x, enemy.position.y, enemy.width * 0.4, enemy.height * 0.2);
-          ctx.fillRect(enemy.position.x, enemy.position.y + enemy.height * 0.8, enemy.width * 0.4, enemy.height * 0.2);
-          ctx.fillStyle = '#00FFFF';
-          ctx.fillRect(enemy.position.x - 5, enemy.position.y + enemy.height * 0.3, 10, enemy.height * 0.1);
-          ctx.fillRect(enemy.position.x - 5, enemy.position.y + enemy.height * 0.6, 10, enemy.height * 0.1);
-          break;
-        case 'elite':
-          ctx.beginPath();
-          ctx.moveTo(enemy.position.x + enemy.width, enemy.position.y + enemy.height / 2);
-          ctx.lineTo(enemy.position.x + enemy.width * 0.6, enemy.position.y);
-          ctx.lineTo(enemy.position.x + enemy.width * 0.4, enemy.position.y + enemy.height * 0.3);
-          ctx.lineTo(enemy.position.x, enemy.position.y + enemy.height * 0.1);
-          ctx.lineTo(enemy.position.x + enemy.width * 0.2, enemy.position.y + enemy.height / 2);
-          ctx.lineTo(enemy.position.x, enemy.position.y + enemy.height * 0.9);
-          ctx.lineTo(enemy.position.x + enemy.width * 0.4, enemy.position.y + enemy.height * 0.7);
-          ctx.lineTo(enemy.position.x + enemy.width * 0.6, enemy.position.y + enemy.height);
-          ctx.closePath();
-          ctx.fill();
-          ctx.strokeStyle = '#FFFFFF';
-          ctx.lineWidth = 1;
-          ctx.stroke();
-          break;
-      }
-
-      ctx.shadowBlur = 0;
+      // Render the 3D object
+      const objectCanvas = this.objectRenderer.render(modelType, rotX, rotY, rotZ);
+      
+      ctx.drawImage(
+        objectCanvas,
+        enemy.position.x - enemy.width / 2,
+        enemy.position.y - enemy.height / 2,
+        enemy.width * 2,
+        enemy.height * 2
+      );
 
       // Health bar
       if (enemy.type === 'bomber' || enemy.type === 'elite') {
@@ -1724,87 +1671,33 @@ export class GameEngine {
   private drawBoss(ctx: CanvasRenderingContext2D): void {
     if (!this.boss) return;
 
-    const colors: Record<typeof this.boss.type, string> = {
-      mantis: '#9D4EDD',
-      leviathan: '#39FF14',
-      omega: '#FF0000',
+    const time = Date.now() / 1000;
+    
+    // Map internal boss types to realistic 3D models
+    const bossModelMap: Record<BossType, ObjectModelType> = {
+      mantis: 'iss',
+      leviathan: 'carrier',
+      omega: 'array'
     };
 
-    const color = colors[this.boss.type];
+    const modelType = bossModelMap[this.boss.type];
+    const color = this.boss.type === 'mantis' ? '#9D4EDD' : this.boss.type === 'leviathan' ? '#39FF14' : '#FF0000';
 
-    ctx.fillStyle = color;
-    ctx.shadowColor = color;
-    ctx.shadowBlur = 20;
-    // Boss styling
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    switch (this.boss.type) {
-      case 'mantis':
-        ctx.beginPath();
-        ctx.moveTo(this.boss.position.x, this.boss.position.y + this.boss.height / 2);
-        ctx.lineTo(this.boss.position.x + this.boss.width * 0.3, this.boss.position.y);
-        ctx.lineTo(this.boss.position.x + this.boss.width, this.boss.position.y + this.boss.height * 0.2);
-        ctx.lineTo(this.boss.position.x + this.boss.width, this.boss.position.y + this.boss.height * 0.8);
-        ctx.lineTo(this.boss.position.x + this.boss.width * 0.3, this.boss.position.y + this.boss.height);
-        ctx.closePath();
-        ctx.fill();
-        ctx.strokeStyle = '#FFFFFF';
-        ctx.lineWidth = 3;
-        ctx.stroke();
-        
-        ctx.fillStyle = '#FFFFFF';
-        const clawOffset = Math.sin(this.stageTime * 5) * 10;
-        ctx.fillRect(this.boss.position.x - 20 + clawOffset, this.boss.position.y + 10, 40, 15);
-        ctx.fillRect(this.boss.position.x - 20 - clawOffset, this.boss.position.y + this.boss.height - 25, 40, 15);
-        
-        ctx.fillStyle = '#FF0000';
-        ctx.fillRect(this.boss.position.x + 30, this.boss.position.y + 30, 20, 10);
-        ctx.fillRect(this.boss.position.x + 30, this.boss.position.y + this.boss.height - 40, 20, 10);
-        break;
-      case 'leviathan':
-        ctx.strokeStyle = '#FFFFFF';
-        ctx.lineWidth = 2;
-        for (let i = 0; i < 4; i++) {
-          const segOffset = Math.sin(this.stageTime * 3 + i) * 15;
-          ctx.beginPath();
-          ctx.arc(this.boss.position.x + 30 + i * 35, this.boss.position.y + this.boss.height / 2 + segOffset, 30 - i * 3, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.stroke();
-          
-          ctx.fillStyle = '#00FFFF';
-          ctx.beginPath();
-          ctx.arc(this.boss.position.x + 30 + i * 35, this.boss.position.y + this.boss.height / 2 + segOffset, 10, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.fillStyle = color;
-        }
-        break;
-      case 'omega':
-        const pulse = Math.abs(Math.sin(this.stageTime * 2)) * 10;
-        ctx.beginPath();
-        ctx.arc(this.boss.position.x + this.boss.width / 2, this.boss.position.y + this.boss.height / 2, 60 + pulse, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.strokeStyle = '#FFFFFF';
-        ctx.lineWidth = 3;
-        ctx.stroke();
-        
-        ctx.fillStyle = '#FFFF00';
-        ctx.shadowColor = '#FFFF00';
-        ctx.shadowBlur = 30;
-        ctx.beginPath();
-        ctx.arc(this.boss.position.x + this.boss.width / 2, this.boss.position.y + this.boss.height / 2, 30 - pulse / 2, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.shadowBlur = 0;
-        
-        ctx.strokeStyle = '#FFFFFF';
-        ctx.lineWidth = 4;
-        ctx.beginPath();
-        ctx.ellipse(this.boss.position.x + this.boss.width / 2, this.boss.position.y + this.boss.height / 2, 90, 30, this.stageTime, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.ellipse(this.boss.position.x + this.boss.width / 2, this.boss.position.y + this.boss.height / 2, 90, 30, -this.stageTime * 1.5, 0, Math.PI * 2);
-        ctx.stroke();
-        break;
-    }
+    // Calculate 3D rotations
+    const rotX = Math.PI / 2 + Math.sin(time) * 0.2;
+    const rotY = Math.PI / 2 + Math.cos(time * 0.5) * 0.3;
+    const rotZ = time * 0.2;
+
+    // Render the 3D boss
+    const bossCanvas = this.objectRenderer.render(modelType, rotX, rotY, rotZ);
+    
+    ctx.drawImage(
+      bossCanvas,
+      this.boss.position.x - this.boss.width / 2,
+      this.boss.position.y - this.boss.height / 2,
+      this.boss.width * 2,
+      this.boss.height * 2
+    );
 
     // Boss health bar
     const healthPercent = this.boss.health / this.boss.maxHealth;

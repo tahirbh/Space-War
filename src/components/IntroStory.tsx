@@ -70,45 +70,45 @@ export function IntroStory({ onComplete }: IntroStoryProps) {
 
       {/* Content */}
       <div className="relative z-10 w-full max-w-4xl px-8 flex flex-col items-center">
-        <div className="mb-12 text-center">
+        <div className="mb-4 sm:mb-12 text-center landscape-hide">
           <h2 className="text-cyan-400 font-mono text-sm tracking-[0.5em] uppercase mb-2">MISSION RECONNAISSANCE</h2>
           <div className="h-[1px] w-64 bg-gradient-to-r from-transparent via-cyan-500 to-transparent mx-auto" />
         </div>
 
-        <div className="bg-black/60 backdrop-blur-md border border-cyan-500/30 p-8 rounded-2xl w-full max-w-2xl text-center transform transition-all duration-500 hover:border-cyan-400/50">
-          <div className="mb-4">
-            <span className="text-cyan-500 font-mono text-xs uppercase tracking-widest">Waypoint {currentSlide + 1} / 10</span>
-            <h3 className="text-3xl font-bold text-white mt-2 font-orbitron">{stages[currentSlide].name}</h3>
+        <div className="bg-black/60 backdrop-blur-md border border-cyan-500/30 p-2 sm:p-8 rounded-2xl w-[220px] sm:w-full h-[120px] sm:h-auto sm:max-w-2xl text-center transform transition-all duration-500 hover:border-cyan-400/50 flex flex-col justify-center landscape-small-content-area">
+          <div className="mb-1 sm:mb-4">
+            <span className="text-cyan-500 font-mono text-[8px] sm:text-xs uppercase tracking-widest landscape-hide">Waypoint {currentSlide + 1} / 10</span>
+            <h3 className="text-sm sm:text-3xl font-bold text-white mt-0.5 sm:mt-2 font-orbitron truncate px-2 landscape-small-title">{stages[currentSlide].name}</h3>
           </div>
           
-          <p className="text-gray-300 text-lg leading-relaxed mb-8 h-20">
+          <p className="text-gray-300 text-[10px] sm:text-lg leading-tight sm:leading-relaxed mb-2 sm:mb-8 h-8 sm:h-20 overflow-hidden text-ellipsis landscape-hide">
             {stages[currentSlide].desc}
           </p>
 
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center justify-between gap-2 sm:gap-4 w-full">
             <button 
               onClick={prevSlide}
               disabled={currentSlide === 0}
-              className={`p-4 rounded-full border border-cyan-500/30 transition-all ${
+              className={`p-2 sm:p-4 rounded-full border border-cyan-500/30 transition-all landscape-nav-button ${
                 currentSlide === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-cyan-500/20 hover:border-cyan-400'
               }`}
             >
-              <ChevronLeft className="w-6 h-6 text-cyan-400" />
+              <ChevronLeft className="w-4 h-4 sm:w-6 sm:h-6 text-cyan-400" />
             </button>
 
             <button 
               onClick={nextSlide}
-              className="flex-1 py-4 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl flex items-center justify-center gap-3 transition-all transform hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(6,182,212,0.4)]"
+              className="flex-1 py-2 sm:py-4 px-4 sm:px-8 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl flex items-center justify-center gap-2 sm:gap-3 transition-all transform hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(6,182,212,0.4)] text-[10px] sm:text-base whitespace-nowrap landscape-small-button"
             >
               {currentSlide === stages.length - 1 ? (
                 <>
-                  <Play className="w-6 h-6 fill-current" />
+                  <Play className="w-4 h-4 sm:w-6 sm:h-6 fill-current" />
                   BEGIN OPERATION
                 </>
               ) : (
                 <>
                   CONTINUE JOURNEY
-                  <ChevronRight className="w-6 h-6" />
+                  <ChevronRight className="w-4 h-4 sm:w-6 sm:h-6" />
                 </>
               )}
             </button>
@@ -116,7 +116,7 @@ export function IntroStory({ onComplete }: IntroStoryProps) {
         </div>
 
         {/* Slide Indicators */}
-        <div className="mt-8 flex gap-2">
+        <div className="mt-4 sm:mt-8 flex gap-2 landscape-hide">
           {stages.map((_, idx) => (
             <div 
               key={idx}

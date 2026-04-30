@@ -306,3 +306,46 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Landscape Mobile / Short Screen Optimizations (Width > 600 and Height < 500) */
+@media (min-width: 601px) and (max-height: 500px) {
+  .landscape-hide {
+    display: none !important;
+  }
+
+  .landscape-compact-gap {
+    gap: 0.25rem !important;
+    margin-bottom: 0.25rem !important;
+  }
+
+  .landscape-small-text {
+    font-size: 0.7rem !important;
+    line-height: 1rem !important;
+  }
+
+  .landscape-small-title {
+    font-size: 1.2rem !important;
+    margin-bottom: 0 !important;
+  }
+
+  .landscape-small-logo {
+    transform: scale(0.45) !important;
+    margin-bottom: -1rem !important;
+    margin-top: -1rem !important;
+  }
+
+  .landscape-small-button {
+    padding: 0.35rem 1rem !important;
+    font-size: 10px !important;
+    min-height: 0 !important;
+  }
+
+  .landscape-small-content-area {
+    height: 110px !important;
+    margin-top: -0.5rem !important;
+  }
+
+  .landscape-nav-button {
+    transform: scale(0.6) !important;
+  }
+}

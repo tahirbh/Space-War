@@ -352,6 +352,14 @@ function App() {
         className="min-h-screen bg-black flex items-center justify-center cursor-pointer overflow-hidden group"
         onClick={() => {
           if (isSystemReady) {
+            // Request fullscreen
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+              elem.requestFullscreen().catch(err => {
+                console.log(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+              });
+            }
+
             setAppState('menu');
             if (soundManagerRefStatic.current) {
               soundManagerRefStatic.current.resume();
@@ -415,6 +423,7 @@ function App() {
         <div className="absolute bottom-6 md:bottom-10 left-0 right-0 text-center text-[8px] sm:text-[10px] text-white/20 font-mono tracking-widest uppercase">
           Neural-Net Alpha Blade Engine v4.1.0
         </div>
+        <OrientationOverlay />
       </div>
     );
   }
@@ -424,6 +433,7 @@ function App() {
       <div className="min-h-screen bg-[#0A0A15]">
         <IntroStory onComplete={startMission} />
         <Toaster />
+        <OrientationOverlay />
       </div>
     );
   }
@@ -437,6 +447,7 @@ function App() {
           soundManager={soundManagerRefStatic.current}
         />
         <Toaster />
+        <OrientationOverlay />
       </div>
     );
   }
@@ -449,6 +460,7 @@ function App() {
           onStartGame={startGame}
         />
         <Toaster />
+        <OrientationOverlay />
       </div>
     );
   }
@@ -579,19 +591,19 @@ function App() {
         )}
 
         {/* Top Controls */}
-        <div className="absolute top-4 right-4 z-10 flex gap-2">
+        <div className="absolute top-2 sm:top-4 right-2 sm:right-4 z-10 flex gap-1 sm:gap-2">
           <button
             onClick={toggleMute}
-            className="p-3 bg-black/60 backdrop-blur-sm rounded-lg text-white/80 hover:text-white hover:bg-black/80 transition-colors border border-white/20"
+            className="p-1.5 sm:p-3 bg-black/60 backdrop-blur-sm rounded-lg text-white/80 hover:text-white hover:bg-black/80 transition-colors border border-white/20"
           >
-            {isMuted ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6" />}
+            {isMuted ? <VolumeX className="w-4 h-4 sm:w-6 sm:h-6" /> : <Volume2 className="w-4 h-4 sm:w-6 sm:h-6" />}
           </button>
           {appState === 'playing' && (
             <button
               onClick={togglePause}
-              className="p-3 bg-black/60 backdrop-blur-sm rounded-lg text-white/80 hover:text-white hover:bg-black/80 transition-colors border border-white/20"
+              className="p-1.5 sm:p-3 bg-black/60 backdrop-blur-sm rounded-lg text-white/80 hover:text-white hover:bg-black/80 transition-colors border border-white/20"
             >
-              <Pause className="w-6 h-6" />
+              <Pause className="w-4 h-4 sm:w-6 sm:h-6" />
             </button>
           )}
         </div>

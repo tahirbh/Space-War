@@ -133,9 +133,9 @@ export function MultiplayerMission({ onBack, onStartGame }: MultiplayerMissionPr
       <div className="min-h-screen bg-[#0A0A15] flex flex-col items-center justify-center p-4">
         <button
           onClick={onBack}
-          className="absolute top-6 left-6 flex items-center gap-2 text-white/60 hover:text-white transition-colors"
+          className="flex items-center gap-2 sm:gap-3 px-6 sm:px-16 py-2 sm:py-4 bg-gradient-to-r from-cyan-600 to-blue-700 rounded-full text-white font-black uppercase tracking-[0.1em] sm:tracking-[0.2em] text-[10px] sm:text-base shadow-[0_0_30px_rgba(0,100,255,0.4)] hover:scale-105 active:scale-95 transition-all landscape-small-button"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-3 h-3 sm:w-5 sm:h-5" />
           Back
         </button>
 
@@ -150,36 +150,36 @@ export function MultiplayerMission({ onBack, onStartGame }: MultiplayerMissionPr
           <button
             onClick={handleHostGame}
             className={cn(
-              "flex-1 group flex flex-col items-center gap-3 sm:gap-4 p-6 sm:p-8 rounded-xl",
+              "flex-1 group flex flex-col items-center gap-2 sm:gap-4 p-4 sm:p-8 rounded-xl",
               "bg-gradient-to-br from-cyan-900/50 to-blue-900/50",
-              "border-2 border-cyan-500/50 hover:border-cyan-400",
-              "transition-all duration-300 hover:scale-105"
+              "border border-cyan-500/50 hover:border-cyan-400",
+              "transition-all duration-300 hover:scale-105 landscape-small-button"
             )}
           >
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-cyan-500/20 flex items-center justify-center">
-              <Wifi className="w-8 h-8 sm:w-10 sm:h-10 text-cyan-400" />
+            <div className="w-10 h-10 sm:w-20 sm:h-20 rounded-full bg-cyan-500/20 flex items-center justify-center landscape-hide">
+              <Wifi className="w-5 h-5 sm:w-10 sm:h-10 text-cyan-400" />
             </div>
             <div className="text-center">
-              <h3 className="text-lg sm:text-xl font-bold text-white mb-1">Host Game</h3>
-              <p className="text-white/60 text-xs sm:text-sm">Create a room and invite a friend</p>
+              <h3 className="text-sm sm:text-xl font-bold text-white mb-0.5 landscape-small-title">Host Game</h3>
+              <p className="text-white/60 text-[8px] sm:text-sm landscape-hide">Create a room and invite a friend</p>
             </div>
           </button>
 
           <button
             onClick={() => setMode('join-input')}
             className={cn(
-              "flex-1 group flex flex-col items-center gap-3 sm:gap-4 p-6 sm:p-8 rounded-xl",
+              "flex-1 group flex flex-col items-center gap-2 sm:gap-4 p-4 sm:p-8 rounded-xl",
               "bg-gradient-to-br from-pink-900/50 to-purple-900/50",
-              "border-2 border-pink-500/50 hover:border-pink-400",
-              "transition-all duration-300 hover:scale-105"
+              "border border-pink-500/50 hover:border-pink-400",
+              "transition-all duration-300 hover:scale-105 landscape-small-button"
             )}
           >
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-pink-500/20 flex items-center justify-center">
-              <Gamepad2 className="w-8 h-8 sm:w-10 sm:h-10 text-pink-400" />
+            <div className="w-10 h-10 sm:w-20 sm:h-20 rounded-full bg-pink-500/20 flex items-center justify-center landscape-hide">
+              <Gamepad2 className="w-5 h-5 sm:w-10 sm:h-10 text-pink-400" />
             </div>
             <div className="text-center">
-              <h3 className="text-lg sm:text-xl font-bold text-white mb-1">Join Game</h3>
-              <p className="text-white/60 text-xs sm:text-sm">Enter a room code to play</p>
+              <h3 className="text-sm sm:text-xl font-bold text-white mb-0.5 landscape-small-title">Join Game</h3>
+              <p className="text-white/60 text-[8px] sm:text-sm landscape-hide">Enter a room code to play</p>
             </div>
           </button>
         </div>
@@ -198,19 +198,19 @@ export function MultiplayerMission({ onBack, onStartGame }: MultiplayerMissionPr
           Back
         </button>
 
-        <div className="w-full max-w-md">
-          <h2 className="text-3xl font-bold text-pink-400 mb-8 text-center" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+        <div className="w-full max-w-md landscape-compact-gap">
+          <h2 className="text-xl sm:text-3xl font-bold text-pink-400 mb-2 sm:mb-8 text-center landscape-small-title" style={{ fontFamily: 'Orbitron, sans-serif' }}>
             JOIN GAME
           </h2>
 
-          <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-            <label className="text-white/80 text-sm mb-3 block">Enter Room Code</label>
+          <div className="bg-white/5 border border-white/10 rounded-xl p-3 sm:p-6 landscape-compact-gap">
+            <label className="text-white/80 text-xs sm:text-sm mb-1 sm:mb-3 block landscape-hide">Enter Room Code</label>
             <input
               type="text"
               value={roomCodeInput}
               onChange={(e) => setRoomCodeInput(e.target.value.toUpperCase())}
               placeholder="XXXXXX"
-              className="w-full bg-black/50 border border-white/20 rounded-lg px-4 py-4 text-2xl text-center tracking-[0.3em] text-white font-mono uppercase placeholder:text-white/20 focus:border-pink-400 focus:outline-none"
+              className="w-full bg-black/50 border border-white/20 rounded-lg px-2 sm:px-4 py-2 sm:py-4 text-xl sm:text-2xl text-center tracking-[0.3em] text-white font-mono uppercase placeholder:text-white/20 focus:border-pink-400 focus:outline-none landscape-small-button"
               maxLength={6}
             />
 
@@ -222,10 +222,10 @@ export function MultiplayerMission({ onBack, onStartGame }: MultiplayerMissionPr
               onClick={handleJoinGame}
               disabled={roomCodeInput.length !== 6}
               className={cn(
-                "w-full mt-6 py-4 rounded-lg font-bold text-lg",
+                "w-full mt-4 sm:mt-6 py-2 sm:py-4 rounded-lg font-bold text-sm sm:text-lg",
                 "bg-gradient-to-r from-pink-600 to-purple-600 text-white",
                 "transition-all duration-300 hover:scale-[1.02]",
-                "disabled:opacity-50 disabled:cursor-not-allowed"
+                "disabled:opacity-50 disabled:cursor-not-allowed landscape-small-button"
               )}
             >
               Join Game
@@ -240,19 +240,15 @@ export function MultiplayerMission({ onBack, onStartGame }: MultiplayerMissionPr
     <div className="min-h-screen bg-[#0A0A15] flex flex-col items-center justify-center p-4">
       <button
         onClick={onBack}
-        className="absolute top-6 left-6 flex items-center gap-2 text-white/60 hover:text-white transition-colors"
+        className="absolute top-4 sm:top-6 left-4 sm:left-6 flex items-center gap-1 sm:gap-2 text-white/60 hover:text-white transition-colors landscape-nav-button"
       >
-        <ArrowLeft className="w-5 h-5" />
+        <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
         Back
       </button>
 
-      <div className="w-full max-w-lg">
-        <h2 className="text-3xl font-bold text-center mb-8" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-          {mode === 'host' ? (
-            <span className="text-cyan-400">HOSTING GAME</span>
-          ) : (
-            <span className="text-pink-400">JOINED GAME</span>
-          )}
+      <div className="w-full max-w-lg landscape-compact-gap">
+        <h2 className="text-xl sm:text-3xl font-bold text-center mb-2 sm:mb-8 landscape-small-title" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+          {mode === 'host' ? 'HOSTING MISSION' : 'JOINING MISSION'}
         </h2>
 
         <div className="bg-white/5 border border-white/10 rounded-xl p-6 space-y-6">
@@ -351,10 +347,10 @@ export function MultiplayerMission({ onBack, onStartGame }: MultiplayerMissionPr
               onClick={startGame}
               disabled={!player2Name}
               className={cn(
-                "w-full py-4 rounded-lg font-bold text-lg",
+                "w-full py-3 sm:py-4 rounded-lg font-bold text-sm sm:text-lg",
                 "bg-gradient-to-r from-cyan-600 to-blue-600 text-white",
-                "transition-all duration-300 hover:scale-[1.02]",
-                "disabled:opacity-50 disabled:cursor-not-allowed"
+                "bg-white/5 border-white/10 hover:border-yellow-400/50 hover:bg-white/10",
+                "disabled:opacity-50 disabled:cursor-not-allowed disabled:grayscale landscape-small-button"
               )}
             >
               {player2Name ? 'Start Game' : 'Waiting for Player 2...'}

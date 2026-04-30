@@ -27,7 +27,7 @@ export class ShipRenderer {
     this.camera.lookAt(0, 0, 0);
 
     this.shipGroup = new THREE.Group();
-    this.createF35();
+    this.createF16();
     this.scene.add(this.shipGroup);
 
     // Lights
@@ -43,117 +43,137 @@ export class ShipRenderer {
     this.scene.add(rimLight);
   }
 
-  private createF35() {
-    // F-35 Lightning II 5th Gen Stealth Fighter
-    // Main Body (Fuselage)
-    const fuselageGeo = new THREE.BoxGeometry(1.2, 0.6, 6);
+  private createF16() {
+    // F-16 Fighting Falcon - Realistic 4th Gen Fighter
+    const bodyColor = 0x808b96; // Military Air Superiority Grey
+    const detailColor = 0x2c3e50; // Dark grey for details
+    
     const fuselageMat = new THREE.MeshStandardMaterial({
-      color: 0x2c3e50,
-      roughness: 0.2,
-      metalness: 0.9,
+      color: bodyColor,
+      roughness: 0.4,
+      metalness: 0.6,
     });
+
+    const engineMat = new THREE.MeshStandardMaterial({
+      color: 0x333333,
+      roughness: 0.7,
+      metalness: 0.8,
+    });
+
+    // Main Fuselage (Blended Body)
+    const fuselageGeo = new THREE.CylinderGeometry(0.5, 0.4, 5, 12);
     const fuselage = new THREE.Mesh(fuselageGeo, fuselageMat);
-    fuselage.scale.set(1, 0.8, 1);
+    fuselage.rotation.x = Math.PI / 2;
+    fuselage.scale.set(1.2, 0.8, 1);
     this.shipGroup.add(fuselage);
 
-    // Pointed Nose
-    const noseGeo = new THREE.ConeGeometry(0.6, 2, 8);
+    // Pointed Nose Radome
+    const noseGeo = new THREE.ConeGeometry(0.4, 1.5, 12);
     const nose = new THREE.Mesh(noseGeo, fuselageMat);
     nose.rotation.x = Math.PI / 2;
-    nose.position.z = 3.5;
+    nose.position.z = 3.25;
     this.shipGroup.add(nose);
 
-    // Wings (Trapezoidal)
+    // Ventral Air Intake (Signature F-16 feature)
+    const intakeGeo = new THREE.BoxGeometry(0.8, 0.4, 1.2);
+    const intake = new THREE.Mesh(intakeGeo, fuselageMat);
+    intake.position.set(0, -0.35, 1.2);
+    intake.rotation.x = 0.1;
+    this.shipGroup.add(intake);
+
+    const intakeOpeningGeo = new THREE.BoxGeometry(0.7, 0.3, 0.1);
+    const intakeOpening = new THREE.Mesh(intakeOpeningGeo, engineMat);
+    intakeOpening.position.set(0, -0.4, 1.8);
+    this.shipGroup.add(intakeOpening);
+
+    // Main Wings (Cropped Delta)
     const wingShape = new THREE.Shape();
     wingShape.moveTo(0, 0);
-    wingShape.lineTo(3.5, -1.5);
-    wingShape.lineTo(3, -3.5);
+    wingShape.lineTo(3, -1.8); // Swept back
+    wingShape.lineTo(2.8, -3); // Trailing edge
     wingShape.lineTo(0, -2.5);
     wingShape.closePath();
 
-    const wingExtrudeSettings = { depth: 0.1, bevelEnabled: true, bevelSize: 0.05, bevelThickness: 0.05 };
+    const wingExtrudeSettings = { depth: 0.05, bevelEnabled: true, bevelSize: 0.02, bevelThickness: 0.02 };
     const wingGeo = new THREE.ExtrudeGeometry(wingShape, wingExtrudeSettings);
     
     const leftWing = new THREE.Mesh(wingGeo, fuselageMat);
     leftWing.rotation.x = Math.PI / 2;
-    leftWing.position.set(0.6, 0, 1.5);
+    leftWing.position.set(0.4, 0, 1.2);
     this.shipGroup.add(leftWing);
 
     const rightWing = new THREE.Mesh(wingGeo, fuselageMat);
     rightWing.rotation.x = Math.PI / 2;
     rightWing.scale.x = -1;
-    rightWing.position.set(-0.6, 0, 1.5);
+    rightWing.position.set(-0.4, 0, 1.2);
     this.shipGroup.add(rightWing);
 
-    // Horizontal Stabilizers (Rear wings)
-    const tailWingShape = new THREE.Shape();
-    tailWingShape.moveTo(0, 0);
-    tailWingShape.lineTo(1.8, -0.8);
-    tailWingShape.lineTo(1.5, -1.8);
-    tailWingShape.lineTo(0, -1.2);
-    tailWingShape.closePath();
+    // Horizontal Stabilizers
+    const hStabShape = new THREE.Shape();
+    hStabShape.moveTo(0, 0);
+    hStabShape.lineTo(1.5, -0.8);
+    hStabShape.lineTo(1.3, -1.5);
+    hStabShape.lineTo(0, -1.2);
+    hStabShape.closePath();
 
-    const leftTailWing = new THREE.Mesh(new THREE.ExtrudeGeometry(tailWingShape, wingExtrudeSettings), fuselageMat);
-    leftTailWing.rotation.x = Math.PI / 2;
-    leftTailWing.position.set(0.4, 0, -2);
-    this.shipGroup.add(leftTailWing);
+    const leftHStab = new THREE.Mesh(new THREE.ExtrudeGeometry(hStabShape, wingExtrudeSettings), fuselageMat);
+    leftHStab.rotation.x = Math.PI / 2;
+    leftHStab.position.set(0.3, 0, -1.8);
+    this.shipGroup.add(leftHStab);
 
-    const rightTailWing = new THREE.Mesh(new THREE.ExtrudeGeometry(tailWingShape, wingExtrudeSettings), fuselageMat);
-    rightTailWing.rotation.x = Math.PI / 2;
-    rightTailWing.scale.x = -1;
-    rightTailWing.position.set(-0.4, 0, -2);
-    this.shipGroup.add(rightTailWing);
+    const rightHStab = new THREE.Mesh(new THREE.ExtrudeGeometry(hStabShape, wingExtrudeSettings), fuselageMat);
+    rightHStab.rotation.x = Math.PI / 2;
+    rightHStab.scale.x = -1;
+    rightHStab.position.set(-0.3, 0, -1.8);
+    this.shipGroup.add(rightHStab);
 
-    // Vertical Stabilizers (Tail fins - Angled)
-    const finShape = new THREE.Shape();
-    finShape.moveTo(0, 0);
-    finShape.lineTo(1.2, 0);
-    finShape.lineTo(1.5, 1.5);
-    finShape.lineTo(0.5, 1.5);
-    finShape.closePath();
+    // Vertical Stabilizer (Single Tail Fin)
+    const vStabShape = new THREE.Shape();
+    vStabShape.moveTo(0, 0);
+    vStabShape.lineTo(1.8, 0);
+    vStabShape.lineTo(1.6, 1.8);
+    vStabShape.lineTo(0.5, 1.8);
+    vStabShape.closePath();
 
-    const leftFin = new THREE.Mesh(new THREE.ExtrudeGeometry(finShape, wingExtrudeSettings), fuselageMat);
-    leftFin.rotation.z = Math.PI / 6; // Angle outward
-    leftFin.position.set(0.4, 0.2, -2.5);
-    this.shipGroup.add(leftFin);
+    const vStab = new THREE.Mesh(new THREE.ExtrudeGeometry(vStabShape, wingExtrudeSettings), fuselageMat);
+    vStab.rotation.y = -Math.PI / 2;
+    vStab.position.set(0, 0.3, -2.5);
+    this.shipGroup.add(vStab);
 
-    const rightFin = new THREE.Mesh(new THREE.ExtrudeGeometry(finShape, wingExtrudeSettings), fuselageMat);
-    rightFin.rotation.z = -Math.PI / 6; // Angle outward
-    rightFin.position.set(-0.4, 0.2, -2.5);
-    this.shipGroup.add(rightFin);
-
-    // Cockpit
-    const cockpitGeo = new THREE.SphereGeometry(0.5, 32, 32, 0, Math.PI * 2, 0, Math.PI / 2);
-    const cockpitMat = new THREE.MeshStandardMaterial({
-      color: 0x00d4ff,
+    // Large Bubble Canopy
+    const canopyGeo = new THREE.SphereGeometry(0.45, 32, 32, 0, Math.PI * 2, 0, Math.PI / 2);
+    const canopyMat = new THREE.MeshStandardMaterial({
+      color: 0x222222,
       transparent: true,
-      opacity: 0.5,
-      emissive: 0x00d4ff,
-      emissiveIntensity: 0.4,
+      opacity: 0.6,
+      roughness: 0,
+      metalness: 1,
     });
-    const cockpit = new THREE.Mesh(cockpitGeo, cockpitMat);
-    cockpit.position.set(0, 0.2, 1.5);
-    cockpit.scale.set(0.8, 0.6, 2.5);
-    this.shipGroup.add(cockpit);
+    const canopy = new THREE.Mesh(canopyGeo, canopyMat);
+    canopy.position.set(0, 0.35, 1.8);
+    canopy.scale.set(0.9, 0.7, 2.2);
+    this.shipGroup.add(canopy);
 
-    // Engine (Single large exhaust)
-    const engineGeo = new THREE.CylinderGeometry(0.4, 0.3, 0.5, 16);
-    const engineMat = new THREE.MeshStandardMaterial({
-      color: 0x333333,
-      roughness: 0.5,
-    });
-    const engine = new THREE.Mesh(engineGeo, engineMat);
-    engine.rotation.x = Math.PI / 2;
-    engine.position.z = -3;
-    this.shipGroup.add(engine);
+    // Pilot Seat Detail
+    const seatGeo = new THREE.BoxGeometry(0.2, 0.3, 0.4);
+    const seat = new THREE.Mesh(seatGeo, engineMat);
+    seat.position.set(0, 0.3, 1.6);
+    this.shipGroup.add(seat);
+
+    // Engine Exhaust Nozzle (Single)
+    const nozzleGeo = new THREE.CylinderGeometry(0.35, 0.45, 0.8, 16);
+    const nozzle = new THREE.Mesh(nozzleGeo, engineMat);
+    nozzle.rotation.x = Math.PI / 2;
+    nozzle.position.z = -2.8;
+    this.shipGroup.add(nozzle);
 
     // Engine Glow
-    const glowGeo = new THREE.CircleGeometry(0.35, 16);
+    const glowGeo = new THREE.CircleGeometry(0.3, 16);
     const glowMat = new THREE.MeshBasicMaterial({
-      color: 0xff3300,
+      color: 0x00d4ff, // Cyan glow to match game theme
     });
     const glow = new THREE.Mesh(glowGeo, glowMat);
-    glow.position.z = -3.26;
+    glow.position.z = -3.21;
     glow.rotation.y = Math.PI;
     this.shipGroup.add(glow);
   }

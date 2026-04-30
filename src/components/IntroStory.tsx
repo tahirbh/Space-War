@@ -1,12 +1,24 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Play } from 'lucide-react';
+import { SoundManager } from '@/engine/SoundManager';
 
 interface IntroStoryProps {
   onComplete: () => void;
+  soundManager?: SoundManager | null;
 }
 
-export function IntroStory({ onComplete }: IntroStoryProps) {
+export function IntroStory({ onComplete, soundManager }: IntroStoryProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    if (soundManager) {
+      soundManager.playSound('welcome');
+      soundManager.startIntroMusic(); // This loops Intro_conversation.mp3
+    }
+    return () => {
+      soundManager?.stopMusic();
+    };
+  }, [soundManager]);
 
   const stages = [
     { id: 1, name: 'EVEREST - MARS ORBIT', desc: 'Infiltrate the high-altitude Martian defense perimeter.' },

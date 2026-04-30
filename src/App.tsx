@@ -317,34 +317,36 @@ function App() {
   }, [appState, player2Connected]);
 
   // Render different screens based on app state
-  const [isSystemReady, setIsSystemReady] = useState(false);
   const [bootLog, setBootLog] = useState<string[]>([]);
+  const [isSystemReady, setIsSystemReady] = useState(false);
+  const hasPlayedStart = useRef(false);
 
   useEffect(() => {
-    if (appState === 'start') {
-      const logs = [
-        'INITIALIZING NEURAL LINK...',
-        'LOADING SHIP ASSETS...',
-        'SYNCING WEAPON SYSTEMS...',
-        'CALIBRATING SHIELD FREQUENCY...',
-        'ESTABLISHING WEBSOCKET UPLINK...',
-        'READY FOR DEPLOYMENT.'
-      ];
-      
-      let i = 0;
-      const interval = setInterval(() => {
-        if (i < logs.length) {
-          setBootLog(prev => [...prev, logs[i]]);
-          i++;
-        } else {
-          setIsSystemReady(true);
-          clearInterval(interval);
+    const logs = [
+      'INITIALIZING NEURAL CORE...',
+      'CHECKING QUANTUM STABILITY...',
+      'LOADING ALPHA BLADE ENGINE...',
+      'ESTABLISHING SATELLITE LINK...',
+      'OPTIMIZING COMBAT HUD...',
+      'NEURAL LINK ESTABLISHED'
+    ];
+    
+    let i = 0;
+    const interval = setInterval(() => {
+      if (i < logs.length) {
+        setBootLog(prev => [...prev, logs[i]]);
+        i++;
+      } else {
+        setIsSystemReady(true);
+        clearInterval(interval);
+        if (!hasPlayedStart.current && soundManagerRefStatic.current) {
+          soundManagerRefStatic.current.playSound('gameStart');
+          hasPlayedStart.current = true;
         }
-      }, 400);
-      
-      return () => clearInterval(interval);
-    }
-  }, [appState]);
+      }
+    }, 500);
+    return () => clearInterval(interval);
+  }, []);
 
   if (appState === 'start') {
     return (
@@ -431,7 +433,10 @@ function App() {
   if (appState === 'intro') {
     return (
       <div className="min-h-screen bg-[#0A0A15]">
-        <IntroStory onComplete={startMission} />
+        <IntroStory 
+          onComplete={startMission} 
+          soundManager={soundManagerRefStatic.current}
+        />
         <Toaster />
         <OrientationOverlay />
       </div>

@@ -622,7 +622,7 @@ function App() {
       </div>
 
       {/* Instructions */}
-      <div className="absolute bottom-16 sm:bottom-2 left-0 right-0 z-10 text-white/40 text-[10px] sm:text-sm text-center flex flex-wrap items-center justify-center gap-x-4 gap-y-1 md:gap-8 pointer-events-none px-4">
+      <div className="absolute bottom-16 sm:bottom-2 left-0 right-0 z-10 text-white/40 text-[10px] sm:text-sm text-center flex flex-wrap items-center justify-center gap-x-4 gap-y-1 md:gap-8 pointer-events-none px-4 mobile-950-hide landscape-hide">
         <span><span className="text-cyan-400 font-bold">P1:</span> WASD + Z/B</span>
         <span className="hidden xs:inline"><span className="text-pink-400 font-bold">P2:</span> IJKL + N/,</span>
         <span className="hidden xs:inline"><span className="text-yellow-400 font-bold">Pause:</span> Enter</span>

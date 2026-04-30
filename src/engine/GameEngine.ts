@@ -1539,13 +1539,15 @@ export class GameEngine {
 
       // Calculate 3D rotations based on movement and time
       const time = Date.now() / 1000;
-      const tiltY = player.velocity ? (player.velocity.y / 10) : 0; // Pitch
-      const tiltZ = player.velocity ? (player.velocity.x / 10) : 0; // Roll
+      const tiltY = player.velocity ? (player.velocity.y / 15) : 0; // Vertical pitch
+      const tiltX = player.velocity ? (player.velocity.x / 10) : 0; // Horizontal roll
       
-      // Base rotation (facing right) + movement tilts
-      const rotX = Math.PI / 2 + Math.sin(time) * 0.05; // Subtle hover
-      const rotY = Math.PI / 2 + tiltY; // Turning up/down
-      const rotZ = tiltZ; // Acceleration tilt
+      // Base rotation (facing right: rotY = PI/2)
+      // rotX = 0 (Top facing sky)
+      // rotZ = tiltY (Nose pointing up/down)
+      const rotX = tiltX; 
+      const rotY = Math.PI / 2; 
+      const rotZ = -tiltY + Math.sin(time) * 0.05; // Hover tilt + movement pitch
 
       // Render the 3D ship
       const shipCanvas = this.shipRenderer.render(rotX, rotY, rotZ);

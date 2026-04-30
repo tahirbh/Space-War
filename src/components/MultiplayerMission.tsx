@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useGameStore } from '@/store/gameStore';
 import { cn } from '@/lib/utils';
-import { ArrowLeft, Copy, Users, Wifi, WifiOff, Check, Gamepad2, Share2 } from 'lucide-react';
+import { ArrowLeft, Copy, Users, Wifi, WifiOff, Check, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Socket } from 'socket.io-client';
 
@@ -139,29 +139,29 @@ export function MultiplayerMission({ onBack, onStartGame }: MultiplayerMissionPr
           Back
         </button>
 
-        <div className="text-center mb-8 sm:mb-12">
-          <h2 className="text-3xl sm:text-4xl font-bold text-cyan-400 mb-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+        <div className="text-center mb-8 sm:mb-12 mobile-950-compact-gap">
+          <h2 className="text-3xl sm:text-4xl font-bold text-cyan-400 mb-2 mobile-950-small-title" style={{ fontFamily: 'Orbitron, sans-serif' }}>
             MULTIPLAYER MISSION
           </h2>
-          <p className="text-white/60 text-sm sm:text-base">Play with a friend online</p>
+          <p className="text-white/60 text-sm sm:text-base mobile-950-hide">Play with a friend online</p>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full max-w-2xl px-4">
+        <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full max-w-2xl px-4 landscape-grid-2">
           <button
             onClick={handleHostGame}
             className={cn(
               "flex-1 group flex flex-col items-center gap-2 sm:gap-4 p-4 sm:p-8 rounded-xl",
               "bg-gradient-to-br from-cyan-900/50 to-blue-900/50",
               "border border-cyan-500/50 hover:border-cyan-400",
-              "transition-all duration-300 hover:scale-105 landscape-small-button"
+              "transition-all duration-300 hover:scale-105 landscape-small-button mobile-950-small-button"
             )}
           >
-            <div className="w-10 h-10 sm:w-20 sm:h-20 rounded-full bg-cyan-500/20 flex items-center justify-center landscape-hide">
+            <div className="w-10 h-10 sm:w-20 sm:h-20 rounded-full bg-cyan-500/20 flex items-center justify-center landscape-hide mobile-950-hide">
               <Wifi className="w-5 h-5 sm:w-10 sm:h-10 text-cyan-400" />
             </div>
             <div className="text-center">
-              <h3 className="text-sm sm:text-xl font-bold text-white mb-0.5 landscape-small-title">Host Game</h3>
-              <p className="text-white/60 text-[8px] sm:text-sm landscape-hide">Create a room and invite a friend</p>
+              <h3 className="text-sm sm:text-xl font-bold text-white mb-0.5 landscape-small-title mobile-950-small-title">Host Game</h3>
+              <p className="text-white/60 text-[8px] sm:text-sm landscape-hide mobile-950-hide">Create a room and invite a friend</p>
             </div>
           </button>
 
@@ -171,15 +171,15 @@ export function MultiplayerMission({ onBack, onStartGame }: MultiplayerMissionPr
               "flex-1 group flex flex-col items-center gap-2 sm:gap-4 p-4 sm:p-8 rounded-xl",
               "bg-gradient-to-br from-pink-900/50 to-purple-900/50",
               "border border-pink-500/50 hover:border-pink-400",
-              "transition-all duration-300 hover:scale-105 landscape-small-button"
+              "transition-all duration-300 hover:scale-105 landscape-small-button mobile-950-small-button"
             )}
           >
-            <div className="w-10 h-10 sm:w-20 sm:h-20 rounded-full bg-pink-500/20 flex items-center justify-center landscape-hide">
-              <Gamepad2 className="w-5 h-5 sm:w-10 sm:h-10 text-pink-400" />
+            <div className="w-10 h-10 sm:w-20 sm:h-20 rounded-full bg-pink-500/20 flex items-center justify-center landscape-hide mobile-950-hide">
+              <Wifi className="w-5 h-5 sm:w-10 sm:h-10 text-pink-400" />
             </div>
             <div className="text-center">
-              <h3 className="text-sm sm:text-xl font-bold text-white mb-0.5 landscape-small-title">Join Game</h3>
-              <p className="text-white/60 text-[8px] sm:text-sm landscape-hide">Enter a room code to play</p>
+              <h3 className="text-sm sm:text-xl font-bold text-white mb-0.5 landscape-small-title mobile-950-small-title">Join Game</h3>
+              <p className="text-white/60 text-[8px] sm:text-sm landscape-hide mobile-950-hide">Enter a room code to play</p>
             </div>
           </button>
         </div>

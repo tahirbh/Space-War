@@ -23,9 +23,9 @@ export function IntroStory({ onComplete, soundManager }: IntroStoryProps) {
   const stages = [
     { id: 1, name: 'EVEREST - MARS ORBIT', desc: 'Infiltrate the high-altitude Martian defense perimeter.' },
     { id: 2, name: 'GULF - SATURN RINGS', desc: 'Navigate the crystal debris of Saturn\'s massive rings.' },
-    { id: 3, name: 'ARAB DESERT - JUPITER', desc: 'Sandstorms and giant storms await on the Jovian surface.' },
+    { id: 5, name: 'ARAB DESERT - JUPITER', desc: 'Sandstorms and giant storms await on the Jovian surface.' },
     { id: 4, name: 'RIO - VENUS GATES', desc: 'Lush alien flora hides experimental tank battalions.' },
-    { id: 5, name: 'KASHMIR - NEPTUNE COLD', desc: 'Zero-degree combat across the frozen Neptune wastes.' },
+    { id: 3, name: 'KASHMIR - NEPTUNE COLD', desc: 'Zero-degree combat across the frozen Neptune wastes.' },
     { id: 6, name: 'NEW YORK - MERCURY FAST', desc: 'High-speed intercept over the sun-scorched Mercury spires.' },
     { id: 7, name: 'SYDNEY - URANUS BLUE', desc: 'Oceanic warfare in the deep azure atmosphere of Uranus.' },
     { id: 8, name: 'REEF - LUNAR TIDE', desc: 'Tidal combat on the lunar surface during full eclipse.' },
@@ -48,9 +48,9 @@ export function IntroStory({ onComplete, soundManager }: IntroStoryProps) {
   return (
     <div className="fixed inset-0 z-[100] bg-black flex items-center justify-center overflow-hidden">
       {/* Cinematic Cockpit Background (Fixed) */}
-      <div 
+      <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40"
-        style={{ 
+        style={{
           backgroundImage: `url('/cockpit_briefing_view.png')`,
         }}
       >
@@ -60,14 +60,13 @@ export function IntroStory({ onComplete, soundManager }: IntroStoryProps) {
       {/* Stage Image (The Slider) */}
       <div className="absolute inset-0 flex items-center justify-center transition-all duration-700 ease-in-out">
         {stages.map((stage, idx) => (
-          <div 
+          <div
             key={stage.id}
-            className={`absolute inset-0 bg-cover bg-center transition-all duration-1000 ${
-              idx === currentSlide ? 'opacity-100 scale-105' : 'opacity-0 scale-100'
-            }`}
+            className={`absolute inset-0 bg-cover bg-center transition-all duration-1000 ${idx === currentSlide ? 'opacity-100 scale-105' : 'opacity-0 scale-100'
+              }`}
             style={{ backgroundImage: `url('/bg_stage_${stage.id}.png')` }}
           >
-             <div className="absolute inset-0 bg-black/20" />
+            <div className="absolute inset-0 bg-black/20" />
           </div>
         ))}
       </div>
@@ -82,35 +81,34 @@ export function IntroStory({ onComplete, soundManager }: IntroStoryProps) {
 
       {/* Content */}
       <div className="relative z-10 w-full max-w-4xl px-8 flex flex-col items-center">
-        <div className="mb-4 sm:mb-12 text-center landscape-hide">
+        <div className="mb-4 sm:mb-12 text-center landscape-hide mobile-950-hide">
           <h2 className="text-cyan-400 font-mono text-sm tracking-[0.5em] uppercase mb-2">MISSION RECONNAISSANCE</h2>
           <div className="h-[1px] w-64 bg-gradient-to-r from-transparent via-cyan-500 to-transparent mx-auto" />
         </div>
 
         <div className="bg-black/60 backdrop-blur-md border border-cyan-500/30 p-2 sm:p-8 rounded-2xl w-[220px] sm:w-full h-[120px] sm:h-auto sm:max-w-2xl text-center transform transition-all duration-500 hover:border-cyan-400/50 flex flex-col justify-center landscape-small-content-area">
           <div className="mb-1 sm:mb-4">
-            <span className="text-cyan-500 font-mono text-[8px] sm:text-xs uppercase tracking-widest landscape-hide">Waypoint {currentSlide + 1} / 10</span>
-            <h3 className="text-sm sm:text-3xl font-bold text-white mt-0.5 sm:mt-2 font-orbitron truncate px-2 landscape-small-title">{stages[currentSlide].name}</h3>
+            <span className="text-cyan-500 font-mono text-[8px] sm:text-xs uppercase tracking-widest landscape-hide mobile-950-hide">Waypoint {currentSlide + 1} / 10</span>
+            <h3 className="text-sm sm:text-3xl font-bold text-white mt-0.5 sm:mt-2 font-orbitron truncate px-2 landscape-small-title mobile-950-small-title">{stages[currentSlide].name}</h3>
           </div>
-          
-          <p className="text-gray-300 text-[10px] sm:text-lg leading-tight sm:leading-relaxed mb-2 sm:mb-8 h-8 sm:h-20 overflow-hidden text-ellipsis landscape-hide">
+
+          <p className="text-gray-300 text-[10px] sm:text-lg leading-tight sm:leading-relaxed mb-2 sm:mb-8 h-8 sm:h-20 overflow-hidden text-ellipsis landscape-hide mobile-950-hide">
             {stages[currentSlide].desc}
           </p>
 
           <div className="flex items-center justify-between gap-2 sm:gap-4 w-full">
-            <button 
+            <button
               onClick={prevSlide}
               disabled={currentSlide === 0}
-              className={`p-2 sm:p-4 rounded-full border border-cyan-500/30 transition-all landscape-nav-button ${
-                currentSlide === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-cyan-500/20 hover:border-cyan-400'
-              }`}
+              className={`p-2 sm:p-4 rounded-full border border-cyan-500/30 transition-all landscape-nav-button ${currentSlide === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-cyan-500/20 hover:border-cyan-400'
+                }`}
             >
               <ChevronLeft className="w-4 h-4 sm:w-6 sm:h-6 text-cyan-400" />
             </button>
 
-            <button 
+            <button
               onClick={nextSlide}
-              className="flex-1 py-2 sm:py-4 px-4 sm:px-8 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl flex items-center justify-center gap-2 sm:gap-3 transition-all transform hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(6,182,212,0.4)] text-[10px] sm:text-base whitespace-nowrap landscape-small-button"
+              className="flex-1 py-2 sm:py-4 px-4 sm:px-8 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl flex items-center justify-center gap-2 sm:gap-3 transition-all transform hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(6,182,212,0.4)] text-[10px] sm:text-base whitespace-nowrap landscape-small-button mobile-950-small-button"
             >
               {currentSlide === stages.length - 1 ? (
                 <>
@@ -130,11 +128,10 @@ export function IntroStory({ onComplete, soundManager }: IntroStoryProps) {
         {/* Slide Indicators */}
         <div className="mt-4 sm:mt-8 flex gap-2 landscape-hide">
           {stages.map((_, idx) => (
-            <div 
+            <div
               key={idx}
-              className={`h-1.5 transition-all duration-300 rounded-full ${
-                idx === currentSlide ? 'w-8 bg-cyan-500' : 'w-2 bg-cyan-500/20'
-              }`}
+              className={`h-1.5 transition-all duration-300 rounded-full ${idx === currentSlide ? 'w-8 bg-cyan-500' : 'w-2 bg-cyan-500/20'
+                }`}
             />
           ))}
         </div>

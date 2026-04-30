@@ -203,9 +203,9 @@ export function Menu({ onStartGame, onJoinGame, soundManager }: MenuProps) {
       />
 
       {/* Main Content */}
-      <div className="relative z-10 flex flex-col items-center gap-[1vh] sm:gap-8 w-full max-w-4xl px-4 text-center landscape-compact-gap">
+      <div className="relative z-10 flex flex-col items-center gap-[1vh] sm:gap-8 w-full max-w-4xl px-4 text-center landscape-compact-gap mobile-950-compact-gap">
         {/* Logo (Stays fixed) */}
-        <div className="mb-[1vh] sm:mb-8 transition-all duration-500 transform origin-top scale-50 sm:scale-100 landscape-small-logo">
+        <div className="mb-[1vh] sm:mb-8 transition-all duration-500 transform origin-top scale-50 sm:scale-100 landscape-small-logo mobile-950-scale-75">
           <h1 className="text-4xl sm:text-6xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 tracking-tighter"
               style={{ fontFamily: 'Orbitron, sans-serif', textShadow: '0 0 40px rgba(0, 212, 255, 0.5)' }}>
             STARSHIPS WAR
@@ -221,7 +221,7 @@ export function Menu({ onStartGame, onJoinGame, soundManager }: MenuProps) {
         </div>
 
         {/* High Score (Fixed) - Hidden on very short screens to save space */}
-        <div className="hidden sm:flex items-center gap-3 bg-black/50 px-6 py-2 rounded-full border border-cyan-500/30 mb-4 landscape-hide">
+        <div className="hidden sm:flex items-center gap-3 bg-black/50 px-6 py-2 rounded-full border border-cyan-500/30 mb-4 landscape-hide mobile-950-hide">
           <Trophy className="w-4 h-4 text-yellow-400" />
           <span className="text-white/60 text-[10px] uppercase tracking-wider">High Score</span>
           <span className="text-xl font-mono text-yellow-400">
@@ -237,9 +237,9 @@ export function Menu({ onStartGame, onJoinGame, soundManager }: MenuProps) {
           >
             {menuPages.map((page, i) => (
               <div key={i} className="min-w-full px-4 flex flex-col items-center justify-center gap-2 sm:gap-6">
-                <div className="text-center landscape-compact-gap">
-                  <h3 className="text-[10px] text-cyan-400/60 font-mono tracking-[0.2em] uppercase mb-0.5 sm:mb-1 landscape-hide">{page.subtitle}</h3>
-                  <h2 className="text-xl sm:text-3xl font-bold text-white tracking-widest uppercase landscape-small-title">{page.title}</h2>
+                <div className="text-center landscape-compact-gap mobile-950-compact-gap">
+                  <h3 className="text-[10px] text-cyan-400/60 font-mono tracking-[0.2em] uppercase mb-0.5 sm:mb-1 landscape-hide mobile-950-hide">{page.subtitle}</h3>
+                  <h2 className="text-xl sm:text-3xl font-bold text-white tracking-widest uppercase landscape-small-title mobile-950-small-title">{page.title}</h2>
                 </div>
                 {page.content}
               </div>
@@ -402,10 +402,10 @@ export function Menu({ onStartGame, onJoinGame, soundManager }: MenuProps) {
       <Dialog open={showSettings} onOpenChange={setShowSettings}>
         <DialogContent className="bg-[#0A0A15] border-cyan-500/50 text-white w-[95vw] sm:max-w-md p-4 sm:p-6 [&>button]:text-cyan-400 [&>button]:opacity-100 landscape-compact-gap overflow-y-auto max-h-[95vh]">
           <DialogHeader>
-            <DialogTitle className="text-xl sm:text-2xl text-cyan-400 landscape-small-title" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+            <DialogTitle className="text-xl sm:text-2xl text-cyan-400 landscape-small-title mobile-950-small-title" style={{ fontFamily: 'Orbitron, sans-serif' }}>
               SETTINGS
             </DialogTitle>
-            <DialogDescription className="text-white/60 text-sm landscape-hide">
+            <DialogDescription className="text-white/60 text-sm landscape-hide mobile-950-hide">
               Customize your experience
             </DialogDescription>
           </DialogHeader>
@@ -418,7 +418,7 @@ export function Menu({ onStartGame, onJoinGame, soundManager }: MenuProps) {
                 value={nameInput}
                 onChange={(e) => setNameInput(e.target.value)}
                 placeholder="Enter your name"
-                className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 sm:py-3 text-white placeholder:text-white/40 focus:border-cyan-400 focus:outline-none landscape-small-button"
+                className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 sm:py-3 text-white placeholder:text-white/40 focus:border-cyan-400 focus:outline-none landscape-small-button mobile-950-small-button"
                 maxLength={12}
               />
             </div>
@@ -446,11 +446,11 @@ export function Menu({ onStartGame, onJoinGame, soundManager }: MenuProps) {
               </div>
             </div>
 
-            <div className="space-y-2 sm:space-y-4 pt-1 sm:pt-2">
+            <div className="landscape-grid-2 space-y-2 sm:space-y-4 pt-1 sm:pt-2">
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <label className="text-white/80 text-xs sm:text-sm font-medium uppercase tracking-wider">Music Volume</label>
-                  <span className="text-cyan-400 font-mono text-xs">{Math.round(tempMusicVol * 100)}%</span>
+                  <label className="text-white/80 text-[10px] sm:text-sm font-medium uppercase tracking-wider">Music</label>
+                  <span className="text-cyan-400 font-mono text-[10px]">{Math.round(tempMusicVol * 100)}%</span>
                 </div>
                 <Slider
                   value={[tempMusicVol * 100]}
@@ -463,8 +463,8 @@ export function Menu({ onStartGame, onJoinGame, soundManager }: MenuProps) {
 
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <label className="text-white/80 text-xs sm:text-sm font-medium uppercase tracking-wider">SFX Volume</label>
-                  <span className="text-pink-400 font-mono text-xs">{Math.round(tempSfxVol * 100)}%</span>
+                  <label className="text-white/80 text-[10px] sm:text-sm font-medium uppercase tracking-wider">SFX</label>
+                  <span className="text-pink-400 font-mono text-[10px]">{Math.round(tempSfxVol * 100)}%</span>
                 </div>
                 <Slider
                   value={[tempSfxVol * 100]}

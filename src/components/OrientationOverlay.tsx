@@ -30,11 +30,11 @@ export function OrientationOverlay() {
           <Smartphone className="w-24 h-24 text-cyan-400 rotate-90" />
         </div>
       </div>
-      
+
       <h2 className="text-3xl font-black text-white mt-8 mb-4 tracking-tighter" style={{ fontFamily: 'Orbitron, sans-serif' }}>
         ROTATE DEVICE
       </h2>
-      
+
       <p className="text-cyan-400/60 font-mono text-sm max-w-xs leading-relaxed uppercase tracking-widest">
         Alpha Blade requires horizontal orientation for optimal neural link stability.
       </p>

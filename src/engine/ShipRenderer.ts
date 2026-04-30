@@ -55,7 +55,7 @@ export class ShipRenderer {
     });
 
     const engineMat = new THREE.MeshStandardMaterial({
-      color: 0x333333,
+      color: detailColor,
       roughness: 0.7,
       metalness: 0.8,
     });
